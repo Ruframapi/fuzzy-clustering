@@ -1,0 +1,106 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" template="templates/template.xhtml">
+	<ui:define name="context">
+		<ui:include src="contextmenu.xhtml" />
+	</ui:define>
+	<ui:define name="content">
+		<h:form id="form1">
+			<p:growl id="growl" showDetail="true" />
+			<p:panel header="Stop Words">
+				<p:panelGrid id="stopwordInput" columns="2">
+					<h:outputLabel for="stopwordName" value="Nombre Expresion: *" />
+					<p:inputText id="stopwordName" value="#{stopword.stopwordDTO.name}"
+						label="stopwordName" />
+					<h:outputLabel for="regex" value="Expresion Regular: *" />
+					<p:inputText id="regex" value="#{stopword.stopwordDTO.regex}"
+						label="regex" />
+					<h:outputLabel for="replace" value="Expresion de Reemplazo: " />
+					<p:inputText id="replace"
+						value="#{stopword.stopwordDTO.regexReplace}" label="replace" />
+					<f:facet name="footer">
+						<p:commandButton actionListener="#{stopword.createStopword}"
+							value="Guardar" update=":form2:stopwords,stopwordInput" >
+						</p:commandButton>
+					</f:facet>
+				</p:panelGrid>
+			</p:panel>
+		</h:form>
+		<h:form id="form2">
+			<p:outputPanel id="stopwords">
+				<p:dataTable id="stopwordsTable" value="#{stopword.stopwordCol}"
+				 selection="#{stopword.stopwordDTO}"
+					var="stopwordCol" selectionMode="single"
+					rowKey="#{stopwordCol.name}" editable="true">
+					<p:ajax event="rowEdit" listener="#{stopword.onRowEdit}" />
+					<p:ajax event="rowSelect" listener="#{stopword.onRowSelect}" />
+					<f:facet name="header">  
+			            Origenes de Datos  
+			        </f:facet>
+					<p:column headerText="Nombre" style="width:25%">
+						<p:cellEditor>
+							<f:facet name="output">
+								<h:outputText value="#{stopwordCol.name}" />
+							</f:facet>
+							<f:facet name="input">
+								<p:inputText id="stopwordName" value="#{stopwordCol.name}"
+									style="width:96%" />
+							</f:facet>
+						</p:cellEditor>
+					</p:column>
+					<p:column headerText="Expresion Regular" style="width:25%">
+						<p:cellEditor>
+							<f:facet name="output">
+								<h:outputText value="#{stopwordCol.regex}" style="font-size:1.5em"/>
+							</f:facet>
+							<f:facet name="input">
+								<p:inputText id="stopwordRegex" value="#{stopwordCol.regex}"
+									style="width:96%;font-size:1.5em"/>
+							</f:facet>
+						</p:cellEditor>
+					</p:column>
+					<p:column headerText="Reemplaza por: (Expresion Regular)"
+						style="width:25%">
+						<p:cellEditor>
+							<f:facet name="output">
+								<h:outputText value="#{stopwordCol.regexReplace}" style="font-size:1.5em"/>
+							</f:facet>
+							<f:facet name="input">
+								<p:inputText id="stopwordRegexReplace"
+									value="#{stopwordCol.regexReplace}" style="width:96%;font-size:1.5em"/>
+							</f:facet>
+						</p:cellEditor>
+					</p:column>
+					<p:column headerText="Habilitada"
+						style="width:5%">
+						<p:cellEditor>
+							<f:facet name="output">
+								<p:selectBooleanCheckbox
+									value="#{stopwordCol.enabled}" style="width:96%;font-size:1.5em" disabled="true" />
+							</f:facet>
+							<f:facet name="input">
+								<p:selectBooleanCheckbox
+									value="#{stopwordCol.enabled}" style="width:96%;font-size:1.5em"/>
+							</f:facet>
+						</p:cellEditor>
+					</p:column>
+
+					<p:column style="width:6%">
+						<p:rowEditor />
+					</p:column>
+					<f:facet name="footer">
+						<p:commandButton icon="ui-icon-carat-1-n"
+							actionListener="#{stopword.upRule}" update=":form2:stopwords"
+							immediate="true">
+						</p:commandButton>
+						<p:commandButton id="delete" value="Eliminar"
+							actionListener="#{stopword.deleteStopword}"
+							update="stopwordsTable" immediate="true" />
+					</f:facet>
+				</p:dataTable>
+			</p:outputPanel>
+		</h:form>
+	</ui:define>
+</ui:composition>
