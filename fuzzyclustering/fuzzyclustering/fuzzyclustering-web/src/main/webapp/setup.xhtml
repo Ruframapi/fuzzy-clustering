@@ -1,0 +1,38 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" template="templates/template.xhtml">
+	<ui:define name="context">
+		<ui:include src="contextmenu.xhtml" />
+	</ui:define>
+	<ui:define name="content">
+		<h:form>
+			<p:panel header="Parametros de Configuracion">
+				<p:dataTable id="properties" var="property"
+					value="#{setup.propertyCol}" editable="true"
+					rowIndexVar="#{property.name}">
+					<p:ajax event="rowEdit" listener="#{setup.onRowEdit}" />
+					<p:column headerText="Nombre" style="width:25%">
+						<h:outputText value="#{property.name}" />
+					</p:column>
+
+					<p:column headerText="Valor" style="width:25%">
+						<p:cellEditor>
+							<f:facet name="output">
+								<h:outputText value="#{property.value}" />
+							</f:facet>
+							<f:facet name="input">
+								<p:inputText id="propertyValue" value="#{property.value}"
+									style="width:96%" />
+							</f:facet>
+						</p:cellEditor>
+					</p:column>
+					<p:column style="width:6%">
+						<p:rowEditor rendered="#{property.global != true}"/>
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>

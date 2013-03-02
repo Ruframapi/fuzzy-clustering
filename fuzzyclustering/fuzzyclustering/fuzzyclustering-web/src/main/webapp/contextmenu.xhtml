@@ -1,0 +1,53 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<h:form>
+		<p:menubar>
+			<p:submenu label="Configuracion" icon="ui-icon-document">
+				<p:menuitem value="Inicializar Sistema" url="#"
+					onclick="confirmation.show()" />
+				<p:menuitem value="Refrescar Datos en Memoria"
+					actionListener="#{setup.refreshMemoryData}" />
+				<p:menuitem value="Origenes de Datos" url="source.xhtml" />
+				<p:menuitem value="Stop Words" url="stopwords.xhtml" />
+				<p:menuitem value="Parametros de Configuracion" url="setup.xhtml" />
+				<p:menuitem value="Copiar Configuraciones" actionListener="#{setup.backupSystem}" />
+				<p:menuitem value="Restaurar Configuracion" actionListener="#{setup.restoreSystem}" />
+				<p:separator />
+				<p:menuitem value="Salir" url="index.xhtml" />
+			</p:submenu>
+			<p:submenu label="Agrupar" icon="ui-icon-document">
+				<p:submenu label="Paso a Paso" icon="ui-icon-document">
+					<p:menuitem value="Descargar" actionListener="#{grouping.download}" />
+					<p:menuitem value="Limpiar Texto"
+						actionListener="#{grouping.cleanText}" />
+					<p:menuitem value="Generar Indice Invertido"
+						actionListener="#{grouping.invertedIndex}" />
+					<p:menuitem value="Generar Matriz de Co-ocurrencias (PPMI)" />
+					<p:menuitem value="Generar Conjuntos Difusos C-Means" />
+				</p:submenu>
+				<p:menuitem value="Agrupacion Automatica" icon="ui-icon-document"
+					url="grouping.xhtml" />
+			</p:submenu>
+
+		</p:menubar>
+		<!-- <p:messages id="messages" showDetail="true" autoUpdate="true"
+		closable="true" /> -->
+		<p:growl id="messages" showDetail="true" sticky="true"
+			autoUpdate="true" />
+		<p:confirmDialog id="confirmDialog"
+			message="Esta seguro de eliminar todos los datos y configuraciones del sistema?"
+			header="Proceso de eliminacion de informacion" severity="alert"
+			widgetVar="confirmation" appendToBody="true">
+
+			<p:commandButton id="confirm" value="Si" update="messages"
+				oncomplete="confirmation.hide()"
+				actionListener="#{setup.initializeTables}" action="index" />
+			<p:commandButton id="decline" value="No"
+				onclick="confirmation.hide()" type="button" />
+		</p:confirmDialog>
+	</h:form>
+</ui:composition>
