@@ -34,10 +34,14 @@ public class IndexManager {
 	
 	
 	
-	public int[][] getTermTermMatrix(){
+	/**
+	 * Retorna la matrix termino documento a partir del indice invertido
+	 * @return
+	 */
+	public int[][] getTermDocumentMatrix(){
 		int[][] termArray = null;
 		String data = this.getInvertedIndexData();
-		String[] termList = data.split("\n");
+		String[] termList = data.split("\r\n");
 		
 		termArray = new int[100][termList.length];
 		for (int i = 0; i < termList.length; ++i) {
@@ -50,60 +54,85 @@ public class IndexManager {
 				termArray[documentId][i]=termArray[documentId][i]+1;
 				int a = 2;
 			}
-	    	
 		}
-		this.saveMatriz(termArray);
+		this.saveMatriz(termArray,"termdocument.txt");
 	    return termArray;	
-	    	
-	    	
-	}
-	/**
-	 * Retorna la matriz termino documento en donde las columnas corresponden
-	 * a los terminos y las filas a los documentos que los contienen
-	 * @return
-	 */
-	public ArrayList<Integer[]> getTermDocumentMatrix1(){
-		//[filas][columnas]
-		ArrayList<Integer[]> termArray = new ArrayList<Integer[]>();
-		String data = this.getInvertedIndexData();
-		String[] termList = data.split("\n");
-		//TODO definir la cantidad de documentos por defecto. Puede ser un valor fijo
-		// o revisar si es posible que sea autoextensible
-		for (String string : termList) {
-			String[] termData = termList[0].split(";");
-	    	String[] documents = termData[1].split(",");
-	    	
-	    	Integer[] vectorTerm = null;
-	    	for (int j = 0; j < documents.length; j++) {
-	    		Integer document =  Integer.parseInt(documents[j]);
-	    		Integer[] documentVector = null;
-	    		
-	    		if(!termArray.contains(document)){
-	    			documentVector = new Integer[termList.length];
-	    		}
-    		
-				documentVector[document] = documentVector[document]+1;
-			}
-	    	termArray.add(vectorTerm);
-		}
-		
-		
-		//this.saveMatriz(termArray);
-	    
-		return termArray;
-		
+ 	
 	}
 	
-	public void saveMatriz(int[][] matrix){
+	/**
+	 * Retorna la matrix termino termino a partir de la matrix termino
+	 * documento.
+	 * @return
+	 */
+	public int[][] getTermTermMatrix(){
+		String data = this.getInvertedIndexData();
+		String[] termList = data.split("\r\n");
+		int[][] termtermMatrix = new int[termList.length][termList.length];
+		for (int i = 0; i < termList.length; ++i) {
+			String termData = termList[i];
+			String[] row = termData.split(";");
+			String[] documents = row[1].split(",");
+	    	for (int j = 0; j < documents.length; j++) {
+	    		ArrayList<int[]> termsByDocument = this.queryTermsByDocument(j,	data);
+	    		for (int[] termDocument : termsByDocument) {
+	    			int relatedTerm = termDocument[0];
+	    			//i terrmino - relatedTerm Termino relacionado = cantidad 
+					termtermMatrix[i][relatedTerm]= termDocument[1];
+				}
+	    	}
+		}
+		this.saveMatriz(termtermMatrix,"termterm.txt");
+		return termtermMatrix;
+	}
+
+	/**
+	 * Retorna el listado de documentos que contiene el termino especificado
+	 * @return
+	 */
+	public ArrayList<int[]> queryTermsByDocument(int queryDocumentId, String invertedIndexData){
+		ArrayList<int[]> terms = new ArrayList<int[]>();
+		String[] termList = invertedIndexData.split("\r\n");
+		for (int i = 0; i < termList.length; ++i) {
+			String termData = termList[i];
+			String[] row = termData.split(";");
+			String word = row[0];
+			int[] termResult = new int[2];
+			int indexTerm = i;
+			int count = 0;
+			String[] documents = row[1].split(",");
+	    	for (int j = 0; j < documents.length; j++) {
+	    		int documentId = Integer.parseInt(documents[j]);
+	    		if(documentId == queryDocumentId){
+	    			count++;
+	    		}
+			}
+	    	if(count>0){
+	    		termResult[0]=indexTerm;
+	    		termResult[1]=count;
+		    	terms.add(termResult);
+				count = 0;
+	    	}
+	    	
+		}
+		return terms;
+	}
+	
+	/**
+	 * Almacena la matrix en disco
+	 **/
+	
+	public void saveMatriz(int[][] matrix, String fileName){
 		StringBuilder data = new StringBuilder();
 		for (int i = 0; i < matrix.length; i++) {;
 			for (int j = 0; j < matrix[i].length; j++) {
 				data.append(matrix[i][j]);
-				data.append("-");
+				data.append(",");
 			}
 			data.append("\r\n");
 		}
-		PersistenceFacade.getInstance().writeFile(EDataFolder.INVERTED_INDEX, "termDocument.txt", data.toString());
+		PersistenceFacade.getInstance().writeFile(EDataFolder.MATRIX, 
+													fileName, data.toString());
 	}
 	
 }

@@ -9,6 +9,7 @@ public  enum EDataFolder {
 	ORIGINAL_RSS("original","\\data\\original\\rss"),
 	ORIGINAL_TWITTER("original","\\data\\original\\twitter"),
 	INVERTED_INDEX("inverted index","\\data\\invertedindex"),
+	MATRIX("matrix","\\data\\matrix"),
 	BACKUP("BACKUP","\\backup");
 	
 	private String name;
