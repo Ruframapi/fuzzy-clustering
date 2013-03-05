@@ -202,9 +202,10 @@ public class TwitterScraping {
     	Collection<String> documentContent = this.getTwitterDocuments(screenName);
     	
     	for (String content : documentContent) {
-    		int atomicSequence = this.atomicSequence.incrementAndGet();
+    		
     		logger.info("Creating new twitter file number:"+ atomicSequence);
     		String fileName = String.valueOf(atomicSequence)+".txt";
+    		this.atomicSequence.incrementAndGet();
 			PersistenceFacade.getInstance().writeFile(EDataFolder.ORIGINAL_TWITTER, fileName, content);
 		}
     }

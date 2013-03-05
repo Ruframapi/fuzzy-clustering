@@ -76,7 +76,7 @@ public class InvertedIndex {
 				}
 				if (tempTerm== null){
 					stringBuilder.append(term);
-					stringBuilder.append("-");
+					stringBuilder.append(";");
 					stringBuilder.append(document);
 					tempTerm = term;
 				}
@@ -86,13 +86,13 @@ public class InvertedIndex {
 						stringBuilder.append(document);
 					}
 					else{
-						stringBuilder.append("=");
+						stringBuilder.append(";");
 						stringBuilder.append(counter);
 						invertedIndex.add(stringBuilder.toString());
 						counter = 0;
 						stringBuilder = new StringBuilder();
 						stringBuilder.append(term);
-						stringBuilder.append("-");
+						stringBuilder.append(";");
 						stringBuilder.append(document);
 					}
 				}

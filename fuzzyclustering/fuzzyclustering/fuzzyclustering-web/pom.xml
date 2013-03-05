@@ -89,6 +89,7 @@
 			<artifactId>postgresql</artifactId>
 			<version>9.1-901.jdbc4</version>
 		</dependency>
+
 		<dependency>
 			<groupId>co.edu.sanmartin</groupId>
 			<artifactId>fuzzyclustering-persistence</artifactId>
@@ -96,12 +97,12 @@
 		</dependency>
 		<dependency>
 			<groupId>co.edu.sanmartin</groupId>
-			<artifactId>fuzzyClustering-webscraping</artifactId>
+			<artifactId>fuzzyclustering-IR</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>co.edu.sanmartin</groupId>
-			<artifactId>fuzzyclustering-IR</artifactId>
+			<artifactId>fuzzyClustering-webscraping</artifactId>
 			<version>1.0</version>
 		</dependency>
 	</dependencies>

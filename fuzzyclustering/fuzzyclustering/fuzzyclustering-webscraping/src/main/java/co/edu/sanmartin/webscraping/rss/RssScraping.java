@@ -86,9 +86,9 @@ public class RssScraping{
     	Collection<String> documentContent = this.getRssDocuments(data);
     	
     	for (String content : documentContent) {
-    		int atomicSequence = this.atomicSequence.incrementAndGet();
     		logger.info("Creating new file number:"+ atomicSequence);
     		String fileName = String.valueOf(atomicSequence)+".txt";
+    		int atomicSequence = this.atomicSequence.incrementAndGet();
 			PersistenceFacade.getInstance().writeFile(EDataFolder.ORIGINAL_RSS, fileName, content);
 		}
     }

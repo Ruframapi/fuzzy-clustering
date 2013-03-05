@@ -22,11 +22,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>co.edu.sanmartin</groupId>
-			<artifactId>fuzzyclustering-persistence</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>9.1-901.jdbc4</version>
@@ -42,6 +37,10 @@
 			<artifactId>lucene-snowball</artifactId>
 			<version>3.0.3</version>
 		</dependency>
-
+		<dependency>
+			<groupId>co.edu.sanmartin</groupId>
+			<artifactId>fuzzyclustering-persistence</artifactId>
+			<version>1.0</version>
+		</dependency>
 	</dependencies>
 </project>
