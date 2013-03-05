@@ -117,8 +117,8 @@ public class FileManager {
 	 * @param folderPath
 	 * @return la coleccion con el nombre de los archivos de la carpeta
 	 */
-	public Collection<String> getFileList(String folderPath) {
-		Collection<String> fileListColl = new ArrayList();
+	private Collection<String> getFileList(String folderPath) {
+		Collection<String> fileListColl = new ArrayList<String>();
 		File folder = new File(folderPath);
 		String[] fileList = folder.list();
 		if (fileList == null) {

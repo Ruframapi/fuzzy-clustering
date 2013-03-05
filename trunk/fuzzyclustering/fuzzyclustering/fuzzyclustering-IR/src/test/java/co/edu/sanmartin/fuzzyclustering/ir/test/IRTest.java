@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import co.edu.sanmartin.fuzzyclustering.ir.execute.CleanerThreadPool;
 import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
+import co.edu.sanmartin.fuzzyclustering.ir.index.IndexManager;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.stemmer.Stemmer;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.stemmer.snowball.SnowballStemmer;
 
@@ -28,6 +29,13 @@ public class IRTest {
 		threadPool.executeThreadPool();
 	}
 
+	
+	@Test
+	
+	public void documentMatrixTest(){
+		IndexManager indexManager = new IndexManager();
+		indexManager.getTermTermMatrix();
+	}
 
 	@Test
 	public void stemmerTest() {

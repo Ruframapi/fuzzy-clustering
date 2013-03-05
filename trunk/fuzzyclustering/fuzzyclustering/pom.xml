@@ -8,9 +8,9 @@
   <name>fuzzyClustering</name>
   <description>Fuzzy Clustering Project</description>
   <modules>
-    <module>fuzzyclustering-web</module>
     <module>fuzzyclustering-persistence</module>
     <module>fuzzyclustering-webscraping</module>
     <module>fuzzyclustering-IR</module>
+    <module>fuzzyclustering-web</module>
   </modules>
 </project>
