@@ -1,5 +1,7 @@
 package co.edu.sanmartin.fuzzyclustering.ir.test;
 
+import java.util.ArrayList;
+
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -31,12 +33,23 @@ public class IRTest {
 
 	
 	@Test
-	
 	public void documentMatrixTest(){
+		IndexManager indexManager = new IndexManager();
+		indexManager.getTermDocumentMatrix();
+	}
+	
+	@Test
+	public void termTermMatrixTest(){
 		IndexManager indexManager = new IndexManager();
 		indexManager.getTermTermMatrix();
 	}
-
+	
+/*	@Test
+	public void queryDocumentTest(){
+		IndexManager indexManager = new IndexManager();
+		indexManager.queryTermsByDocument(25);
+	}
+*/
 	@Test
 	public void stemmerTest() {
 		Stemmer stemmer = new Stemmer();
