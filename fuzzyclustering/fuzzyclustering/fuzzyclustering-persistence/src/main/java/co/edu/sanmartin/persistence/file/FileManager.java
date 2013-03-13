@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.constant.ESystemProperty;
+import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
@@ -35,7 +36,7 @@ public class FileManager {
 		try {
 
 			this.createFolder(folderPath);
-			File file = new File(folderPath + "\\" + fileName);
+			File file = new File(folderPath + System.getProperty("file.separator") + fileName);
 			if (!file.exists()) {
 				file.createNewFile();
 			}
@@ -105,32 +106,25 @@ public class FileManager {
 	
 	/**
 	 * Retorna la lista de archivos de un directorio
-	 * @param dataFolder enumeracion de los directorios que maneja el sistema
-	 * @return
-	 */
-	public Collection<String> getFileList(EDataFolder dataFolder) {
-		return this.getFileList(this.getFolderPath(dataFolder));
-	}
-
-	/**
-	 * Retorna la lista de archivos de un directorio
 	 * @param folderPath
 	 * @return la coleccion con el nombre de los archivos de la carpeta
 	 */
-	private Collection<String> getFileList(String folderPath) {
-		Collection<String> fileListColl = new ArrayList<String>();
+	public Collection<DocumentDTO> getFileList(EDataFolder dataFolder) {
+		String folderPath = this.getFolderPath(dataFolder);
+		Collection<DocumentDTO> fileListColl = new ArrayList<DocumentDTO>();
 		File folder = new File(folderPath);
 		String[] fileList = folder.list();
 		if (fileList == null) {
 			System.out.println("There is not file Path:" + folderPath);
 		} else {
 			for (int i = 0; i < fileList.length; i++) {
-				fileListColl.add(folderPath + "\\" + fileList[i]);
+				DocumentDTO document = new DocumentDTO(folderPath,fileList[i]);
+				fileListColl.add(document);
 			}
 		}
-
 		return fileListColl;
 	}
+
 
 	/**
 	 * Extrae el nombre del archivo de una ruta completa
@@ -138,7 +132,7 @@ public class FileManager {
 	 * @return en nombre del archivo
 	 */
 	public String getFileName(String path) {
-		String fileName = path.substring(path.lastIndexOf("\\") + 1,
+		String fileName = path.substring(path.lastIndexOf(System.getProperty("file.separator")) + 1,
 				path.length());
 		return fileName;
 	}
@@ -149,9 +143,9 @@ public class FileManager {
 	 * @return en nombre del archivo
 	 */
 	public String getFileNameWithOutExtension(String path) {
-		String fileName = path.substring(path.lastIndexOf("\\") + 1,
+		String fileName = path.substring(path.lastIndexOf(System.getProperty("file.separator")) + 1,
 				path.length());
-		String[] fileNameColl = fileName.split("\\.");
+		String[] fileNameColl = fileName.split(System.getProperty("file.separator")+".");
 		return fileNameColl[0];
 	}
 	

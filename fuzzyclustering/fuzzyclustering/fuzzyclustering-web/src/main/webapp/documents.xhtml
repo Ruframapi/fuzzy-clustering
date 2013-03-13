@@ -1,0 +1,41 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	<p:panel>
+		<h:form id="form2">
+			<p:panelGrid columns="2" styleClass="align_top">
+
+				<p:dataTable id="documents" value="#{documents.documentsColl}"
+					var="document" selection="#{documents.document}"
+					selectionMode="single" rowKey="#{document.name}"
+					paginator="true" rows="10">
+					<p:ajax event="rowSelect" listener="#{documents.onRowSelect}"
+						update=":form2:dataFile" />
+					<f:facet name="header">  
+			            Listado de Archivos 
+			        </f:facet>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="Nombre" />
+						</f:facet>
+						<h:outputText value="#{document.name}" />
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="Path" />
+						</f:facet>
+						<h:outputText value="#{document.path}" />
+					</p:column>
+
+					<f:facet id="footer" name="footer">
+					</f:facet>
+				</p:dataTable>
+				<p:panel id="dataFile" header="Informacion del Archivo">
+					<h:outputText value="#{documents.document.lazyData}"></h:outputText>
+				</p:panel>
+			</p:panelGrid>
+		</h:form>
+	</p:panel>
+</ui:composition>

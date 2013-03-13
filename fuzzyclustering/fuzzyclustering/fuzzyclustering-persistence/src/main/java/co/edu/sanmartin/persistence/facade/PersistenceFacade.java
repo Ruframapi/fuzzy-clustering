@@ -11,6 +11,7 @@ import co.edu.sanmartin.persistence.constant.ESourceType;
 import co.edu.sanmartin.persistence.dao.PropertyDAO;
 import co.edu.sanmartin.persistence.dao.SourceDAO;
 import co.edu.sanmartin.persistence.dao.StopwordDAO;
+import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.PropertyDTO;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.dto.StopwordDTO;
@@ -116,7 +117,7 @@ public class PersistenceFacade {
 		return fileManager.readFile(fileName);
 	}
 
-	public Collection<String> getFileList(EDataFolder dataFolder) {
+	public Collection<DocumentDTO> getFileList(EDataFolder dataFolder) {
 		return fileManager.getFileList(dataFolder);
 	}
 

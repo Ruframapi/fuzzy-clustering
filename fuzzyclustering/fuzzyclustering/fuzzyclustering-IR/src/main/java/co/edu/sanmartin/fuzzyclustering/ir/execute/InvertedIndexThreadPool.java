@@ -12,9 +12,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import co.edu.sanmartin.fuzzyclustering.ir.execute.worker.InvertedIndexWorkerThread;
-import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
+import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndexBuilder;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EProperty;
+import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.PropertyDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
@@ -41,7 +42,7 @@ public class InvertedIndexThreadPool {
 			e.printStackTrace();
 		}
 
-		Collection<String> fileCol = PersistenceFacade.getInstance().getFileList(EDataFolder.CLEAN);
+		Collection<DocumentDTO> fileCol = PersistenceFacade.getInstance().getFileList(EDataFolder.CLEAN);
 		
 		InvertedIndexWorkerThread invertedIndexWorkerThread;
 		
@@ -50,16 +51,15 @@ public class InvertedIndexThreadPool {
 		HashMap<String, StringBuilder> dataMap = new HashMap<String,StringBuilder>();
 		
 		//Almacenamos los archivos en memoria
-		for (String file : fileCol) {
+		for (DocumentDTO file : fileCol) {
 			PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
-			String fileName = persistenceFacade.getFileNameWithOutExtension(file);
 			StringBuilder dataFile = new StringBuilder();
-			dataFile.append(persistenceFacade.readFile(file));
-			dataMap.put(fileName, dataFile);
+			dataFile.append(persistenceFacade.readFile(file.getCompletePath()));
+			dataMap.put(file.getNameWithoutExtension(), dataFile);
 		}
 
 		Iterator<Entry<String, StringBuilder>> it = dataMap.entrySet().iterator();
-		InvertedIndex index = new InvertedIndex(new ConcurrentLinkedDeque<String>());
+		InvertedIndexBuilder index = new InvertedIndexBuilder(new ConcurrentLinkedDeque<String>());
 		while (it.hasNext()) {
 			Map.Entry<String,StringBuilder> e = (Entry<String, StringBuilder>)it.next();
 			invertedIndexWorkerThread = new InvertedIndexWorkerThread(e.getValue(), e.getKey(), index);
