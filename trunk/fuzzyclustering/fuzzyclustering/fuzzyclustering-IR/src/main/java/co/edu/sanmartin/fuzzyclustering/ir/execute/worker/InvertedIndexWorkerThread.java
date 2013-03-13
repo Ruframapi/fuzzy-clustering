@@ -2,7 +2,7 @@ package co.edu.sanmartin.fuzzyclustering.ir.execute.worker;
 
 import org.apache.log4j.Logger;
 
-import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
+import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndexBuilder;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
@@ -17,9 +17,9 @@ public class InvertedIndexWorkerThread implements Runnable{
 	private static Logger logger = Logger.getRootLogger();
 	private String dataFile;
 	private String fileName;
-	private InvertedIndex index;
+	private InvertedIndexBuilder index;
 	
-	public InvertedIndexWorkerThread(StringBuilder dataFile, String fileName, InvertedIndex index) {
+	public InvertedIndexWorkerThread(StringBuilder dataFile, String fileName, InvertedIndexBuilder index) {
 		this.dataFile = dataFile.toString();
 		this.fileName = fileName;
 		this.index = index;

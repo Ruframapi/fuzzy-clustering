@@ -4,3 +4,7 @@
 	font-size: 90% !important;
 	font-family:Arial, Helvetica, sans-serif;
 }
+
+.align_top td{
+	vertical-align: top; 
+}

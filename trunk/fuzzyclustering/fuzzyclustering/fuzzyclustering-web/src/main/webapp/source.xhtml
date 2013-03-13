@@ -10,7 +10,7 @@
 		<h:form id="documentForm">
 			<p:growl id="growl" showDetail="true" />
 			<p:panel header="Crear origenes de datos">
-				<p:panelGrid columns="2">
+				<p:panelGrid columns="2" styleClass="align_top">
 					<h:outputLabel for="source_name" value="Nombre Origen: *" />
 					<p:inputText id="source_name" value="#{source.sourceDTO.name}"
 						label="source_name" />
@@ -25,7 +25,7 @@
 				</p:panelGrid>
 			</p:panel>
 			<p:outputPanel id="sources">
-				<p:panelGrid columns="2">
+				<p:panelGrid columns="2" styleClass="align_top">
 					<p:dataTable id="sourcesTable" value="#{source.rssSourceCol}"
 						var="sourceCol" selection="#{source.sourceRSSSelected}"
 						selectionMode="single" rowKey="#{sourceCol.name}">

@@ -2,6 +2,7 @@ package co.edu.sanmartin.fuzzyclustering.ir.facade;
 
 import co.edu.sanmartin.fuzzyclustering.ir.execute.CleanerThreadPool;
 import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
+import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
 
 /**
  * Fachada que gestiona los procesos de recuperación de la informacion (Information Retrieval)
@@ -11,9 +12,9 @@ import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
 public class IRFacade {
 
 	private static IRFacade instance;
-	
+	InvertedIndex indexManager;
 	private IRFacade(){
-		
+		indexManager = new InvertedIndex();
 	}
 	
 	public static IRFacade getInstance(){
@@ -33,5 +34,9 @@ public class IRFacade {
 	public void createInvertedIndex(){
 		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool();
 		threadPool.executeThreadPool();
+	}
+	
+	public int[][] getTermTermMatrix(){
+		return indexManager.getTermTermMatrix();
 	}
 }

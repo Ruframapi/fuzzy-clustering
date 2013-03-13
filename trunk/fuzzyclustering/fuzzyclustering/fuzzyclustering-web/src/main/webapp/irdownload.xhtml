@@ -1,0 +1,31 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	template="templates/irtemplate.xhtml">
+	<f:metadata>
+		<f:event listener="#{irDownload.load}" type="preRenderView" />
+	</f:metadata>
+	<ui:define name="headDocuments">
+		<h:form id="documentForm">
+			<p:growl id="growl" showDetail="true" />
+			<p:panelGrid columns="2">
+				<p:panelGrid columns="2">
+					<p:outputLabel>Fuentes Consultadas:</p:outputLabel>
+					<p:outputLabel>0</p:outputLabel>
+					<p:outputLabel>Total Documentos Descargados:</p:outputLabel>
+					<p:outputLabel>0</p:outputLabel>
+					<p:outputLabel>Tiempo de Descarga:</p:outputLabel>
+					<p:outputLabel>0</p:outputLabel>
+				</p:panelGrid>
+				<p:commandButton value="Descargar" actionListener="irDownload.download">
+				</p:commandButton>
+			</p:panelGrid>
+		</h:form>
+	</ui:define>
+	<ui:define name="documents">
+		<ui:include src="documents.xhtml" />
+	</ui:define>
+
+</ui:composition>
