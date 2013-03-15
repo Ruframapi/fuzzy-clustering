@@ -10,6 +10,7 @@ public  enum EDataFolder {
 	ORIGINAL_TWITTER("original","\\data\\original\\twitter"),
 	INVERTED_INDEX("inverted index","\\data\\invertedindex"),
 	MATRIX("matrix","\\data\\matrix"),
+	MACHINE_LEARNING("machine learning", "\\data\\machinelearning"),
 	BACKUP("BACKUP","\\backup");
 	
 	private String name;

@@ -103,6 +103,10 @@ public class PersistenceFacade {
 	public void createFolder(String folderPath) {
 		fileManager.createFolder(folderPath);
 	}
+	
+	public void deleteFolder( EDataFolder dataFolder ){
+		fileManager.deteleFolder(dataFolder);
+	}
 
 	public void writeFile(String folderPath, String fileName, String data) {
 		fileManager.writeFile(folderPath, fileName, data);
@@ -115,6 +119,10 @@ public class PersistenceFacade {
 
 	public String readFile(String fileName) {
 		return fileManager.readFile(fileName);
+	}
+	
+	public String readFile(EDataFolder dataFolder, String fileName){
+		return fileManager.readFile(dataFolder, fileName);
 	}
 
 	public Collection<DocumentDTO> getFileList(EDataFolder dataFolder) {

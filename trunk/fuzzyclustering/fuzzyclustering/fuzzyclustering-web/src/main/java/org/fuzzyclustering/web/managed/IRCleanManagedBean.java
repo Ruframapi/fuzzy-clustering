@@ -20,7 +20,7 @@ import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.webscraping.facade.WebscrapingFacade;
 
 
-@ManagedBean(name = "irDownload")
+@ManagedBean(name = "irClean")
 @ViewScoped
 public class IRCleanManagedBean implements Serializable {
 	private static Logger logger = Logger.getRootLogger();
@@ -33,7 +33,7 @@ public class IRCleanManagedBean implements Serializable {
 	}*/
 	
 	public void load(){
-		documents.loadDocuments(EDataFolder.ORIGINAL_RSS);
+		documents.loadDocuments(EDataFolder.CLEAN);
 	}
 
 	public void setDocuments(DocumentsManagedBean documents) {
@@ -56,5 +56,6 @@ public class IRCleanManagedBean implements Serializable {
 					"Error al realizar el proceso", e.getDescription());
 			FacesContext.getCurrentInstance().addMessage(null, msg);
 		}
+		this.load();
 	}
 }

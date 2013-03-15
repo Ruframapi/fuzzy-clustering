@@ -1,5 +1,6 @@
 package co.edu.sanmartin.fuzzyclustering.ir.test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.log4j.BasicConfigurator;
@@ -13,6 +14,8 @@ import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
 import co.edu.sanmartin.fuzzyclustering.ir.index.MutualInformation;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.stemmer.Stemmer;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.stemmer.snowball.SnowballStemmer;
+import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.file.BigMatrixFileManager;
 
 public class IRTest {
 
@@ -46,9 +49,47 @@ public class IRTest {
 		indexManager.getTermTermMatrix();
 	}
 	@Test
+	public void buildTermTermMatrixTest(){
+		InvertedIndex indexManager = new InvertedIndex();
+		indexManager.buildTermTermMatrix(true, false);
+	}
+	@Test
+	public void buildTermTermBigMatrixTest(){
+		InvertedIndex indexManager = new InvertedIndex();
+		try {
+			indexManager.buildTermTermBigMatrix(true, false);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	@Test
 	public void mutualInformationTest(){
 		MutualInformation mutualInformation = new MutualInformation();
 		mutualInformation.buildMutualInformationMatrix();
+	}
+	
+	@Test
+	public void loadTermTermBigMatrixTest(){
+		long start = System.nanoTime();
+		
+		try {
+			BigMatrixFileManager largeMatrix = 
+					new BigMatrixFileManager();
+			largeMatrix.loadReadOnly(EDataFolder.MATRIX,"termterm.txt");
+			for (int i = 0; i < 10; i++) {
+				for (int j = 0; j < largeMatrix.width(); j++) {
+					System.out.print(largeMatrix.get(i, j)+ " ");
+				}
+				System.out.println();
+			}
+			largeMatrix.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		long time = System.nanoTime() - start;
+		System.out.print("Time"+ time);
 	}
 	
 /*	@Test

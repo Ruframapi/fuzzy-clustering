@@ -27,7 +27,7 @@ public class FileManager {
 	private static Logger log = Logger.getRootLogger();
 
 	/**
-	 * Escribe un archivo en disco
+	 * Escribe un archivo en disco en caso de existir lo elimina y crea uno nuevo
 	 * @param folderPath ubicacion del archivo
 	 * @param fileName nombre del archivo
 	 * @param data informacion del archivo
@@ -39,6 +39,9 @@ public class FileManager {
 			File file = new File(folderPath + System.getProperty("file.separator") + fileName);
 			if (!file.exists()) {
 				file.createNewFile();
+			}
+			else{
+				file.delete();
 			}
 			FileWriter fileWritter = new FileWriter(file);
 			BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
@@ -61,6 +64,29 @@ public class FileManager {
 	public void writeFile(EDataFolder dataFolder, String fileName, String data){
 		
     	this.writeFile(this.getFolderPath(dataFolder), fileName, data);
+	}
+	
+	/**
+	 * Elimina la carpeta especificada
+	 * @param dataFolder
+	 */
+	public void deteleFolder(EDataFolder dataFolder){
+		File file = new File(dataFolder.getPath());
+		file.delete();
+	}
+
+	/**
+	 * Retorna el archivo de la carpeta especificada
+	 * @param dataFolder
+	 * @param fileName
+	 * @return
+	 */
+	public String readFile(EDataFolder dataFolder, String fileName){
+		StringBuilder stringBuider = new StringBuilder();
+		stringBuider.append(PersistenceFacade.getInstance().getFolderPath(dataFolder));
+		stringBuider.append(System.getProperty("file.separator"));
+		stringBuider.append(fileName);
+    	return this.readFile(stringBuider.toString());
 	}
 
 	/**

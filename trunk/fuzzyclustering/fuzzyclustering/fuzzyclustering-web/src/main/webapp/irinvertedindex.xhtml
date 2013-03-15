@@ -9,7 +9,7 @@
 	<ui:define name="headDocuments">
 		<h:form id="documentForm">
 			<p:growl id="growl" showDetail="true" />
-			<p:panel header="Descarga de Archivos Fuente">
+			<p:panel header="Construccion de Indice Invertido">
 			<p:panelGrid columns="2" >
 				
 				<p:panelGrid columns="2">
@@ -18,7 +18,7 @@
 					<p:outputLabel>Tiempo de Limipieza:</p:outputLabel>
 					<p:outputLabel>0</p:outputLabel>
 				</p:panelGrid>
-				<p:commandButton value="Normalizar" actionListener="irInvertedIndex.buildInvertedIndex"> </p:commandButton>
+				<p:commandButton value="Generar Indice" actionListener="#{irInvertedIndex.buildInvertedIndex}"> </p:commandButton>
 			</p:panelGrid>
 			</p:panel>
 		</h:form>

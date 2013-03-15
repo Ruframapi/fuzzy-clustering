@@ -14,7 +14,7 @@ public class IRFacade {
 	private static IRFacade instance;
 	InvertedIndex indexManager;
 	private IRFacade(){
-		indexManager = new InvertedIndex();
+		
 	}
 	
 	public static IRFacade getInstance(){
@@ -32,6 +32,7 @@ public class IRFacade {
 		threadPool.executeThreadPool();
 	}
 	public void createInvertedIndex(){
+		indexManager = new InvertedIndex();
 		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool();
 		threadPool.executeThreadPool();
 	}
