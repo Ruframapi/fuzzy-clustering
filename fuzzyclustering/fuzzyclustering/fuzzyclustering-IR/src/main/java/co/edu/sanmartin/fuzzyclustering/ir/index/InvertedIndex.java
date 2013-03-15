@@ -1,5 +1,7 @@
 package co.edu.sanmartin.fuzzyclustering.ir.index;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -10,6 +12,7 @@ import co.edu.sanmartin.persistence.constant.ESystemProperty;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.file.BigMatrixFileManager;
 
 /**
  * Clase encargada de cargar en memoria el indice invertido
@@ -107,12 +110,14 @@ public class InvertedIndex {
 		for (DocumentDTO fileName : fileList) {
 			data.append(persistenceFacade.readFile(fileName.getCompletePath())); 
 		}
-		this.invertedIndexData = data.toString();
-		this.termList =this.invertedIndexData.split("\r\n");
-		this.termCount = this.termList.length;
-		this.countTotalInvertedIndexTerms();
-		this.countTermsDocument();
-		this.countDocuments();
+		if(data.length()>0){
+			this.invertedIndexData = data.toString();
+			this.termList =this.invertedIndexData.split("\r\n");
+			this.termCount = this.termList.length;
+			this.countTotalInvertedIndexTerms();
+			this.countTermsDocument();
+			this.countDocuments();
+		}
 	}
 	
 	/**
@@ -176,19 +181,48 @@ public class InvertedIndex {
 		for (int i = 0; i < termCount; ++i) {
 			String termData = termList[i];
 			String[] row = termData.split(";");
-			String word = row[0];
 	    	String[] documents = row[1].split(",");
 	    	for (int j = 0; j < documents.length; j++) {
 	    		int documentId = Integer.parseInt(documents[j]);
 				termArray[documentId][i]=termArray[documentId][i]+1;
 			}
 		}
-		this.saveMatriz(termArray,"termdocument.txt");
+		this.saveMatrix(termArray,"termdocument.txt");
 	    return termArray;	
  	
 	}
 	
-	
+	/**
+	 * Retorna la matrix termino termino a partir de la matrix termino utilizando mapeo de archivos en memoria
+	 * @param datos del indice invertido
+	 * @return
+	 * @throws IOException 
+	 */
+	public void buildTermTermBigMatrix(boolean persist, boolean refresh) throws IOException{
+		BigMatrixFileManager largeMatrix = 
+				new BigMatrixFileManager();
+		largeMatrix.loadReadWrite(EDataFolder.MATRIX,"termterm.txt", termCount, termCount);
+		for (int i = 0; i < termCount; ++i) {
+			String termData = termList[i];
+			String[] row = termData.split(";");
+			String[] documents = row[1].split(",");
+	    	for (int j = 0; j < documents.length; j++) {
+	    		int documentId = Integer.parseInt(documents[j]);
+	    		ArrayList<int[]> termsByDocument = this.queryTermsByDocument(documentId);
+	    		for (int[] termDocument : termsByDocument) {
+	    			int relatedTerm = termDocument[0];
+	    			if(i!=relatedTerm){ 
+	    				Long value = Long.valueOf(termDocument[1]);
+	    				largeMatrix.set(i, relatedTerm, value);
+	    			}
+				}
+	    	}
+		}
+		if(persist){
+			//this.saveMatrix(termtermMatrix,"termterm.txt");
+			largeMatrix.close();
+		}
+	}
 	/**
 	 * Retorna la matrix termino termino a partir de la matrix termino
 	 * documento.
@@ -196,7 +230,7 @@ public class InvertedIndex {
 	 * @return
 	 */
 	public void buildTermTermMatrix(boolean persist, boolean refresh){
-
+		
 		int[][] termtermMatrix = new int[termCount][termCount];
 		for (int i = 0; i < termCount; ++i) {
 			String termData = termList[i];
@@ -214,7 +248,7 @@ public class InvertedIndex {
 	    	}
 		}
 		if(persist){
-			this.saveMatriz(termtermMatrix,"termterm.txt");
+			this.saveMatrix(termtermMatrix,"termterm1.txt");
 		}
 		this.termTermMatrix = termtermMatrix;
 	}
@@ -228,7 +262,6 @@ public class InvertedIndex {
 		for (int i = 0; i < termCount; ++i) {
 			String termData = termList[i];
 			String[] row = termData.split(";");
-			String word = row[0];
 			int[] termResult = new int[2];
 			int indexTerm = i;
 			int count = 0;
@@ -254,7 +287,8 @@ public class InvertedIndex {
 	/**
 	 * Almacena la matriz en disco
 	 **/
-	public void saveMatriz(int[][] matrix, String fileName){
+	public void saveMatrix(int[][] matrix, String fileName){
+		System.out.print("Init savematrix");
 		StringBuilder data = new StringBuilder();
 		for (int i = 0; i < matrix.length; i++) {;
 			for (int j = 0; j < matrix[i].length; j++) {
@@ -265,6 +299,27 @@ public class InvertedIndex {
 		}
 		PersistenceFacade.getInstance().writeFile(EDataFolder.MATRIX, 
 													fileName, data.toString());
+	}
+	
+	public void saveBigMatrix(int[][] matrix, String fileName){
+		long start = System.nanoTime();
+		
+		try {
+			BigMatrixFileManager largeMatrix = 
+					new BigMatrixFileManager();
+			largeMatrix.loadReadWrite(EDataFolder.MATRIX,fileName, matrix.length, matrix[0].length);
+			for (int i = 0; i < matrix.length; i++) {
+				for (int j = 0; j < matrix[i].length; j++) {
+					largeMatrix.set(i, j, matrix[i][j]);
+				}
+			}
+			largeMatrix.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		long time = System.nanoTime() - start;
+		System.out.print("Time"+ time);
 	}
 	
 	/**

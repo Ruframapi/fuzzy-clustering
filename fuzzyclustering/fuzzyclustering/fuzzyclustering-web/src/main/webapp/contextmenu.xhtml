@@ -19,26 +19,15 @@
 				<p:separator />
 				<p:menuitem value="Salir" url="index.xhtml" />
 			</p:submenu>
-			<p:submenu label="Agrupar" icon="ui-icon-document">
-				<p:submenu label="Paso a Paso" icon="ui-icon-document">
-					<p:menuitem value="Descargar" actionListener="#{grouping.download}" />
-					<p:menuitem value="Limpiar Texto"
-						actionListener="#{grouping.cleanText}" />
-					<p:menuitem value="Generar Indice Invertido"
-						actionListener="#{grouping.invertedIndex}" />
-					<p:menuitem value="Generar Matriz de Co-ocurrencias (PPMI)" />
-					<p:menuitem value="Generar Conjuntos Difusos C-Means" />
-				</p:submenu>
-				<p:menuitem value="Agrupacion Automatica" icon="ui-icon-document"
-					url="grouping.xhtml" />
-			</p:submenu>
 			<p:submenu label="Recuperacion de Informacion" icon="ui-icon-document">
 				<p:menuitem value="Descarga de archivos" url="irdownload.xhtml"/>
 				<p:menuitem value="Archivos Normalizados" url="irclean.xhtml" />
 				<p:menuitem value="Indice Invertido" url="irinvertedindex.xhtml" />
 				<p:menuitem value="Matrices de Terminos" url="irmatrix.xhtml" />
 			</p:submenu>
-
+			<p:submenu label="Clustering" icon="ui-icon-document">
+				<p:menuitem value="Generar Conjuntos Difusos C-Means" url="cmeans.xhtml" />
+			</p:submenu>
 		</p:menubar>
 		<!-- <p:messages id="messages" showDetail="true" autoUpdate="true"
 		closable="true" /> -->

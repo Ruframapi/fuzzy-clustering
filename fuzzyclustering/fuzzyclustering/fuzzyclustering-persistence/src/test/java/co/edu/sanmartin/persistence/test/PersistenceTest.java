@@ -27,6 +27,7 @@ public class PersistenceTest {
 	}
 	
 	@Test
+	 @Ignore
 	public void propertiesTest(){
 		PropertiesLoader loader = PropertiesLoader.getInstance();
 		loader.getProperty("test");

@@ -12,5 +12,6 @@
     <module>fuzzyclustering-webscraping</module>
     <module>fuzzyclustering-IR</module>
     <module>fuzzyclustering-web</module>
+    <module>fuzzyclustering-machinelearning</module>
   </modules>
 </project>

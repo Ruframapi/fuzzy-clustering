@@ -10,7 +10,7 @@
 		<h:form id="documentForm">
 			<p:growl id="growl" showDetail="true" />
 			<p:panel header="Descarga de Archivos Fuente">
-			<p:panelGrid columns="2" >
+			<p:panelGrid columns="4" >
 				
 				<p:panelGrid columns="2">
 					<p:outputLabel>Documentos normalizados:</p:outputLabel>
@@ -18,7 +18,9 @@
 					<p:outputLabel>Tiempo de Limipieza:</p:outputLabel>
 					<p:outputLabel>0</p:outputLabel>
 				</p:panelGrid>
-				<p:commandButton value="Normalizar"> </p:commandButton>
+				<p:commandButton value="Generar Matrix Termino Documento"> </p:commandButton>
+				<p:commandButton value="Generar Matrix Mutual Information"> </p:commandButton>
+				<p:commandButton value="Generar Matrix Termino Termino"> </p:commandButton>
 			</p:panelGrid>
 			</p:panel>
 		</h:form>
