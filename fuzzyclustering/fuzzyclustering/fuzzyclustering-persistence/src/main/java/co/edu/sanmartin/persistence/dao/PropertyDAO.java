@@ -14,6 +14,7 @@ public class PropertyDAO extends AbstractDAO<PropertyDTO> {
 	
 	
 	public PropertyDAO (){
+		this.selectAll(true);
 	}
 
 	ArrayList<PropertyDTO> propertyCol = new ArrayList<PropertyDTO>();
@@ -180,11 +181,11 @@ public class PropertyDAO extends AbstractDAO<PropertyDTO> {
 					objectDTO.setGlobal(false);
 					this.propertyCol.add(objectDTO);
 				}
-			} catch (Throwable e) {
+				this.loadGlobalProperties();
+			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
 			finally{
 				getConnectionPool().freeConnection(connection);
 			}
@@ -199,6 +200,21 @@ public class PropertyDAO extends AbstractDAO<PropertyDTO> {
 			this.selectAll(true);
 		}
 		return this.propertyCol;
+	}
+	
+	/**
+	 * Carga las propiedades globales del archivo fuzzyclustering.properties
+	 */
+	private void loadGlobalProperties(){
+		PropertiesLoader globalPropertiesLoader = PropertiesLoader.getInstance();
+		Collection<ESystemProperty> properties = ESystemProperty.toList();
+		for (ESystemProperty eProperty : properties) {
+			PropertyDTO propertyDTO = new PropertyDTO();
+			propertyDTO.setName(eProperty.name());
+			propertyDTO.setValue(globalPropertiesLoader.getProperty(eProperty.getPropertyName()));
+			propertyDTO.setGlobal(true);
+			this.propertyCol.add(propertyDTO);
+		}
 	}
 	
 	public void backupTable(){
