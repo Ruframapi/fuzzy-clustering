@@ -100,16 +100,6 @@
 			<artifactId>fuzzyclustering-IR</artifactId>
 			<version>1.0</version>
 		</dependency>
-		<dependency>
-			<groupId>co.edu.sanmartin</groupId>
-			<artifactId>fuzzyClustering-webscraping</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.richfaces.core</groupId>
-			<artifactId>richfaces-core-api</artifactId>
-			<version>4.3.0.Final</version>
-		</dependency>
             
 		<dependency>
 			<groupId>com.google.code.gson</groupId>

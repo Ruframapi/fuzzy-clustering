@@ -15,7 +15,6 @@ import org.primefaces.event.SelectEvent;
 import co.edu.sanmartin.persistence.constant.ESourceType;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
-import co.edu.sanmartin.webscraping.facade.WebscrapingFacade;
 
 @ManagedBean(name = "source")
 @ViewScoped
@@ -125,8 +124,8 @@ public class SourceManagedBean implements Serializable {
 	 */
 	private void createTwitterSource(){
 		this.sourceDTO.setType(ESourceType.TWITTER);
-		WebscrapingFacade webscrapingFacade = WebscrapingFacade.getInstance();
-		webscrapingFacade.createFriendship(this.sourceDTO.getUrl());
+		//WebscrapingFacade webscrapingFacade = WebscrapingFacade.getInstance();
+		//webscrapingFacade.createFriendship(this.sourceDTO.getUrl());
 	}
 	/**
 	 * Elimina el objeto source en la base de datos y de los amigos en la
@@ -134,8 +133,8 @@ public class SourceManagedBean implements Serializable {
 	 */
 	public void deleteTwitterSource(){
 		try {
-			WebscrapingFacade webscrapingFacade = WebscrapingFacade.getInstance();
-			webscrapingFacade.removeFriendship(this.sourceDTO.getUrl());
+			//WebscrapingFacade webscrapingFacade = WebscrapingFacade.getInstance();
+			//webscrapingFacade.removeFriendship(this.sourceDTO.getUrl());
 			PersistenceFacade.getInstance().deleteSource(sourceTwitterSelected);
 			this.loadSources();
 		} catch (SQLException e) {

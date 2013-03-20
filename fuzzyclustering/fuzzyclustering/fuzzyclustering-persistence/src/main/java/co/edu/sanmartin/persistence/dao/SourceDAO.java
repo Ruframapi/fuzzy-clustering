@@ -35,12 +35,13 @@ public class SourceDAO extends AbstractDAO<SourceDTO> {
 	public void update(SourceDTO sourceDTO) {
 		try {
 			connection = getConnectionPool().getConnection();
-			sQLQuery = "update source set name = ?,url =?, type=? where name =?";
+			sQLQuery = "update source set name = ?,url =?, type=?, lastQuery = ? where name =?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, sourceDTO.getName());
 			statement.setString(2, sourceDTO.getUrl());
 			statement.setString(3, sourceDTO.getType().name());
-			statement.setString(4, sourceDTO.getName());
+			statement.setTimestamp(4, new java.sql.Timestamp(sourceDTO.getLastQuery().getTime()));
+			statement.setString(5, sourceDTO.getName());
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -88,6 +89,7 @@ public class SourceDAO extends AbstractDAO<SourceDTO> {
 					SourceDTO sourceDTO = new SourceDTO();
 					sourceDTO.setName(rs.getString("name"));
 					sourceDTO.setUrl(rs.getString("url"));
+					sourceDTO.setLastQuery(rs.getTimestamp("lastquery"));
 					ESourceType sourceType = ESourceType.valueOf(rs.getString("type"));
 					sourceDTO.setType(sourceType);
 					sourceColl.add(sourceDTO);
@@ -117,7 +119,7 @@ public class SourceDAO extends AbstractDAO<SourceDTO> {
 				statement.executeUpdate();
 			}
 			sQLQuery = "CREATE TABLE source (" + "name varchar(40) NOT NULL,"
-					+ "url text NOT NULL, type varchar(20) NOT NULL)";
+					+ "url text NOT NULL, type varchar(20) NOT NULL, lastquery DATETIME)";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.executeUpdate();
 		} catch (SQLException e) {

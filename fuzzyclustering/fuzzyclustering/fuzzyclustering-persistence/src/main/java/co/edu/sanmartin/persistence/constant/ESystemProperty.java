@@ -11,7 +11,11 @@ import java.util.List;
  */
 public enum ESystemProperty {
 	
-	MAIN_PATH("main.path","Ubicacion principal de la ubicacion");
+	MAIN_PATH("main.path","Ubicacion principal de la ubicacion"),
+	MYSQL_DATABASE("mysql.database", "Nombre de la base de datos"),
+	MYSQL_SERVER("mysql.server", "Servidor de Mysql"),
+	MYSQL_USER("mysql.user","Usuario de Mysql"),
+	MYSQL_PASSWORD("mysql.password", "Contrasenia de Mysql");
 
 	private String propertyName;
 

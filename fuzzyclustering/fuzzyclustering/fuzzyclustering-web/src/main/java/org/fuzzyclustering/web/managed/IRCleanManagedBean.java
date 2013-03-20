@@ -17,7 +17,6 @@ import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.fuzzyclustering.ir.facade.IRFacade;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
-import co.edu.sanmartin.webscraping.facade.WebscrapingFacade;
 
 
 @ManagedBean(name = "irClean")

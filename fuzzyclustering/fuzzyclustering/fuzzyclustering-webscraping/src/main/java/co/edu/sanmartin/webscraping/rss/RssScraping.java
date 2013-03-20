@@ -4,6 +4,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -14,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EProperty;
+import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
@@ -35,26 +37,31 @@ public class RssScraping{
     Set urlSet = new HashSet();
     private AtomicInteger atomicSequence;
     
-    public RssScraping(){
+    public RssScraping(AtomicInteger atomicSequence){
     	logger.info("Init RssScraping Class");
-    	this.atomicSequence = new AtomicInteger();
+    	this.atomicSequence = atomicSequence;
     }
     /**
      * Retorna la coleccion de documentos RSS de la fuente
      * @return
      */
-    public Collection<String> getRssDocuments(String source){
+    public Collection<String> getRssDocuments(SourceDTO source){
     	boolean ok = false;
     	Collection<String> documentCol = new ArrayList<String>();
         try {
             
-            URL feedUrl = new URL(source);
+            URL feedUrl = new URL(source.getUrl());
 
             SyndFeedInput input = new SyndFeedInput();
             SyndFeed feed = input.build(new XmlReader(feedUrl));
-            
+            feed.getPublishedDate();
             // System.out.println(feed);
             ok = true;
+            boolean isNew = false;
+            if (source.getLastQuery()==null){
+            	source.setLastQuery(new Date());
+            	isNew = true;
+            }
             for (SyndEntry entry : (List<SyndEntry>) feed.getEntries()) {
             	StringBuilder documentData = new StringBuilder();
                 String title = entry.getTitle();
@@ -62,15 +69,18 @@ public class RssScraping{
                 documentData.append(".");
                 documentData.append(" ");
                 String uri = entry.getUri();
-                String date = entry.getPublishedDate().toString();            
-                // Get the Contents
-                for (SyndContentImpl content : (List<SyndContentImpl>) entry.getContents()) {
-                    documentData.append(content.getValue());
-                    System.out.println("Content: " + documentData.toString());
-                    documentCol.add(documentData.toString());
-                }
+                Date publishedDate = entry.getPublishedDate();
                 
-                feed.createWireFeed();
+                if (isNew || publishedDate.after(source.getLastQuery())){
+	                // Get the Contents
+	                for (SyndContentImpl content : (List<SyndContentImpl>) entry.getContents()) {
+	                    documentData.append(content.getValue());
+	                    System.out.println("Content: " + documentData.toString());
+	                    documentCol.add(documentData.toString());
+	                }
+	                
+	                feed.createWireFeed();
+                }
             }
 
         } catch (Exception ex) {
@@ -81,16 +91,18 @@ public class RssScraping{
         return documentCol;
     }
 
-    public void saveRSSDocument(String data){
+    public void saveRSSDocument(SourceDTO source) throws Exception{
     	logger.info("Init saveRSSDocument");
-    	Collection<String> documentContent = this.getRssDocuments(data);
+    	Collection<String> documentContent = this.getRssDocuments(source);
     	
     	for (String content : documentContent) {
     		logger.info("Creating new file number:"+ atomicSequence);
     		String fileName = String.valueOf(atomicSequence)+".txt";
-    		int atomicSequence = this.atomicSequence.incrementAndGet();
+    		this.atomicSequence.incrementAndGet();
 			PersistenceFacade.getInstance().writeFile(EDataFolder.ORIGINAL_RSS, fileName, content);
 		}
+    	source.setLastQuery(new Date());
+    	PersistenceFacade.getInstance().updateSource(source);
     }
     
 

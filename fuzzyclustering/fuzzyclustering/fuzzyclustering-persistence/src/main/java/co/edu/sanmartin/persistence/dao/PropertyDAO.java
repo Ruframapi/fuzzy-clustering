@@ -3,13 +3,11 @@ package co.edu.sanmartin.persistence.dao;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.constant.ESystemProperty;
 import co.edu.sanmartin.persistence.constant.properties.PropertiesLoader;
 import co.edu.sanmartin.persistence.dto.PropertyDTO;
-import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 
 public class PropertyDAO extends AbstractDAO<PropertyDTO> {
@@ -43,11 +41,12 @@ public class PropertyDAO extends AbstractDAO<PropertyDTO> {
 	public void update(PropertyDTO object){
 		try {
 			connection = getConnectionPool().getConnection();
-			sQLQuery = "update property set value = ? where name =?";
+			sQLQuery = "UPDATE property SET value = ? WHERE name =?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, object.getValue());
 			statement.setString(2, object.getName());
 			statement.executeUpdate();
+			this.selectAll(true);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

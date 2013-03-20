@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 public  enum EDataFolder {
+	DATA_ROOT("dataRoot","\\data"),
 	CLEAN("clean","\\data\\clean"), 
 	ORIGINAL_RSS("original","\\data\\original\\rss"),
 	ORIGINAL_TWITTER("original","\\data\\original\\twitter"),

@@ -2,17 +2,24 @@ package co.edu.sanmartin.persistence.facade;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import com.sun.swing.internal.plaf.synth.resources.synth;
+
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EProperty;
+import co.edu.sanmartin.persistence.constant.EQueueEvent;
+import co.edu.sanmartin.persistence.constant.EQueueStatus;
 import co.edu.sanmartin.persistence.constant.ESourceType;
 import co.edu.sanmartin.persistence.dao.PropertyDAO;
+import co.edu.sanmartin.persistence.dao.QueueDAO;
 import co.edu.sanmartin.persistence.dao.SourceDAO;
 import co.edu.sanmartin.persistence.dao.StopwordDAO;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.PropertyDTO;
+import co.edu.sanmartin.persistence.dto.QueueDTO;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.dto.StopwordDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
@@ -32,13 +39,16 @@ public class PersistenceFacade {
 	private SourceDAO sourceDAO;
 	private PropertyDAO propertyDAO;
 	private StopwordDAO stopwordDAO;
+	private QueueDAO queueDAO;
 	private FileManager fileManager;
+	
 
 	private PersistenceFacade() {
-		sourceDAO = new SourceDAO();
-		stopwordDAO = new StopwordDAO();
-		propertyDAO = new PropertyDAO();
-		fileManager = new FileManager();
+		this.sourceDAO = new SourceDAO();
+		this.stopwordDAO = new StopwordDAO();
+		this.propertyDAO = new PropertyDAO();
+		this.queueDAO = new QueueDAO();
+		this.fileManager = new FileManager();
 		logger.info("Facade Persistence Initialized");
 	}
 
@@ -99,6 +109,30 @@ public class PersistenceFacade {
 	public PropertyDTO getProperty(Enum<?> property) throws PropertyValueNotFoundException {
 		return propertyDAO.getProperty(property);
 	}
+	
+	public Collection<QueueDTO> getQueueByStatusDate(EQueueEvent event, EQueueStatus status, Date nowDate){
+		return this.queueDAO.getQueueByStatusDate(event, status, nowDate);
+	}
+	
+	public Collection<QueueDTO> getQueueByStatus(EQueueEvent event, EQueueStatus status){
+		return this.queueDAO.getQueueByStatus(event, status);
+	}
+	
+	public synchronized void updateQueue(QueueDTO queue) throws SQLException {
+		this.queueDAO.update(queue);
+	}
+	
+	public synchronized void insertQueue(QueueDTO queue) throws SQLException {
+		this.queueDAO.insert(queue);
+	}
+	
+	public void truncateQueue() throws SQLException {
+		this.queueDAO.truncate();
+	}
+	
+	public void createQueueTable(boolean dropTable) throws SQLException {
+		this.queueDAO.createTable(dropTable);
+	}
 
 	public void createFolder(String folderPath) {
 		fileManager.createFolder(folderPath);
@@ -141,6 +175,8 @@ public class PersistenceFacade {
 		return fileManager.getFolderPath(dataFolder);
 	}
 	
+
+	
 	/**
 	 * Refresca los datos en memoria
 	 */
@@ -161,6 +197,7 @@ public class PersistenceFacade {
 		sourceDAO.createTable(true);
 		stopwordDAO.createTable(true);
 		propertyDAO.createTable(true);
+		queueDAO.createTable(true);
 		this.refreshMemoryData();
 	}
 	
@@ -171,6 +208,7 @@ public class PersistenceFacade {
 		stopwordDAO.backupTable();
 		sourceDAO.backupTable();
 		propertyDAO.backupTable();
+		queueDAO.backupTable();
 	}
 	
 	/**
@@ -181,6 +219,7 @@ public class PersistenceFacade {
 		propertyDAO.restoreTable();
 		stopwordDAO.restoreTable();
 		sourceDAO.restoreTable();
+		queueDAO.restoreTable();
 		this.refreshMemoryData();
 	}
 }
