@@ -1,0 +1,27 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" template="templates/template.xhtml">
+
+	<ui:define name="context">
+		<ui:include src="contextmenu.xhtml" />
+	</ui:define>
+	<ui:define name="content">
+		<h:form>
+			<p:panel>
+				<p:panelGrid columns="2">
+					<p:outputLabel value="Cantidad de Terminos"></p:outputLabel>
+					<p:inputText></p:inputText>
+					<p:outputLabel value="Cantidad de Centroides"></p:outputLabel>
+					<p:inputText></p:inputText>
+					<p:outputLabel value="Iteraciones"></p:outputLabel>
+					<p:inputText></p:inputText>
+					<p:outputLabel value="Valor de Fuzzyficacion"></p:outputLabel>
+					<p:inputText></p:inputText>
+				</p:panelGrid>
+				<p:commandButton value="Clusterizar"></p:commandButton>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>
