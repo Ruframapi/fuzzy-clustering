@@ -1,16 +1,10 @@
 package co.edu.sanmartin.persistence.dao;
 
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 
-import co.edu.sanmartin.persistence.constant.EDataFolder;
-import co.edu.sanmartin.persistence.dto.PropertyDTO;
 import co.edu.sanmartin.persistence.dto.StopwordDTO;
-import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
-import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
 /**
  * DAO que gestiona la persistencia de las reglas de Stopwords

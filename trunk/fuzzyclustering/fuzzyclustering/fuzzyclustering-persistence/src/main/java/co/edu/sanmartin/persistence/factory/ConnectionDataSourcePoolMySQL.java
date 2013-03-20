@@ -11,6 +11,8 @@ import org.apache.commons.dbcp.BasicDataSource;
 
 import co.edu.sanmartin.persistence.constant.EDatabase;
 import co.edu.sanmartin.persistence.constant.ESystemProperty;
+import co.edu.sanmartin.persistence.constant.properties.PropertiesLoader;
+import co.edu.sanmartin.persistence.dao.PropertyDAO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 /**
@@ -36,27 +38,22 @@ public class ConnectionDataSourcePoolMySQL {
 	 */
 	private void inicializaDataSource(EDatabase database) {
 		BasicDataSource basicDataSource = new BasicDataSource();
-		try {
-			String userName =PersistenceFacade.getInstance().getProperty(ESystemProperty.MYSQL_USER).getValue();
-			String password = PersistenceFacade.getInstance().getProperty(ESystemProperty.MYSQL_PASSWORD).getValue();
-			String databaseName = PersistenceFacade.getInstance().getProperty(ESystemProperty.MYSQL_DATABASE).getValue();
-			String server = PersistenceFacade.getInstance().getProperty(ESystemProperty.MYSQL_SERVER).getValue();
-			basicDataSource.setDriverClassName(database.getDriverName());
-			basicDataSource.setUsername(userName);
-			basicDataSource.setPassword(password);
-			basicDataSource.setUrl("jdbc:mysql://"+server+"/"+databaseName);
-			
-			//basicDataSource.setUsername("fuzzyclustering");
-			//basicDataSource.setPassword("fuzzyclustering");
-			//basicDataSource.setUrl("jdbc:mysql://localhost/fuzzyclustering");
-			// Opcional. Sentencia SQL que le puede servir a BasicDataSource
-			// para comprobar que la conexion es correcta.
-			basicDataSource.setValidationQuery("select 1");
-			dataSource = basicDataSource;
-		} catch (PropertyValueNotFoundException e) {
-			// TODO Auto-generated catch block
-			System.out.print("No se encuentran las propiedades de conexion a la base de datos");
-		}
+		PropertiesLoader propertiesLoader = PropertiesLoader.getInstance();
+		String userName = propertiesLoader.getProperty(ESystemProperty.MYSQL_USER.getPropertyName());
+		String password = propertiesLoader.getProperty(ESystemProperty.MYSQL_PASSWORD.getPropertyName());
+		String databaseName = propertiesLoader.getProperty(ESystemProperty.MYSQL_USER.getPropertyName());
+		String server = propertiesLoader.getProperty(ESystemProperty.MYSQL_SERVER.getPropertyName());
+		basicDataSource.setDriverClassName(database.getDriverName());
+		basicDataSource.setUsername(userName);
+		basicDataSource.setPassword(password);
+		basicDataSource.setUrl("jdbc:mysql://"+server+"/"+databaseName);
+		basicDataSource.setUsername("fuzzyclustering");
+		basicDataSource.setPassword("fuzzyclustering");
+		basicDataSource.setUrl("jdbc:mysql://localhost/fuzzyclustering");
+		// Opcional. Sentencia SQL que le puede servir a BasicDataSource
+		// para comprobar que la conexion es correcta.
+		basicDataSource.setValidationQuery("select 1");
+		dataSource = basicDataSource;
 	}
 
 	public Connection getConnection(){
