@@ -5,14 +5,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Scanner;
+
 import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
-import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.constant.ESystemProperty;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
@@ -71,7 +70,8 @@ public class FileManager {
 	 * @param dataFolder
 	 */
 	public void deteleFolder(EDataFolder dataFolder){
-		File file = new File(dataFolder.getPath());
+		String dataPath = PersistenceFacade.getInstance().getFolderPath(dataFolder);
+		File file = new File(dataPath);
 		file.delete();
 	}
 
@@ -191,4 +191,5 @@ public class FileManager {
 		}
     	return folderPath.toString();
 	}
+
 }

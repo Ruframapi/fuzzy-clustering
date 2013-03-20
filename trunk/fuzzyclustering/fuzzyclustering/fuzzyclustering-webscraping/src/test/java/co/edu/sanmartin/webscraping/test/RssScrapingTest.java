@@ -1,9 +1,12 @@
 package co.edu.sanmartin.webscraping.test;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import co.edu.sanmartin.webscraping.execute.DowloadThreadPool;
+import co.edu.sanmartin.persistence.dto.SourceDTO;
+import co.edu.sanmartin.webscraping.execute.DowloadRSSThreadPool;
 import co.edu.sanmartin.webscraping.rss.RssScraping;
 
 /**
@@ -17,16 +20,19 @@ public class RssScrapingTest {
 	}
 	
 	@Test
-	@Ignore
+	//@Ignore
 	public void rssDowloadTest(){
-		RssScraping rssScraping = new RssScraping();
-		rssScraping.getRssDocuments("http://www.eltiempo.com/economia/rss.xml");
+		AtomicInteger ai = new AtomicInteger();
+		RssScraping rssScraping = new RssScraping(ai);
+		SourceDTO sourceDTO = new SourceDTO();
+		sourceDTO.setUrl("http://www.eltiempo.com/economia/rss.xml");
+		rssScraping.getRssDocuments(sourceDTO);
 	}
 	
 	@Test
 	//@Ignore
 	public void downloadThreadPoolTest(){
-		DowloadThreadPool threadPool = new DowloadThreadPool();
-		threadPool.executeThreadPool();
+		//DowloadRSSThreadPool threadPool = new DowloadRSSThreadPool();
+		//threadPool.executeThreadPool();
 	}
 }

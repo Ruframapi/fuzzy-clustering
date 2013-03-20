@@ -12,7 +12,6 @@ import javax.faces.context.FacesContext;
 import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.fuzzyclustering.ir.facade.IRFacade;
-import co.edu.sanmartin.webscraping.facade.WebscrapingFacade;
 
 @ManagedBean(name = "grouping")
 @ViewScoped
@@ -46,7 +45,7 @@ public class GroupingManagedBean implements Serializable{
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Inicializa Proceso de Descarga", "Consultando las fuentes de información...");
 		FacesContext.getCurrentInstance().addMessage(null, msg);
-		WebscrapingFacade.getInstance().downloadSources();
+		//WebscrapingFacade.getInstance().downloadSources();
 	}
 	
 	public void download(){
@@ -54,7 +53,7 @@ public class GroupingManagedBean implements Serializable{
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Inicializa Proceso de Descarga", "Consultando las fuentes de información...");
 		FacesContext.getCurrentInstance().addMessage(null, msg);
-		WebscrapingFacade.getInstance().downloadSources();
+		//WebscrapingFacade.getInstance().downloadSources();
 	}
 	
 	public void cleanText(){

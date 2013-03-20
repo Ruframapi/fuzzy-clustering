@@ -1,6 +1,7 @@
 package co.edu.sanmartin.webscraping.execute.worker;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 
@@ -17,17 +18,19 @@ public class RssDownloadWorkerThread implements Callable<String>{
 
 	private static Logger logger = Logger.getRootLogger();
 	private SourceDTO sourceDTO;
-	RssScraping rssScraping = new RssScraping();
+	RssScraping rssScraping;
 	
-	public RssDownloadWorkerThread(SourceDTO sourceDTO) {
+	public RssDownloadWorkerThread(SourceDTO sourceDTO, AtomicInteger sequence) {
 		logger.info("Init RssDownloadWorkerThread");
 		this.sourceDTO = sourceDTO;
+		this.rssScraping = new RssScraping(sequence);
 	}
 
 	public String call() throws Exception {
 		logger.info("Init RssDownloadWorkerThread Run Method");
 		logger.info("sourceDTO.getUrl()");
-		rssScraping.saveRSSDocument(sourceDTO.getUrl());
+		rssScraping.saveRSSDocument(sourceDTO);
+		
 		return "true";
 	}
 

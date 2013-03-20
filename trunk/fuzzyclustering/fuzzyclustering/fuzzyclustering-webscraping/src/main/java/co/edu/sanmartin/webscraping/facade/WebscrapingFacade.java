@@ -1,6 +1,9 @@
 package co.edu.sanmartin.webscraping.facade;
 
-import co.edu.sanmartin.webscraping.execute.DowloadThreadPool;
+import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.dto.QueueDTO;
+import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.webscraping.execute.DowloadRSSThreadPool;
 import co.edu.sanmartin.webscraping.rss.RssScraping;
 import co.edu.sanmartin.webscraping.twitter.TwitterScraping;
 
@@ -12,10 +15,10 @@ import co.edu.sanmartin.webscraping.twitter.TwitterScraping;
 public class WebscrapingFacade {
 
 	private static WebscrapingFacade instance;
-	private TwitterScraping twitterScraping;
+	private static TwitterScraping twitterScraping;
 	
 	private WebscrapingFacade(){
-		this.twitterScraping = new TwitterScraping();
+		twitterScraping = new TwitterScraping();
 	}
 	public static WebscrapingFacade getInstance(){
 		if(instance == null){
@@ -24,17 +27,13 @@ public class WebscrapingFacade {
 		return instance;
 	}
 	
-	public void downloadSources(){
-		DowloadThreadPool threadPool = new DowloadThreadPool();
-		threadPool.executeThreadPool();
-	}
 	
 	public void createFriendship(String screenName){
-		this.twitterScraping.createFriendship(screenName);
+		twitterScraping.createFriendship(screenName);
 	}
 	
 	public void removeFriendship(String screenName){
-		this.twitterScraping.removeFriendship(screenName);
+		twitterScraping.removeFriendship(screenName);
 	}
 	
 }
