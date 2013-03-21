@@ -10,6 +10,9 @@
         <dependent-module archiveName="fuzzyclustering-IR-1.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/fuzzyclustering-IR/fuzzyclustering-IR">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="fuzzyClustering-webscraping-1.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/fuzzyclustering-webscraping/fuzzyclustering-webscraping">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <property name="context-root" value="fuzzyclustering-web"/>
         <property name="java-output-path" value="/fuzzyclustering-web/target/classes"/>
     </wb-module>
