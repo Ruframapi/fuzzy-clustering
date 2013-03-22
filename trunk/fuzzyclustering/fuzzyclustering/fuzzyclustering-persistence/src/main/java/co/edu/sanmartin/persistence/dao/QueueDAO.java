@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import co.edu.sanmartin.persistence.constant.EModule;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
@@ -15,17 +16,18 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 	public void insert(QueueDTO queue) throws SQLException {
 		try {
 			connection = getConnectionPool().getConnection();
-			sQLQuery = "INSERT INTO queue (event,initDate,processDate,status) VALUES (?,?,?,?)";
+			sQLQuery = "INSERT INTO queue (module, event,initDate,processDate,status) VALUES (?,?,?,?,?)";
 			statement = connection.prepareStatement(sQLQuery);
-			statement.setString(1, queue.getEvent().name());
-			statement.setTimestamp(2, new java.sql.Timestamp(queue.getInitDate().getTime()));
+			statement.setString(1, queue.getModule().name());
+			statement.setString(2, queue.getEvent().name());
+			statement.setTimestamp(3, new java.sql.Timestamp(queue.getInitDate().getTime()));
 			if(queue.getProcessDate()!=null) {
-				statement.setDate(3, new java.sql.Date(queue.getProcessDate().getTime()));
+				statement.setDate(4, new java.sql.Date(queue.getProcessDate().getTime()));
 			}
 			else{
-				statement.setDate(3, null);
+				statement.setDate(4, null);
 			}
-			statement.setString(4, queue.getStatus().name());
+			statement.setString(5, queue.getStatus().name());
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -72,6 +74,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 			while(rs.next()){
 				QueueDTO queue = new QueueDTO();
 				queue.setId(rs.getInt("id"));
+				queue.setModule(EModule.valueOf(rs.getString("module")));
 				queue.setEvent(EQueueEvent.valueOf(rs.getString("event")));
 				queue.setInitDate(rs.getTimestamp("initDate"));
 				queue.setProcessDate(rs.getTimestamp("processDate"));
@@ -93,14 +96,14 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 	 * Retonar las colas a procesar
 	 * @return
 	 */
-	public Collection<QueueDTO> getQueueByStatusDate(EQueueEvent event, EQueueStatus status, Date nowDate){
+	public Collection<QueueDTO> getQueueByStatusDate(EModule module, EQueueStatus status, Date nowDate){
 		
 		Collection<QueueDTO> queueColl = new ArrayList<QueueDTO>();
 		try {
 			connection = getConnectionPool().getConnection();
-			sQLQuery = "SELECT * FROM queue WHERE event=? AND status = ? AND initDate <= ?";
+			sQLQuery = "SELECT * FROM queue WHERE module=? AND status = ? AND initDate <= ?";
 			statement = connection.prepareStatement(sQLQuery);
-			statement.setString(1, event.name());
+			statement.setString(1, module.name());
 			statement.setString(2, status.name());
 			java.sql.Timestamp date = new java.sql.Timestamp(nowDate.getTime());
 			statement.setTimestamp(3, date);
@@ -108,7 +111,45 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 			while(rs.next()){
 				QueueDTO queue = new QueueDTO();
 				queue.setId(rs.getInt("id"));
-				queue.setEvent(event);
+				queue.setModule(EModule.valueOf(rs.getString("module")));
+				queue.setEvent(EQueueEvent.valueOf(rs.getString("event")));
+				queue.setInitDate(rs.getTimestamp("initDate"));
+				queue.setProcessDate(rs.getTimestamp("processDate"));
+				queue.setStatus(status);
+				queueColl.add(queue);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally{
+			getConnectionPool().freeConnection(connection);
+		}
+		
+		return queueColl;
+	}
+	
+	
+	/**
+	 * Retonar las colas a procesar
+	 * @return
+	 */
+	public Collection<QueueDTO> getQueueByStatus(EQueueStatus status, Date nowDate){
+		
+		Collection<QueueDTO> queueColl = new ArrayList<QueueDTO>();
+		try {
+			connection = getConnectionPool().getConnection();
+			sQLQuery = "SELECT * FROM queue WHERE status = ? AND initDate <= ?";
+			statement = connection.prepareStatement(sQLQuery);
+			statement.setString(1, status.name());
+			java.sql.Timestamp date = new java.sql.Timestamp(nowDate.getTime());
+			statement.setTimestamp(2, date);
+			rs = statement.executeQuery();
+			while(rs.next()){
+				QueueDTO queue = new QueueDTO();
+				queue.setId(rs.getInt("id"));
+				queue.setModule(EModule.valueOf(rs.getString("module")));
+				queue.setEvent(EQueueEvent.valueOf(rs.getString("event")));
 				queue.setInitDate(rs.getTimestamp("initDate"));
 				queue.setProcessDate(rs.getTimestamp("processDate"));
 				queue.setStatus(status);
@@ -135,7 +176,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 		Collection<QueueDTO> queueColl = new ArrayList<QueueDTO>();
 		try {
 			connection = getConnectionPool().getConnection();
-			sQLQuery = "SELECT * FROM queue WHERE event=? AND status = ?";
+			sQLQuery = "SELECT * FROM queue WHERE event = ?  AND status = ?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, event.name());
 			statement.setString(2, status.name());
@@ -143,7 +184,8 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 			while(rs.next()){
 				QueueDTO queue = new QueueDTO();
 				queue.setId(rs.getInt("id"));
-				queue.setEvent(event);
+				queue.setModule(EModule.valueOf(rs.getString("module")));
+				queue.setEvent(EQueueEvent.valueOf(rs.getString("event")));
 				queue.setInitDate(rs.getTimestamp("initDate"));
 				queue.setProcessDate(rs.getTimestamp("processDate"));
 				queue.setStatus(status);
@@ -159,6 +201,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 		
 		return queueColl;
 	}
+
 	
 	/**
 	 * Crea la tabla del DTO
@@ -174,7 +217,8 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 				statement = connection.prepareStatement(sQLQuery);
 				statement.executeUpdate();
 			}
-			sQLQuery = "CREATE  TABLE fuzzyclustering.queue (id INT NOT NULL AUTO_INCREMENT , " +
+			sQLQuery = "CREATE TABLE fuzzyclustering.queue (id INT NOT NULL AUTO_INCREMENT , " +
+					"module VARCHAR(45) NOT NULL ," +
 					"event VARCHAR(45) NOT NULL ," +
 					"initDate DATETIME NOT NULL ," +
 					"processDate DATETIME ," +
@@ -195,13 +239,19 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 	public void update(QueueDTO queue) throws SQLException {
 		try {
 			connection = getConnectionPool().getConnection();
-			sQLQuery = "UPDATE queue SET event=?,initDate=?,processDate=?,status=? WHERE id=?";
+			sQLQuery = "UPDATE queue SET module=?, event=?,initDate=?,processDate=?,status=? WHERE id=?";
 			statement = connection.prepareStatement(sQLQuery);
-			statement.setString(1, queue.getEvent().name());
-			statement.setTimestamp(2, new java.sql.Timestamp(queue.getInitDate().getTime()));
-			statement.setTimestamp(3, new java.sql.Timestamp(queue.getProcessDate().getTime()));
-			statement.setString(4, queue.getStatus().name());
-			statement.setInt(5, queue.getId());
+			statement.setString(1,queue.getModule().name());
+			statement.setString(2, queue.getEvent().name());
+			statement.setTimestamp(3, new java.sql.Timestamp(queue.getInitDate().getTime()));
+			if(queue.getProcessDate()!=null){
+				statement.setTimestamp(4, new java.sql.Timestamp(queue.getProcessDate().getTime()));
+			}
+			else{
+				statement.setTimestamp(4, null);
+			}
+			statement.setString(5, queue.getStatus().name());
+			statement.setInt(6, queue.getId());
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -222,7 +272,6 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 		// TODO Auto-generated method stub
 		
 	}
-
 
 	@Override
 	public Collection<QueueDTO> selectAll() throws SQLException {

@@ -17,7 +17,6 @@ public class StopwordDAO extends AbstractDAO<StopwordDTO> {
 	private Collection<StopwordDTO> stopwordColl;
 	
 	public StopwordDAO(){
-		this.selectAll(true);
 	}
 	
 	@Override

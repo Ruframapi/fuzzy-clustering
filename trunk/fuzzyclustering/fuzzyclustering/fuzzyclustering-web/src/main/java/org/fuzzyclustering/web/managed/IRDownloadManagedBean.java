@@ -17,6 +17,7 @@ import javax.faces.context.FacesContext;
 import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.constant.EModule;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
@@ -44,6 +45,7 @@ public class IRDownloadManagedBean implements Serializable {
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Inicializa Proceso de Descarga", "Consultando las fuentes de información...");
 		QueueDTO queue = new QueueDTO();
+		queue.setModule(EModule.WEBSCRAPPING);
 		queue.setEvent(EQueueEvent.DOWNLOAD_RSS);
 		queue.setInitDate(new Date());
 		queue.setStatus(EQueueStatus.ENQUEUE);
@@ -62,6 +64,7 @@ public class IRDownloadManagedBean implements Serializable {
 	 */
 	public void deleteDownloadSources(){
 		QueueDTO queue = new QueueDTO();
+		queue.setModule(EModule.WEBSCRAPPING);
 		queue.setEvent(EQueueEvent.CLEAN_DOWNLOAD);
 		queue.setInitDate(new Date());
 		queue.setStatus(EQueueStatus.ENQUEUE);
