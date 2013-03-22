@@ -2,6 +2,7 @@ package co.edu.sanmartin.persistence.dto;
 
 import java.util.Date;
 
+import co.edu.sanmartin.persistence.constant.EModule;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
 
@@ -12,6 +13,7 @@ import co.edu.sanmartin.persistence.constant.EQueueStatus;
  */
 public class QueueDTO {
 	private int id;
+	private EModule module;
 	private Date initDate;
 	private Date processDate;
 	private EQueueEvent event;
@@ -23,6 +25,13 @@ public class QueueDTO {
 	}
 	public void setId(int id) {
 		this.id = id;
+	}
+	
+	public EModule getModule() {
+		return module;
+	}
+	public void setModule(EModule module) {
+		this.module = module;
 	}
 	public Date getInitDate() {
 		return initDate;

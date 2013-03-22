@@ -40,7 +40,12 @@ public class SourceDAO extends AbstractDAO<SourceDTO> {
 			statement.setString(1, sourceDTO.getName());
 			statement.setString(2, sourceDTO.getUrl());
 			statement.setString(3, sourceDTO.getType().name());
-			statement.setTimestamp(4, new java.sql.Timestamp(sourceDTO.getLastQuery().getTime()));
+			if(sourceDTO.getLastQuery()!=null){
+			   statement.setTimestamp(4, new java.sql.Timestamp(sourceDTO.getLastQuery().getTime()));
+			}
+			else{
+				statement.setTimestamp(4, null);
+			}
 			statement.setString(5, sourceDTO.getName());
 			statement.executeUpdate();
 		} catch (SQLException e) {

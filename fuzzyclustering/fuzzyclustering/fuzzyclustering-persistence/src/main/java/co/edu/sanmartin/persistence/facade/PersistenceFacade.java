@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import com.sun.swing.internal.plaf.synth.resources.synth;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.constant.EModule;
 import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
@@ -110,8 +111,12 @@ public class PersistenceFacade {
 		return propertyDAO.getProperty(property);
 	}
 	
-	public Collection<QueueDTO> getQueueByStatusDate(EQueueEvent event, EQueueStatus status, Date nowDate){
-		return this.queueDAO.getQueueByStatusDate(event, status, nowDate);
+	public Collection<QueueDTO> getQueueByStatusDate(EModule module, EQueueStatus status, Date nowDate){
+		return this.queueDAO.getQueueByStatusDate(module, status, nowDate);
+	}
+	
+	public Collection<QueueDTO> getQueueByStatus(EQueueStatus status, Date nowDate){
+		return this.queueDAO.getQueueByStatus(status, nowDate);
 	}
 	
 	public Collection<QueueDTO> getQueueByStatus(EQueueEvent event, EQueueStatus status){

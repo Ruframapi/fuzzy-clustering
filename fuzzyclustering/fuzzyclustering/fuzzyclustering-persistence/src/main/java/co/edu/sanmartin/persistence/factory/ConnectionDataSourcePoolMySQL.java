@@ -47,9 +47,6 @@ public class ConnectionDataSourcePoolMySQL {
 		basicDataSource.setUsername(userName);
 		basicDataSource.setPassword(password);
 		basicDataSource.setUrl("jdbc:mysql://"+server+"/"+databaseName);
-		basicDataSource.setUsername("fuzzyclustering");
-		basicDataSource.setPassword("fuzzyclustering");
-		basicDataSource.setUrl("jdbc:mysql://localhost/fuzzyclustering");
 		// Opcional. Sentencia SQL que le puede servir a BasicDataSource
 		// para comprobar que la conexion es correcta.
 		basicDataSource.setValidationQuery("select 1");

@@ -7,7 +7,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.log4j.Logger;
+
 import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.constant.EModule;
 import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
@@ -27,6 +30,7 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
 public class Dequeue implements Runnable{
 
+	private static Logger logger = Logger.getLogger(Dequeue.class);
 	PersistenceFacade persistenceFacade;
 	AtomicInteger sequence = new AtomicInteger();
 	//static Logger logger = Logger.getRootLogger();
@@ -72,7 +76,7 @@ public class Dequeue implements Runnable{
 	public void executeQueue() throws SQLException, PropertyValueNotFoundException{
 
 		Collection<QueueDTO> queueCol = 
-				this.persistenceFacade.getQueueByStatusDate(EQueueEvent.DOWNLOAD_RSS, 
+				this.persistenceFacade.getQueueByStatusDate(EModule.WEBSCRAPPING, 
 						EQueueStatus.ENQUEUE, new Date());
 		for (QueueDTO queueDTO : queueCol) {
 			switch( queueDTO.getEvent() ){
@@ -147,6 +151,7 @@ public class Dequeue implements Runnable{
 	 */
 	public void addNewQueueEvent(EQueueEvent queueEvent) throws PropertyValueNotFoundException, SQLException{
 		QueueDTO queueDTO = new QueueDTO();
+		queueDTO.setModule(EModule.WEBSCRAPPING);
 		queueDTO.setProcessDate(null);
 		PropertyDTO rssTimeDelay = 
 				PersistenceFacade.getInstance().getProperty(EProperty.WEB_SCRAPPING_RSS_DOWNLOAD_TIME);
