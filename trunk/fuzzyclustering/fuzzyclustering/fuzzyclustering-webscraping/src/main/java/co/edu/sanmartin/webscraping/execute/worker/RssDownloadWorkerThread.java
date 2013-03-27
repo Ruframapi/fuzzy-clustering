@@ -21,14 +21,14 @@ public class RssDownloadWorkerThread implements Callable<String>{
 	RssScraping rssScraping;
 	
 	public RssDownloadWorkerThread(SourceDTO sourceDTO, AtomicInteger sequence) {
-		logger.info("Init RssDownloadWorkerThread");
+		logger.debug("Init RssDownloadWorkerThread source" + sourceDTO.getUrl());
 		this.sourceDTO = sourceDTO;
 		this.rssScraping = new RssScraping(sequence);
 	}
 
 	public String call() throws Exception {
-		logger.info("Init RssDownloadWorkerThread Run Method");
-		logger.info("sourceDTO.getUrl()");
+		logger.debug("Init RssDownloadWorkerThread Run Method");
+		logger.debug("sourceDTO.getUrl()");
 		rssScraping.saveRSSDocument(sourceDTO);
 		
 		return "true";

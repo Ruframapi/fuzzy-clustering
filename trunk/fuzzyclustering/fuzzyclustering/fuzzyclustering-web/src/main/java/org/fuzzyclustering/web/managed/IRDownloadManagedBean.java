@@ -41,12 +41,19 @@ public class IRDownloadManagedBean implements Serializable {
 	}
 	
 	public void download(){
-		logger.info("Start download process");
+		logger.debug("Start download process");
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Inicializa Proceso de Descarga", "Consultando las fuentes de información...");
+		this.addQueueDownload(EQueueEvent.DOWNLOAD_RSS);
+		this.addQueueDownload(EQueueEvent.DOWNLOAD_TWITTER);
+		FacesContext.getCurrentInstance().addMessage(null, msg);
+		//WebscrapingFacade.getInstance().downloadSources();
+	}
+	
+	private void addQueueDownload(EQueueEvent queueEvent){
 		QueueDTO queue = new QueueDTO();
 		queue.setModule(EModule.WEBSCRAPPING);
-		queue.setEvent(EQueueEvent.DOWNLOAD_RSS);
+		queue.setEvent(queueEvent);
 		queue.setInitDate(new Date());
 		queue.setStatus(EQueueStatus.ENQUEUE);
 		try {
@@ -55,8 +62,6 @@ public class IRDownloadManagedBean implements Serializable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		FacesContext.getCurrentInstance().addMessage(null, msg);
-		//WebscrapingFacade.getInstance().downloadSources();
 	}
 	
 	/**

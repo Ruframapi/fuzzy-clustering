@@ -26,9 +26,9 @@ public class InvertedIndexWorkerThread implements Runnable{
 	}
 
 	public void run() {
-		logger.info("Init run Inverted Index Worker Thread DataFile:" + fileName);
+		logger.debug("Init run Inverted Index Worker Thread DataFile:" + fileName);
 		String[] termList = dataFile.split(",");
-		logger.info("Term size:"+termList.length);
+		logger.debug("Term size:"+termList.length);
 		for (int i = 0; i < termList.length; i++) {
 			index.addIndex(termList[i],fileName);
 		}

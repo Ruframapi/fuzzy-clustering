@@ -5,14 +5,16 @@ import java.util.Collection;
 import java.util.List;
 
 public  enum EDataFolder {
-	DATA_ROOT("dataRoot","\\data"),
-	CLEAN("clean","\\data\\clean"), 
-	ORIGINAL_RSS("original","\\data\\original\\rss"),
-	ORIGINAL_TWITTER("original","\\data\\original\\twitter"),
-	INVERTED_INDEX("inverted index","\\data\\invertedindex"),
-	MATRIX("matrix","\\data\\matrix"),
-	MACHINE_LEARNING("machine learning", "\\data\\machinelearning"),
-	BACKUP("BACKUP","\\backup");
+	
+	
+	DATA_ROOT("dataRoot",System.getProperty("file.separator")+"data"),
+	CLEAN("clean",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"clean"), 
+	ORIGINAL_RSS("original",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"original"+System.getProperty("file.separator")+"rss"),
+	ORIGINAL_TWITTER("original",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"original"+System.getProperty("file.separator")+"twitter"),
+	INVERTED_INDEX("inverted index",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"invertedindex"),
+	MATRIX("matrix",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"matrix"),
+	MACHINE_LEARNING("machine learning", System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"machinelearning"),
+	BACKUP("BACKUP",System.getProperty("file.separator")+"backup");
 	
 	private String name;
 	private String path;

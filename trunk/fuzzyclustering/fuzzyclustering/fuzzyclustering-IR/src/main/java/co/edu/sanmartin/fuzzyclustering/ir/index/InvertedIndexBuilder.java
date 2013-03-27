@@ -32,7 +32,7 @@ public class InvertedIndexBuilder {
 	
 	
 	public InvertedIndexBuilder(ConcurrentLinkedDeque<String> index){
-		logger.info("Init Inverted Index");
+		logger.debug("Init Inverted Index");
 		this.index = index;
 	}
 	

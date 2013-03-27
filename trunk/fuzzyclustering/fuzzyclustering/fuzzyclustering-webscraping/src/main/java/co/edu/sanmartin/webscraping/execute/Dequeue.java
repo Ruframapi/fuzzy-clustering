@@ -83,6 +83,9 @@ public class Dequeue implements Runnable{
 			case DOWNLOAD_RSS:
 				this.downloadRSS(queueDTO);
 				break;
+			case DOWNLOAD_TWITTER:
+				this.downloadTwitter(queueDTO);
+				break;
 			case CANCEL_DOWNLOAD:
 				this.cancelDownload(queueDTO, EQueueEvent.DOWNLOAD_RSS);
 				this.cancelDownload(queueDTO, EQueueEvent.DOWNLOAD_TWITTER);
@@ -127,6 +130,7 @@ public class Dequeue implements Runnable{
 			sourceDTO.setLastQuery(null);
 			persistenceFacade.updateSource(sourceDTO);
 		}
+		persistenceFacade.truncateDocument();
 	}
 	
 
@@ -138,8 +142,11 @@ public class Dequeue implements Runnable{
 	}
 	
 	
-	public void downloadTwitter(QueueDTO queueDTO){
-		
+	public void downloadTwitter(QueueDTO queueDTO) throws PropertyValueNotFoundException, SQLException{
+		DowloadTwitterThreadPool threadPool = new DowloadTwitterThreadPool(queueDTO, this.sequence);
+		threadPool.executeThreadPool(ESourceType.TWITTER);
+		persistenceFacade.updateQueue(queueDTO);
+		this.addNewQueueEvent(EQueueEvent.DOWNLOAD_TWITTER);
 	}
 	
 	/**
@@ -153,15 +160,35 @@ public class Dequeue implements Runnable{
 		QueueDTO queueDTO = new QueueDTO();
 		queueDTO.setModule(EModule.WEBSCRAPPING);
 		queueDTO.setProcessDate(null);
-		PropertyDTO rssTimeDelay = 
-				PersistenceFacade.getInstance().getProperty(EProperty.WEB_SCRAPPING_RSS_DOWNLOAD_TIME);
-		Calendar cal = Calendar.getInstance();
-		
-		cal.add(Calendar.SECOND, rssTimeDelay.intValue());
-		queueDTO.setInitDate(cal.getTime());
+		queueDTO.setInitDate(getNextQueueDate(queueEvent));
 		queueDTO.setEvent(queueEvent);
 		queueDTO.setStatus(EQueueStatus.ENQUEUE);
 		persistenceFacade.insertQueue(queueDTO);
+	}
+	
+	/**
+	 * Retorna la fecha de la ejecucion de la siguiente cola del evento
+	 * @param queueEvent
+	 * @return
+	 * @throws PropertyValueNotFoundException 
+	 */
+	public Date getNextQueueDate(EQueueEvent queueEvent) throws PropertyValueNotFoundException {
+		EProperty property = null;
+		
+		switch (queueEvent){
+			case DOWNLOAD_RSS:
+				property = EProperty.WEB_SCRAPPING_RSS_DOWNLOAD_TIME;
+				break;
+			case DOWNLOAD_TWITTER:
+				property = EProperty.WEB_SCRAPPING_TWITTER_DOWNLOAD_TIME;
+				break;
+		}
+		PropertyDTO rssTimeDelay = 
+				PersistenceFacade.getInstance().getProperty(property);
+		Calendar cal = Calendar.getInstance();
+		
+		cal.add(Calendar.SECOND, rssTimeDelay.intValue());
+		return cal.getTime();
 	}
 }
 

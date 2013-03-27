@@ -1,5 +1,6 @@
 package co.edu.sanmartin.webscraping.facade;
 
+import twitter4j.TwitterException;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
@@ -18,7 +19,12 @@ public class WebscrapingFacade {
 	private static TwitterScraping twitterScraping;
 	
 	private WebscrapingFacade(){
-		twitterScraping = new TwitterScraping();
+		try {
+			twitterScraping = new TwitterScraping();
+		} catch (TwitterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	public static WebscrapingFacade getInstance(){
 		if(instance == null){

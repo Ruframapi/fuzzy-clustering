@@ -40,7 +40,7 @@ public class IRCleanManagedBean implements Serializable {
 	}
 	
 	public void clean(){
-		logger.info("Start download process");
+		logger.debug("Start download process");
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Inicializa Proceso de Limpieza de textos", "Procesando los documentos descargados.");
 		FacesContext.getCurrentInstance().addMessage(null, msg);

@@ -41,7 +41,7 @@ public class ConnectionDataSourcePoolMySQL {
 		PropertiesLoader propertiesLoader = PropertiesLoader.getInstance();
 		String userName = propertiesLoader.getProperty(ESystemProperty.MYSQL_USER.getPropertyName());
 		String password = propertiesLoader.getProperty(ESystemProperty.MYSQL_PASSWORD.getPropertyName());
-		String databaseName = propertiesLoader.getProperty(ESystemProperty.MYSQL_USER.getPropertyName());
+		String databaseName = propertiesLoader.getProperty(ESystemProperty.MYSQL_DATABASE.getPropertyName());
 		String server = propertiesLoader.getProperty(ESystemProperty.MYSQL_SERVER.getPropertyName());
 		basicDataSource.setDriverClassName(database.getDriverName());
 		basicDataSource.setUsername(userName);

@@ -14,6 +14,7 @@ import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
 import co.edu.sanmartin.persistence.constant.ESourceType;
+import co.edu.sanmartin.persistence.dao.DocumentDAO;
 import co.edu.sanmartin.persistence.dao.PropertyDAO;
 import co.edu.sanmartin.persistence.dao.QueueDAO;
 import co.edu.sanmartin.persistence.dao.SourceDAO;
@@ -41,6 +42,7 @@ public class PersistenceFacade {
 	private PropertyDAO propertyDAO;
 	private StopwordDAO stopwordDAO;
 	private QueueDAO queueDAO;
+	private DocumentDAO documentDAO;
 	private FileManager fileManager;
 	
 
@@ -49,8 +51,9 @@ public class PersistenceFacade {
 		this.stopwordDAO = new StopwordDAO();
 		this.propertyDAO = new PropertyDAO();
 		this.queueDAO = new QueueDAO();
+		this.documentDAO = new DocumentDAO();
 		this.fileManager = new FileManager();
-		logger.info("Facade Persistence Initialized");
+		logger.debug("Facade Persistence Initialized");
 	}
 
 	public static PersistenceFacade getInstance() {
@@ -138,6 +141,14 @@ public class PersistenceFacade {
 	public void createQueueTable(boolean dropTable) throws SQLException {
 		this.queueDAO.createTable(dropTable);
 	}
+	
+	public void insertDocument(DocumentDTO document) throws SQLException {
+		this.documentDAO.insert(document);
+	}
+	
+	public void truncateDocument() throws SQLException {
+		this.documentDAO.truncate();
+	}
 
 	public void createFolder(String folderPath) {
 		fileManager.createFolder(folderPath);
@@ -179,7 +190,6 @@ public class PersistenceFacade {
 	public String getFolderPath(EDataFolder dataFolder){
 		return fileManager.getFolderPath(dataFolder);
 	}
-	
 
 	
 	/**
@@ -190,7 +200,7 @@ public class PersistenceFacade {
 		stopwordDAO = new StopwordDAO();
 		propertyDAO = new PropertyDAO();
 		fileManager = new FileManager();
-		logger.info("Facade Persistence Re-Initialized");
+		logger.debug("Facade Persistence Re-Initialized");
 	}
 
 	/**
@@ -203,6 +213,7 @@ public class PersistenceFacade {
 		stopwordDAO.createTable(true);
 		propertyDAO.createTable(true);
 		queueDAO.createTable(true);
+		documentDAO.createTable(true);
 		this.refreshMemoryData();
 	}
 	
@@ -213,7 +224,6 @@ public class PersistenceFacade {
 		stopwordDAO.backupTable();
 		sourceDAO.backupTable();
 		propertyDAO.backupTable();
-		queueDAO.backupTable();
 	}
 	
 	/**
@@ -224,7 +234,6 @@ public class PersistenceFacade {
 		propertyDAO.restoreTable();
 		stopwordDAO.restoreTable();
 		sourceDAO.restoreTable();
-		queueDAO.restoreTable();
 		this.refreshMemoryData();
 	}
 }
