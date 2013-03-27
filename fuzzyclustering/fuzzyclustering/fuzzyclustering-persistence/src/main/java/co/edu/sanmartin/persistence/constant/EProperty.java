@@ -17,6 +17,7 @@ public enum EProperty {
 	TWITTER_ACCESS_TOKEN_SECRET("twitter.access.token.secret", "Twitter Access Token Secret"),
 	TWITTER_HOME_TIMELINE_PAGES("twitter.home.timeline.pages","Cantidad de paginas de descarga de twitter"),
 	WEB_SCRAPPING_RSS_DOWNLOAD_TIME("webscraping.rss.download.time","tiempo entre busquedas de noticicas RSS"),
+	WEB_SCRAPPING_TWITTER_DOWNLOAD_TIME("webscraping.twitter.download.time","tiempo entre busquedas de noticicas RSS"),
 	WEB_SCRAPPING_THREAD_NUMBER("webscrapin.thread.number", "Numero de Hilos de Descarga"),
 	INVERTED_INDEX_THREAD_NUMBER("inverted.index.thread.number", "Numero de Hilos de Indices Invertidos"),
 	TEXT_SPLIT_TOKEN("text.split.token", "Token para separacion de textos"),

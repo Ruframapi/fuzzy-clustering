@@ -11,14 +11,18 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.swing.text.html.HTMLDocument.Iterator;
+
 import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EProperty;
+import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
+import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndContentImpl;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -38,7 +42,7 @@ public class RssScraping{
     private AtomicInteger atomicSequence;
     
     public RssScraping(AtomicInteger atomicSequence){
-    	logger.info("Init RssScraping Class");
+    	logger.debug("Init RssScraping Class");
     	this.atomicSequence = atomicSequence;
     }
     /**
@@ -46,21 +50,17 @@ public class RssScraping{
      * @return
      */
     public Collection<String> getRssDocuments(SourceDTO source){
+    	logger.trace("Init getRssDocuments for source:" + source.getUrl());
     	boolean ok = false;
     	Collection<String> documentCol = new ArrayList<String>();
         try {
-            
             URL feedUrl = new URL(source.getUrl());
-
             SyndFeedInput input = new SyndFeedInput();
             SyndFeed feed = input.build(new XmlReader(feedUrl));
             feed.getPublishedDate();
-            // System.out.println(feed);
             ok = true;
-            boolean isNew = false;
             if (source.getLastQuery()==null){
-            	source.setLastQuery(new Date());
-            	isNew = true;
+            	source.setLastQuery(new Date(0));
             }
             for (SyndEntry entry : (List<SyndEntry>) feed.getEntries()) {
             	StringBuilder documentData = new StringBuilder();
@@ -68,38 +68,44 @@ public class RssScraping{
                 documentData.append(title);
                 documentData.append(".");
                 documentData.append(" ");
-                String uri = entry.getUri();
                 Date publishedDate = entry.getPublishedDate();
                 
-                if (isNew || publishedDate.after(source.getLastQuery())){
-	                // Get the Contents
-	                for (SyndContentImpl content : (List<SyndContentImpl>) entry.getContents()) {
-	                    documentData.append(content.getValue());
-	                    System.out.println("Content: " + documentData.toString());
-	                    documentCol.add(documentData.toString());
+                if (publishedDate.after(source.getLastQuery())){
+	                SyndContent description = entry.getDescription();
+	                if(description.getValue()!=null){
+	                	documentData.append(description.getValue());
+	                	List<SyndContentImpl> contents = (List<SyndContentImpl>) entry.getContents();
+	                	documentData.append(".");
+	                    documentData.append(" ");
+	                	for (SyndContentImpl content : contents) {
+	                		documentData.append(content.getValue());
+	                	}
+	                	documentCol.add(documentData.toString());
 	                }
-	                
-	                feed.createWireFeed();
                 }
             }
 
         } catch (Exception ex) {
-            ex.printStackTrace();
-            System.out.println("ERROR: " + ex.getMessage());
+            logger.info("ERROR: " + ex.getMessage() + " Source:" + source) ;
         }
 
         return documentCol;
     }
 
     public void saveRSSDocument(SourceDTO source) throws Exception{
-    	logger.info("Init saveRSSDocument");
+    	logger.debug("Init saveRSSDocument Source:" + source.getUrl());
     	Collection<String> documentContent = this.getRssDocuments(source);
-    	
+    	logger.info("Documents to save Rss Source:" + source + " Amount:" + documentContent.size());
+    	PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
     	for (String content : documentContent) {
-    		logger.info("Creating new file number:"+ atomicSequence);
+    		logger.debug("Creating new file number:"+ atomicSequence);
     		String fileName = String.valueOf(atomicSequence)+".txt";
+    		persistenceFacade.writeFile(EDataFolder.ORIGINAL_RSS, fileName, content);
+    		DocumentDTO document = new DocumentDTO(EDataFolder.ORIGINAL_RSS.getPath(), fileName);
+    		document.setSource(source.getUrl());
+    		document.setDownloadDate(new Date());
+    		persistenceFacade.insertDocument(document);
     		this.atomicSequence.incrementAndGet();
-			PersistenceFacade.getInstance().writeFile(EDataFolder.ORIGINAL_RSS, fileName, content);
 		}
     	source.setLastQuery(new Date());
     	PersistenceFacade.getInstance().updateSource(source);

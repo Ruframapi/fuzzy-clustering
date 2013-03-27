@@ -41,7 +41,7 @@ public class DowloadRSSThreadPool {
 	public void executeThreadPool(ESourceType sourceType){
 		int threadPoolNumber = 10;
 		Collection<SourceDTO> rssSourceCol = null;
-		logger.info("Init DownloadTread Execute Method");
+		logger.info("Init DownloadTread RSS Execute Method for" + sourceType);
 		//Se cargan las fuentes rss disponibles
 		try {
 			PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
@@ -54,17 +54,17 @@ public class DowloadRSSThreadPool {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			this.queue.setStatus(EQueueStatus.ERROR);
-			e.printStackTrace();
+			logger.error(e);
 		} catch (PropertyValueNotFoundException e) {
 			// TODO Auto-generated catch block
 			this.queue.setStatus(EQueueStatus.ERROR);
-			e.printStackTrace();
+			logger.error(e);
 		}
 		ThreadPoolExecutor executor=(ThreadPoolExecutor)Executors.newFixedThreadPool(threadPoolNumber);
-		TwitterDownloadWorkerThread twitterWorkerThread;
 		RssDownloadWorkerThread rssWorkerThread;
 		logger.info("Sources Found:" +rssSourceCol.size());
 		for (SourceDTO sourceDTO : rssSourceCol) {
+			logger.info("Init download:" + sourceDTO.getUrl());
 			if(sourceDTO.getType().equals(ESourceType.RSS)){
 				rssWorkerThread = new RssDownloadWorkerThread(sourceDTO, rssSequence);
 				executor.submit(rssWorkerThread);

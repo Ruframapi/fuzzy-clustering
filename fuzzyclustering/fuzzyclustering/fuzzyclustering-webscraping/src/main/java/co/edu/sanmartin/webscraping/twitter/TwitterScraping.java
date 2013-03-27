@@ -1,7 +1,9 @@
 package co.edu.sanmartin.webscraping.twitter;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,6 +21,7 @@ import twitter4j.auth.AccessToken;
 import twitter4j.conf.ConfigurationBuilder;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EProperty;
+import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
@@ -78,12 +81,11 @@ twitter.access.token.secret=XZ8LRynlddi7vvcIFsjuNsLtDsk6jqcoXoOo9LX687A
 public class TwitterScraping {
 	
 	private static Logger logger = Logger.getRootLogger();
-	private Twitter twitter;
-	private AtomicInteger atomicSequence;
 	 
 	private PersistenceFacade persistence = PersistenceFacade.getInstance();
-	public TwitterScraping(){
-		this.atomicSequence = new AtomicInteger();
+	private Twitter twitter;
+	
+	public TwitterScraping() throws TwitterException{
 		try {
 			this.init();
 		} catch (PropertyValueNotFoundException e) {
@@ -92,46 +94,12 @@ public class TwitterScraping {
 		}
 	}
 	
-	private void init() throws PropertyValueNotFoundException{
-		
-		try{
-			if(this.twitter ==null || this.twitter.getId()==0){
-				this.loginTwitter();
-			}
-		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			this.loginTwitter();
-		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	private void init() throws PropertyValueNotFoundException, TwitterException{
+		this.twitter = TwitterConnection.getInstance().getTwitter();
+		//this.twitter = TwitterConnection.
 	}
 	
-	private void loginTwitter(){
-		String consumerKey;
-		try {
-			consumerKey = this.persistence.getProperty(EProperty.TWITTER_CONSUMER_KEY).getValue();
-			String consumerSecret = this.persistence.getProperty(EProperty.TWITTER_CONSUMER_SECRET).getValue();
-			String accessToken = this.persistence.getProperty(EProperty.TWITTER_ACCESS_TOKEN).getValue();
-			String accessTokenSecret = this.persistence.getProperty(EProperty.TWITTER_ACCESS_TOKEN_SECRET).getValue();
-			ConfigurationBuilder cb = new ConfigurationBuilder();
-			cb.setDebugEnabled(true)
-			  .setOAuthConsumerKey(consumerKey)
-			  .setOAuthConsumerSecret(consumerSecret)
-			  .setOAuthAccessToken(accessToken)
-			  .setOAuthAccessTokenSecret(accessTokenSecret);
-			TwitterFactory tf = new TwitterFactory(cb.build());
-			this.twitter = tf.getInstance();
-			this.twitter.verifyCredentials();
-		} catch (PropertyValueNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}
+	
 
 	/**
 	 * Retorna el Timeline del usuario
@@ -162,6 +130,34 @@ public class TwitterScraping {
 		return documentCol;
 	}
 	
+	
+	
+	
+	/**
+	 * Almacena los tweets descargados en disco
+	 * @param screenName nombre del usuario de twitter a decargar
+	 * @throws SQLException 
+	 * @throws TwitterException 
+	 * @throws IllegalStateException 
+	 */
+	public void saveTwitterDocument(String screenName, AtomicInteger sequence) throws SQLException, IllegalStateException, TwitterException{
+    	logger.debug("Init saveRSSDocument");
+    	if(this.twitter ==null && this.twitter.getId()==0){
+	    	Collection<String> documentContent = this.getTwitterDocuments(screenName);
+	    	PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
+	    	for (String content : documentContent) {		
+	    		logger.debug("Creating new twitter file number:"+ sequence);
+	    		String fileName = String.valueOf(sequence)+".txt";
+	    		persistenceFacade.writeFile(EDataFolder.ORIGINAL_TWITTER, fileName, content);
+				DocumentDTO document = new DocumentDTO(EDataFolder.ORIGINAL_TWITTER.getPath(), fileName);
+	    		document.setSource(screenName);
+	    		document.setDownloadDate(new Date());
+	    		persistenceFacade.insertDocument(document);
+	    		sequence.incrementAndGet();
+			}
+    	}
+    }
+	
 	/**
 	 * Retorna el Timeline del usuario especificado
 	 * @param screenName identificacion del usuario
@@ -182,8 +178,8 @@ public class TwitterScraping {
 				System.out.println(b.getText());
 			}
 		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error in getTwitterDocuments:" + e.getErrorMessage()+
+						"StatusCode:" + e.getStatusCode());
 		} catch (PropertyValueNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -191,24 +187,6 @@ public class TwitterScraping {
 		
 		return documentCol;
 	}
-	
-	
-	/**
-	 * Almacena los tweets descargados en disco
-	 * @param screenName nombre del usuario de twitter a decargar
-	 */
-	public void saveTwitterDocument(String screenName){
-    	logger.info("Init saveRSSDocument");
-    	Collection<String> documentContent = this.getTwitterDocuments(screenName);
-    	
-    	for (String content : documentContent) {
-    		
-    		logger.info("Creating new twitter file number:"+ atomicSequence);
-    		String fileName = String.valueOf(atomicSequence)+".txt";
-    		this.atomicSequence.incrementAndGet();
-			PersistenceFacade.getInstance().writeFile(EDataFolder.ORIGINAL_TWITTER, fileName, content);
-		}
-    }
 	
 	
 	/**

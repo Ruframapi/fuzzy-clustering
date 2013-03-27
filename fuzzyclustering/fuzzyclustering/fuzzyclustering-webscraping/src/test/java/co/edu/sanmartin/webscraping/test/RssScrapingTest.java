@@ -25,7 +25,8 @@ public class RssScrapingTest {
 		AtomicInteger ai = new AtomicInteger();
 		RssScraping rssScraping = new RssScraping(ai);
 		SourceDTO sourceDTO = new SourceDTO();
-		sourceDTO.setUrl("http://www.eltiempo.com/economia/rss.xml");
+		//sourceDTO.setUrl("http://www.eltiempo.com/economia/rss.xml");
+		sourceDTO.setUrl("http://es.noticias.yahoo.com/rss/economia");
 		rssScraping.getRssDocuments(sourceDTO);
 	}
 	
@@ -35,4 +36,5 @@ public class RssScrapingTest {
 		//DowloadRSSThreadPool threadPool = new DowloadRSSThreadPool();
 		//threadPool.executeThreadPool();
 	}
+	
 }

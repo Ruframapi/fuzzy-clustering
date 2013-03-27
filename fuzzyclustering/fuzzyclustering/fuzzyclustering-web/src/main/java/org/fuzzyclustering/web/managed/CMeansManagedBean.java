@@ -26,7 +26,7 @@ public class CMeansManagedBean implements Serializable {
 	
 	
 	public void generate(){
-		logger.info("Start Fuzzy Cmeans process");
+		logger.debug("Start Fuzzy Cmeans process");
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Inicializa Proceso de Limpieza de textos", "Procesando los documentos descargados.");
 		FacesContext.getCurrentInstance().addMessage(null, msg);

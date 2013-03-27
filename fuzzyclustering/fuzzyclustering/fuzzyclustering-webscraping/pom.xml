@@ -36,7 +36,8 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<!-- La seccion de pluginManagement permite la creación de las librerias en una carpeta especifica que lo suporte m2 -->
+		<!-- La seccion de pluginManagement permite la creación de las librerias 
+			en una carpeta especifica que lo suporte m2 -->
 		<pluginManagement>
 			<plugins>
 				<!-- Ignore/Execute plugin execution -->
@@ -67,7 +68,8 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-		<!-- No contempla los archivos de propiedades dentro del .jar ya que los define por la ruta en el manifest -->
+		<!-- No contempla los archivos de propiedades dentro del .jar ya que los 
+			define por la ruta en el manifest -->
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -79,16 +81,11 @@
 		</resources>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
+				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<!-- appendAssemblyId false = No crea el applet sin dependencias -->
-					<appendAssemblyId>false</appendAssemblyId>
 					<archive>
 						<manifest>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<addClasspath>true</addClasspath>
 							<mainClass>co.edu.sanmartin.webscraping.execute.Main</mainClass>
 						</manifest>
@@ -97,19 +94,11 @@
 						</manifestEntries>
 					</archive>
 				</configuration>
-				<executions>
-					<execution>
-						<id>make-my-app-jar</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
+
 			</plugin>
 
-		<!-- Copia las dependencias en una carpeta externa de forma que el jar no contenga todas las librerias lo
-		que lo hace mas liviano -->
+			<!-- Copia las dependencias en una carpeta externa de forma que el jar 
+				no contenga todas las librerias lo que lo hace mas liviano -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -126,7 +115,9 @@
 							<overWriteSnapshots>false</overWriteSnapshots>
 							<overWriteIfNewer>true</overWriteIfNewer>
 						</configuration>
+
 					</execution>
+
 				</executions>
 			</plugin>
 		</plugins>

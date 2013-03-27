@@ -41,7 +41,7 @@ public class GroupingManagedBean implements Serializable{
 	}
 	
 	public void start(){
-		logger.info("Start grouping process");
+		logger.debug("Start grouping process");
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Inicializa Proceso de Descarga", "Consultando las fuentes de información...");
 		FacesContext.getCurrentInstance().addMessage(null, msg);
@@ -49,7 +49,7 @@ public class GroupingManagedBean implements Serializable{
 	}
 	
 	public void download(){
-		logger.info("Start download process");
+		logger.debug("Start download process");
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Inicializa Proceso de Descarga", "Consultando las fuentes de información...");
 		FacesContext.getCurrentInstance().addMessage(null, msg);
@@ -57,7 +57,7 @@ public class GroupingManagedBean implements Serializable{
 	}
 	
 	public void cleanText(){
-		logger.info("Start download process");
+		logger.debug("Start download process");
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Inicializa Proceso de Limpieza de textos", "Procesando los documentos descargados.");
 		FacesContext.getCurrentInstance().addMessage(null, msg);
@@ -75,7 +75,7 @@ public class GroupingManagedBean implements Serializable{
 	}
 	
 	public void invertedIndex(){
-		logger.info("Start download process");
+		logger.debug("Start download process");
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Inicializa Proceso de Creación de Indices", "Procesando los documentos descargados.");
 		FacesContext.getCurrentInstance().addMessage(null, msg);

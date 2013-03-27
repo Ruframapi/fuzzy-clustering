@@ -40,7 +40,7 @@ public class IRInvertedIndexManagedBean implements Serializable {
 	}
 	
 	public void buildInvertedIndex(){
-		logger.info("Start download process");
+		logger.debug("Start download process");
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Inicializa Proceso de Creación de Indices", "Procesando los documentos descargados.");
 		FacesContext.getCurrentInstance().addMessage(null, msg);

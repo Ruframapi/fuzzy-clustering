@@ -17,7 +17,7 @@ public class PropertiesLoader extends Properties {
 		try {
         	this.load(this.getClass().getClassLoader().getResourceAsStream("fuzzyclustering.properties"));
         } catch (Exception e) {
-           System.out.print("Error al cargar el PropertiesLoader" + e);
+           System.out.print("Error al cargar el PropertiesLoader " + e);
         }
 	}
 	

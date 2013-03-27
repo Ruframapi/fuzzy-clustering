@@ -68,7 +68,7 @@ public class InitServlet extends HttpServlet {
 			e.printStackTrace();
 		} 
 		
-		logger.info("Fuzzy Logic Log Started");
+		logger.debug("Fuzzy Logic Log Started");
 		
 	}
 }
