@@ -279,6 +279,8 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 		return null;
 	}
 	
+	
+	
 	public void backupTable(){
 		super.backupTable("queue");
 	}

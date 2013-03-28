@@ -20,6 +20,15 @@
 		<p:layoutUnit position="south" size="50"
 			resizable="true" closable="true" collapsible="true">
 			<h:outputText value="Fuzzy Clustering." />
+			<p:ajaxStatus style="width:64px;height:64px;position:fixed;right:5px;bottom:5px">  
+			    <f:facet name="start">  
+			        <p:graphicImage value="images/loading.gif" />  
+			    </f:facet>  
+			  
+			    <f:facet name="complete">  
+			        <h:outputText value="" />  
+			    </f:facet>  
+			</p:ajaxStatus> 
 		</p:layoutUnit>
 
 		<!--  <p:layoutUnit position="west" size="200" header="Left" resizable="true" closable="true" collapsible="true">  

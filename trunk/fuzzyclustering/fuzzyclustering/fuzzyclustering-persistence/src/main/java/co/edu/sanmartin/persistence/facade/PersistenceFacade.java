@@ -134,6 +134,10 @@ public class PersistenceFacade {
 		this.queueDAO.insert(queue);
 	}
 	
+	public int getDownloadDocumentAmount(){
+		return this.documentDAO.getDownloadDocumentAmount();
+	}
+	
 	public void truncateQueue() throws SQLException {
 		this.queueDAO.truncate();
 	}

@@ -69,7 +69,8 @@ public class RssScraping{
                 documentData.append(".");
                 documentData.append(" ");
                 Date publishedDate = entry.getPublishedDate();
-                
+                logger.debug("PublishedDate:"+entry.getPublishedDate().toString() + 
+                			" LastQuery:"+source.getLastQuery().toString());
                 if (publishedDate.after(source.getLastQuery())){
 	                SyndContent description = entry.getDescription();
 	                if(description.getValue()!=null){

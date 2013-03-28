@@ -135,6 +135,8 @@ public class Dequeue implements Runnable{
 	
 
 	public void downloadRSS(QueueDTO queueDTO) throws PropertyValueNotFoundException, SQLException {
+		queueDTO.setStatus(EQueueStatus.ACTIVE);
+		persistenceFacade.updateQueue(queueDTO);
 		DowloadRSSThreadPool threadPool = new DowloadRSSThreadPool(queueDTO, this.sequence);
 		threadPool.executeThreadPool(ESourceType.RSS);
 		persistenceFacade.updateQueue(queueDTO);
@@ -143,6 +145,8 @@ public class Dequeue implements Runnable{
 	
 	
 	public void downloadTwitter(QueueDTO queueDTO) throws PropertyValueNotFoundException, SQLException{
+		queueDTO.setStatus(EQueueStatus.ACTIVE);
+		persistenceFacade.updateQueue(queueDTO);
 		DowloadTwitterThreadPool threadPool = new DowloadTwitterThreadPool(queueDTO, this.sequence);
 		threadPool.executeThreadPool(ESourceType.TWITTER);
 		persistenceFacade.updateQueue(queueDTO);
