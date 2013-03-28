@@ -157,6 +157,10 @@ public class PersistenceFacade {
 	public void deleteFolder( EDataFolder dataFolder ){
 		fileManager.deteleFolder(dataFolder);
 	}
+	
+	public void deleteFile(EDataFolder dataFolder, String fileName){
+		fileManager.deleteFile(dataFolder, fileName);
+	}
 
 	public void writeFile(String folderPath, String fileName, String data) {
 		fileManager.writeFile(folderPath, fileName, data);

@@ -74,6 +74,20 @@ public class FileManager {
 		File file = new File(dataPath);
 		file.delete();
 	}
+	
+	/**
+	 * Elimina un archivo de la carpeta especificada
+	 * @param dataFolder carpeta de origen del archivo
+	 * @param fileName nombre del archivo
+	 */
+	public void deleteFile(EDataFolder dataFolder, String fileName){
+		StringBuilder stringBuider = new StringBuilder();
+		stringBuider.append(this.getFolderPath(dataFolder));
+		stringBuider.append(System.getProperty("file.separator"));
+		stringBuider.append(fileName);
+		File file = new File(stringBuider.toString());
+		file.delete();
+	}
 
 	/**
 	 * Retorna el archivo de la carpeta especificada
@@ -83,7 +97,7 @@ public class FileManager {
 	 */
 	public String readFile(EDataFolder dataFolder, String fileName){
 		StringBuilder stringBuider = new StringBuilder();
-		stringBuider.append(PersistenceFacade.getInstance().getFolderPath(dataFolder));
+		stringBuider.append(this.getFolderPath(dataFolder));
 		stringBuider.append(System.getProperty("file.separator"));
 		stringBuider.append(fileName);
     	return this.readFile(stringBuider.toString());

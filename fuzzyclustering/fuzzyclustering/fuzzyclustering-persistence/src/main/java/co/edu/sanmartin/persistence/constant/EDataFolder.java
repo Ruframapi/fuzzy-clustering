@@ -9,6 +9,8 @@ public  enum EDataFolder {
 	
 	DATA_ROOT("dataRoot",System.getProperty("file.separator")+"data"),
 	CLEAN("clean",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"clean"), 
+	DOWNLOAD_RSS("download",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"download"+System.getProperty("file.separator")+"rss"),
+	DOWNLOAD_TWITTER("download",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"download"+System.getProperty("file.separator")+"twitter"),
 	ORIGINAL_RSS("original",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"original"+System.getProperty("file.separator")+"rss"),
 	ORIGINAL_TWITTER("original",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"original"+System.getProperty("file.separator")+"twitter"),
 	INVERTED_INDEX("inverted index",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"invertedindex"),

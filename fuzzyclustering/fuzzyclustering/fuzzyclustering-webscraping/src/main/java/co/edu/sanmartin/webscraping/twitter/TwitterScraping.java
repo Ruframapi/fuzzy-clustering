@@ -148,8 +148,8 @@ public class TwitterScraping {
 	    	for (String content : documentContent) {		
 	    		logger.debug("Creating new twitter file number:"+ sequence);
 	    		String fileName = String.valueOf(sequence)+".txt";
-	    		persistenceFacade.writeFile(EDataFolder.ORIGINAL_TWITTER, fileName, content);
-				DocumentDTO document = new DocumentDTO(EDataFolder.ORIGINAL_TWITTER.getPath(), fileName);
+	    		persistenceFacade.writeFile(EDataFolder.DOWNLOAD_TWITTER, fileName, content);
+				DocumentDTO document = new DocumentDTO(EDataFolder.DOWNLOAD_TWITTER.getPath(), fileName);
 	    		document.setSource(screenName);
 	    		document.setDownloadDate(new Date());
 	    		persistenceFacade.insertDocument(document);

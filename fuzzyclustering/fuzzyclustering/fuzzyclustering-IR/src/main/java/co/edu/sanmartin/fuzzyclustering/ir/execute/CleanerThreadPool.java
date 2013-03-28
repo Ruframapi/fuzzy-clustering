@@ -45,28 +45,23 @@ public class CleanerThreadPool {
 			e.printStackTrace();
 		}
 
-		Collection<DocumentDTO> fileCol = PersistenceFacade.getInstance().getFileList(EDataFolder.ORIGINAL_RSS);
+		Collection<DocumentDTO> fileCol = PersistenceFacade.getInstance().getFileList(EDataFolder.DOWNLOAD_RSS);
 		
 		CleanerWorkerThread cleanerWorkerThread;
 		//Se realiza la limipieza de los archivos
 		ThreadPoolExecutor executor=(ThreadPoolExecutor)Executors.newFixedThreadPool(threadPoolNumber);
-		HashMap<String, StringBuilder> dataMap = new HashMap<String,StringBuilder>();
 		
-		//Almacenamos los archivos en memoria
+		
+		//Cargamos la informacion de los archivos en memoria
 		for (DocumentDTO file : fileCol) {
 			PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
-			StringBuilder dataFile = new StringBuilder();
-			dataFile.append(persistenceFacade.readFile(file.getCompletePath()));
-			dataMap.put(file.getNameWithoutExtension(), dataFile);
-		}
-
-		Iterator<Entry<String, StringBuilder>> it = dataMap.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<String,StringBuilder> e = (Entry<String, StringBuilder>)it.next();
-			cleanerWorkerThread = new CleanerWorkerThread(e.getValue(),e.getKey());
-			executor.submit(cleanerWorkerThread);
+			file.setLazyData(persistenceFacade.readFile(file.getCompletePath()));
 		}
 		
+		for (DocumentDTO documentDTO : fileCol) {
+			cleanerWorkerThread = new CleanerWorkerThread(documentDTO);
+			executor.submit(cleanerWorkerThread);
+		}
 		
 		executor.shutdown();
 		//invertedIndex.getInstance().printIndex();
