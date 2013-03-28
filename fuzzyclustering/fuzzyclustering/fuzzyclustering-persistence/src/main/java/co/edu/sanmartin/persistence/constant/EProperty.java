@@ -11,6 +11,7 @@ import java.util.List;
  */
 public enum EProperty {
 	
+	LANGUAGE("language", "Idioma a procesar"),
 	TWITTER_CONSUMER_KEY("twitter.consumer.key", "Twitter Consumer KEY"), 
 	TWITTER_CONSUMER_SECRET("twitter.consumer.secret", "Twitter Consumer Secret"), 
 	TWITTER_ACCESS_TOKEN("twitter.access.token", "Twitter Access Token"), 
@@ -20,6 +21,11 @@ public enum EProperty {
 	WEB_SCRAPPING_TWITTER_DOWNLOAD_TIME("webscraping.twitter.download.time","tiempo entre busquedas de noticicas RSS"),
 	WEB_SCRAPPING_THREAD_NUMBER("webscrapin.thread.number", "Numero de Hilos de Descarga"),
 	INVERTED_INDEX_THREAD_NUMBER("inverted.index.thread.number", "Numero de Hilos de Indices Invertidos"),
+	IR_DELETE_ADVERBS("ir.delete.adverbs", "Elimina Adverbios"),
+	IR_DELETE_CONJUNCTIONS("ir.delete.conjunctions", "Elimina Conjunciones"),
+	IR_DELETE_DETERMINANTS("ir.delete.determinants", "Elimina Determinantes"),
+	IR_DELETE_PREPOSITIONS("ir.delete.prepositions", "Elimina Preposiciones"),
+	IR_DELETE_PRONOUNS("ir.delete.pronouns", "Elimina Pronombres"),
 	TEXT_SPLIT_TOKEN("text.split.token", "Token para separacion de textos"),
 	TEXT_STEMMER_ON("text.stemmer.on","Indica si realiza lematizacion(stemming) al texto");
 	

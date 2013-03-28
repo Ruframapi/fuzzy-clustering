@@ -12,6 +12,7 @@ import co.edu.sanmartin.fuzzyclustering.ir.execute.CleanerThreadPool;
 import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
 import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
 import co.edu.sanmartin.fuzzyclustering.ir.index.MutualInformation;
+import co.edu.sanmartin.fuzzyclustering.ir.normalize.Cleaner;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.stemmer.Stemmer;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.stemmer.snowball.SnowballStemmer;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
@@ -29,6 +30,13 @@ public class IRTest {
 		CleanerThreadPool threadPool = new CleanerThreadPool();
 		threadPool.executeThreadPool();
 	}
+	
+	@Test
+	public void cleanTextLexicon(){
+		Cleaner cleaner = new Cleaner();
+		cleaner.deleteLexiconStopWords("a ante bajo co contra Ricardo Carvajal Estuvo en un lugar muy importante", "miArchivo.txt", false);
+	}
+	
 	
 	@Test
 	public void invertedIndexText() {
