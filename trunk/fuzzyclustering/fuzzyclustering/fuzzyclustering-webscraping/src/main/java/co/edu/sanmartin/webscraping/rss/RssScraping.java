@@ -95,7 +95,8 @@ public class RssScraping{
     public void saveRSSDocument(SourceDTO source) throws Exception{
     	logger.debug("Init saveRSSDocument Source:" + source.getUrl());
     	Collection<String> documentContent = this.getRssDocuments(source);
-    	logger.info("Documents to save Rss Source:" + source + " Amount:" + documentContent.size());
+    	logger.info("Documents to save Rss Source:" + source.getUrl() + 
+    				" Amount:" + documentContent.size());
     	PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
     	for (String content : documentContent) {
     		logger.debug("Creating new file number:"+ atomicSequence);

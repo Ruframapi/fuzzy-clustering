@@ -14,7 +14,8 @@ public  enum EDataFolder {
 	INVERTED_INDEX("inverted index",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"invertedindex"),
 	MATRIX("matrix",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"matrix"),
 	MACHINE_LEARNING("machine learning", System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"machinelearning"),
-	BACKUP("BACKUP",System.getProperty("file.separator")+"backup");
+	BACKUP("BACKUP",System.getProperty("file.separator")+"backup"),
+	LEXICON("LEXICON",System.getProperty("file.separator")+"lexicon");
 	
 	private String name;
 	private String path;

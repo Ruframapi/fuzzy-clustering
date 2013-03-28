@@ -4,7 +4,7 @@ INSERT INTO source(name, url, type) VALUES ('El tiempo economia', 'http://www.el
 INSERT INTO source(name, url, type) VALUES ('CNN economia', 'http://feeds2.feedburner.com/cnnexpansion/economia', 'RSS');
 
 -- PROPERTY
-INSERT INTO property (name,value) VALUES('WEB_SCRAPPING_TWITTER_DOWNLOAD_TIME','60'); 
+INSERT INTO property (name,value) VALUES('IR_DELETE_ADVERBS','true');  
 UPDATE property SET value='D:\\RicardoC\\fuzzyclustering\\data' WHERE name='FILE_SOURCE_PATH';
 UPDATE property SET value='D:\\RicardoC\\fuzzyclustering\\data\\Documents\\InvertedIndex' WHERE name='FILE_INVERTED_INDEX';
 UPDATE property SET value='D:\\RicardoC\\fuzzyclustering\\data\\Documents\\Original' WHERE name='FILE_ORIGINAL_PATH';

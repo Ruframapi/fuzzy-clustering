@@ -2,6 +2,9 @@ package co.edu.sanmartin.fuzzyclustering.ir.normalize;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -10,8 +13,10 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.constant.ELexicon;
 import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.dto.StopwordDTO;
+import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
 /**
@@ -88,5 +93,29 @@ public class Cleaner {
 	    }
         return result;
     }
+    
+    /**
+     * Elimina las stop words del archivo realizando la busqueda en los archivos del lexicon
+     * @param data datos del archivo
+     * @param fileName nombre del archivo a almacenar
+     * @param persist indica si persiste el proceso en un archivo
+     * @return
+     */
+    public String deleteLexiconStopWords(String data, String fileName, boolean persist){
+    	StringBuilder cleanString = new StringBuilder();
+    	cleanString.append(data);
+    	Lexicon lexicon = Lexicon.getInstance();
+    	HashMap<ELexicon,String> lexiconMap = lexicon.getLexiconMap();
+    	Iterator it = lexiconMap.entrySet().iterator();
+    	while (it.hasNext()) {
+    		Map.Entry e = (Map.Entry)it.next();
+    		Pattern pattern = Pattern.compile((String) e.getValue());
+    		Matcher matcher = pattern.matcher(cleanString.toString());
+    		cleanString = new StringBuilder(matcher.replaceAll(" "));
+    		logger.debug("Cleaning data Lexicon:" + ((ELexicon)e.getKey()).name());
+    	}
+    	return cleanString.toString();
+    }
+    
     
 }
