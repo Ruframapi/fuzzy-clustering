@@ -11,18 +11,32 @@
 		<h:form id="documentForm">
 			<p:growl id="growl" showDetail="true" />
 			<p:panelGrid columns="3">
-				<p:panelGrid columns="2">
+				<p:panelGrid id="resume" columns="2">
 					<p:outputLabel>Fuentes Consultadas:</p:outputLabel>
 					<p:outputLabel>0</p:outputLabel>
 					<p:outputLabel>Total Documentos Descargados:</p:outputLabel>
-					<p:outputLabel>0</p:outputLabel>
+					<p:outputLabel value="#{irDownload.downloadDocumentAmount}"></p:outputLabel>
 					<p:outputLabel>Tiempo de Descarga:</p:outputLabel>
 					<p:outputLabel>0</p:outputLabel>
 				</p:panelGrid>
-				<p:commandButton value="Descargar" actionListener="#{irDownload.download}"></p:commandButton>
-				<p:commandButton value="Eliminar" actionListener="#{irDownload.deleteDownloadSources}"></p:commandButton>
+					<p:dataList id="dataListEnqueue" value="#{irDownload.downloadEnqueue}" var="queueEnqueue"
+						type="definition">  
+				    Proximo Evento: #{queueEnqueue.event}, Fecha: #{queueEnqueue.initDate} 
+					</p:dataList>
+					
+					<p:dataList id="dataListActive" value="#{irDownload.downloadActive}" var="queueActive"
+						type="definition">  
+				    Evento Activo: #{queueActive.event}, Fecha: #{queueActive.initDate} 
+					</p:dataList>
 				
 			</p:panelGrid>
+
+			<p:commandButton value="Descargar"
+				actionListener="#{irDownload.download}"></p:commandButton>
+			<p:commandButton value="Eliminar"
+				actionListener="#{irDownload.deleteDownloadSources}"></p:commandButton>
+				
+			<p:poll interval="10" update="dataListEnqueue,dataListActive,resume" listener="#{irDownload.poolListener}" /> 
 		</h:form>
 	</ui:define>
 	<ui:define name="documents">

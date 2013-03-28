@@ -3,6 +3,8 @@ package org.fuzzyclustering.web.managed;
 
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 
 import javax.annotation.PostConstruct;
@@ -27,7 +29,13 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 @ManagedBean(name = "irDownload")
 @ViewScoped
 public class IRDownloadManagedBean implements Serializable {
+
+	private static final long serialVersionUID = 3153779723933087121L;
 	private static Logger logger = Logger.getRootLogger();
+	private Collection<QueueDTO> downloadEnqueue;
+	private Collection<QueueDTO> downloadActive;
+	private int downloadDocumentAmount;
+	
 	@ManagedProperty(value = "#{documents}") 
 	private DocumentsManagedBean documents;
 	
@@ -80,6 +88,34 @@ public class IRDownloadManagedBean implements Serializable {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	public void poolListener(){
+		PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
+		Collection<QueueDTO> enqueueColl = new ArrayList<QueueDTO>();
+		this.downloadEnqueue = persistenceFacade.getQueueByStatusDate(EModule.WEBSCRAPPING, 
+																			EQueueStatus.ENQUEUE, new Date());
+		this.downloadActive = persistenceFacade.getQueueByStatusDate(EModule.WEBSCRAPPING, 
+																			EQueueStatus.ACTIVE, new Date());
+		this.downloadDocumentAmount = persistenceFacade.getDownloadDocumentAmount();
+	}
+
+	public Collection<QueueDTO> getDownloadEnqueue() {
+		return downloadEnqueue;
+	}
+
+	public Collection<QueueDTO> getDownloadActive() {
+		return downloadActive;
+	}
+
+	public int getDownloadDocumentAmount() {
+		return downloadDocumentAmount;
+	}
+	
+	
+	
+	
+	
 	
 
 }
