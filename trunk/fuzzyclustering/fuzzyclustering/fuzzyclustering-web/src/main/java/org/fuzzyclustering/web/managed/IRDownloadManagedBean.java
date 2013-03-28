@@ -33,7 +33,7 @@ public class IRDownloadManagedBean implements Serializable {
 	
 	
 	public void load(){
-		documents.loadDocuments(EDataFolder.ORIGINAL_RSS);
+		documents.loadDocuments(EDataFolder.DOWNLOAD_RSS);
 	}
 
 	public void setDocuments(DocumentsManagedBean documents) {

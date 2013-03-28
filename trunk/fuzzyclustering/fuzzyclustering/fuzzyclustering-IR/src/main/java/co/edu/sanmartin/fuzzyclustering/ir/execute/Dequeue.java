@@ -76,7 +76,7 @@ public class Dequeue implements Runnable{
 		for (QueueDTO queueDTO : queueCol) {
 			switch( queueDTO.getEvent() ){
 			case DOWNLOAD_RSS:
-				this.downloadRSS(queueDTO);
+				//this.downloadRSS(queueDTO);
 				break;
 			case CANCEL_DOWNLOAD:
 				this.cancelDownload(queueDTO, EQueueEvent.DOWNLOAD_RSS);
@@ -122,16 +122,6 @@ public class Dequeue implements Runnable{
 			sourceDTO.setLastQuery(null);
 			persistenceFacade.updateSource(sourceDTO);
 		}
-	}
-	
-
-	public void downloadRSS(QueueDTO queueDTO) throws PropertyValueNotFoundException, SQLException {
-	
-	}
-	
-	
-	public void downloadTwitter(QueueDTO queueDTO){
-		
 	}
 	
 	/**

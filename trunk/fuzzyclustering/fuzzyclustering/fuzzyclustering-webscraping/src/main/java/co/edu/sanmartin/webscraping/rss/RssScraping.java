@@ -101,8 +101,8 @@ public class RssScraping{
     	for (String content : documentContent) {
     		logger.debug("Creating new file number:"+ atomicSequence);
     		String fileName = String.valueOf(atomicSequence)+".txt";
-    		persistenceFacade.writeFile(EDataFolder.ORIGINAL_RSS, fileName, content);
-    		DocumentDTO document = new DocumentDTO(EDataFolder.ORIGINAL_RSS.getPath(), fileName);
+    		persistenceFacade.writeFile(EDataFolder.DOWNLOAD_RSS, fileName, content);
+    		DocumentDTO document = new DocumentDTO(EDataFolder.DOWNLOAD_RSS.getPath(), fileName);
     		document.setSource(source.getUrl());
     		document.setDownloadDate(new Date());
     		persistenceFacade.insertDocument(document);
