@@ -1,5 +1,7 @@
 package co.edu.sanmartin.webscraping.facade;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import twitter4j.TwitterException;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
@@ -20,7 +22,7 @@ public class WebscrapingFacade {
 	
 	private WebscrapingFacade(){
 		try {
-			twitterScraping = new TwitterScraping();
+			twitterScraping = new TwitterScraping(new AtomicInteger());
 		} catch (TwitterException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

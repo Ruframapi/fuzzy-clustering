@@ -9,6 +9,7 @@ public class SourceDTO implements Serializable{
 	private String name;
 	private String url;
 	private Date lastQuery;
+	private long sinceId = 0L;
 	private ESourceType type;
 	
 	public String getName() {
@@ -36,7 +37,11 @@ public class SourceDTO implements Serializable{
 	public void setLastQuery(Date lastQuery) {
 		this.lastQuery = lastQuery;
 	}
-	
-	
-	
+	public long getSinceId() {
+		return sinceId;
+	}
+	public void setSinceId(long sinceId) {
+		this.sinceId = sinceId;
+	}
+
 }
