@@ -28,13 +28,13 @@ public class TwitterDownloadWorkerThread implements Callable<String>{
 		logger.debug("Init TwitterDownloadWorkerThread");
 		this.sequence = sequence;
 		this.sourceDTO = sourceDTO;
-		twitterScraping = new TwitterScraping();
+		twitterScraping = new TwitterScraping(sequence);
 	}
 
 	public String call() throws Exception {
 		logger.debug("Init TwitterDownloadWorkerThread Run Method");
 		logger.debug("sourceDTO.getUrl()");
-		twitterScraping.saveTwitterDocument(sourceDTO.getUrl(), sequence);
+		twitterScraping.saveTwitterDocument(sourceDTO);
 		return "true";
 	}
 

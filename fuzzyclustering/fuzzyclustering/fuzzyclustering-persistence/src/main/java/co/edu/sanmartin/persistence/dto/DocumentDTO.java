@@ -19,6 +19,7 @@ public class DocumentDTO implements Serializable{
     private String lazyData;
     private String source;
     private Date downloadDate;
+    private Date publishedDate;
     
     
 	public DocumentDTO(String path, String name) {
@@ -68,6 +69,15 @@ public class DocumentDTO implements Serializable{
 
 	public void setDownloadDate(Date downloadDate) {
 		this.downloadDate = downloadDate;
+	}
+
+	
+	public Date getPublishedDate() {
+		return publishedDate;
+	}
+
+	public void setPublishedDate(Date publishedDate) {
+		this.publishedDate = publishedDate;
 	}
 
 	/**

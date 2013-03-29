@@ -45,6 +45,12 @@
 							</f:facet>
 							<h:outputLink value="#{sourceCol.url}">#{sourceCol.url}</h:outputLink>
 						</p:column>
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="Fecha Ultima Publicacion" />
+							</f:facet>
+							<h:outputText value="#{sourceCol.lastQuery}" />
+						</p:column>
 						<f:facet id="footer" name="footer">
 							<p:commandButton id="delete" value="Eliminar"
 								actionListener="#{source.deleteRssSource}" update="sourcesTable" />
@@ -69,6 +75,13 @@
 							</f:facet>
 							<h:outputLink value="#{sourceCol.url}">#{sourceCol.url}</h:outputLink>
 						</p:column>
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="Ultimo Id" />
+							</f:facet>
+							<h:outputText value="#{sourceCol.sinceId}" />
+						</p:column>
+						
 						<f:facet name="footer">
 							<p:commandButton id="delete1" value="Eliminar"
 								actionListener="#{source.deleteTwitterSource}" update="twitterTable" />

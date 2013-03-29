@@ -122,7 +122,9 @@ public class Dequeue implements Runnable{
 	 * @throws SQLException
 	 */
 	public void cleanDownload() throws SQLException{
+		logger.info("Cleaning Download Process");
 		persistenceFacade.truncateQueue();
+		persistenceFacade.truncateDocument();
 		persistenceFacade.deleteFolder(EDataFolder.DATA_ROOT);
 		this.sequence = new AtomicInteger();
 		Collection<SourceDTO> source = persistenceFacade.getAllSources(true);
@@ -130,7 +132,7 @@ public class Dequeue implements Runnable{
 			sourceDTO.setLastQuery(null);
 			persistenceFacade.updateSource(sourceDTO);
 		}
-		persistenceFacade.truncateDocument();
+		
 	}
 	
 

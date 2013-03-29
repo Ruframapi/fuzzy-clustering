@@ -81,12 +81,14 @@ twitter.access.token.secret=XZ8LRynlddi7vvcIFsjuNsLtDsk6jqcoXoOo9LX687A
 public class TwitterScraping {
 	
 	private static Logger logger = Logger.getRootLogger();
-	 
+	private AtomicInteger atomicSequence;
+	
 	private PersistenceFacade persistence = PersistenceFacade.getInstance();
 	private Twitter twitter;
 	
-	public TwitterScraping() throws TwitterException{
+	public TwitterScraping(AtomicInteger atomicSequence) throws TwitterException{
 		try {
+			this.atomicSequence = atomicSequence;
 			this.init();
 		} catch (PropertyValueNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -98,8 +100,6 @@ public class TwitterScraping {
 		this.twitter = TwitterConnection.getInstance().getTwitter();
 		//this.twitter = TwitterConnection.
 	}
-	
-	
 
 	/**
 	 * Retorna el Timeline del usuario
@@ -111,13 +111,12 @@ public class TwitterScraping {
 			int timeLinePages = persistence.getProperty(EProperty.TWITTER_HOME_TIMELINE_PAGES).intValue();
 			List<Status> statuses =  this.twitter.getHomeTimeline();			
 			for (Status status : statuses) {
-				System.out.println(status.getUser().getName() + ":" + status.getText());
+				System.out.println(status.getId() + "-" +status.getUser().getName() + ":" + status.getText());
 			}
 
 			ResponseList<Status> responseList = twitter.getUserTimeline(new Paging(1, timeLinePages));
 			for (Status b : responseList) {
 				documentCol.add(b.getText());
-				System.out.println(b.getText());
 			}
 		} catch (TwitterException e) {
 			// TODO Auto-generated catch block
@@ -140,20 +139,17 @@ public class TwitterScraping {
 	 * @throws TwitterException 
 	 * @throws IllegalStateException 
 	 */
-	public void saveTwitterDocument(String screenName, AtomicInteger sequence) throws SQLException, IllegalStateException, TwitterException{
-    	logger.debug("Init saveRSSDocument");
-    	if(this.twitter ==null && this.twitter.getId()==0){
-	    	Collection<String> documentContent = this.getTwitterDocuments(screenName);
+	public void saveTwitterDocument(SourceDTO source) throws SQLException, IllegalStateException, TwitterException{
+		logger.debug("Init saveTwitterDocument Source:" + source.getUrl());
+    	if(this.twitter !=null && this.twitter.getId()!=0){
+	    	Collection<DocumentDTO> documentContent = this.getTwitterDocuments(source);
+	    	logger.info("Documents to save Twitter Source:" + source.getUrl() + 
+					" Amount:" + documentContent.size());
 	    	PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
-	    	for (String content : documentContent) {		
-	    		logger.debug("Creating new twitter file number:"+ sequence);
-	    		String fileName = String.valueOf(sequence)+".txt";
-	    		persistenceFacade.writeFile(EDataFolder.DOWNLOAD_TWITTER, fileName, content);
-				DocumentDTO document = new DocumentDTO(EDataFolder.DOWNLOAD_TWITTER.getPath(), fileName);
-	    		document.setSource(screenName);
-	    		document.setDownloadDate(new Date());
-	    		persistenceFacade.insertDocument(document);
-	    		sequence.incrementAndGet();
+	    	for (DocumentDTO documentDTO : documentContent) {	
+	    		logger.debug("Creating new twitter file:"+ documentDTO.getName());
+	    		persistenceFacade.writeFile(EDataFolder.DOWNLOAD_TWITTER, documentDTO.getName(), documentDTO.getLazyData());
+	    		persistenceFacade.insertDocument(documentDTO);
 			}
     	}
     }
@@ -162,21 +158,45 @@ public class TwitterScraping {
 	 * Retorna el Timeline del usuario especificado
 	 * @param screenName identificacion del usuario
 	 * @return
+	 * @throws SQLException 
 	 */
-	public Collection<String> getTwitterDocuments(String screenName){
-		Collection<String> documentCol = new ArrayList<String>();
+	public Collection<DocumentDTO> getTwitterDocuments(SourceDTO source) throws SQLException{
+		Collection<DocumentDTO> documentCol = new ArrayList<DocumentDTO>();
 		try {
 			int timeLinePages = persistence.getProperty(EProperty.TWITTER_HOME_TIMELINE_PAGES).intValue();
-			List<Status> statuses =  this.twitter.getUserTimeline(screenName);			
-			for (Status status : statuses) {
-				System.out.println(status.getUser().getName() + ":" + status.getText());
+			Paging paging = new Paging();
+			
+			if(source.getSinceId()>0){
+				paging.setSinceId(source.getSinceId());
 			}
+			else{
+				paging.setPage(1);
+				paging.setCount(timeLinePages);
+			}
+			
+			List<Status> statuses =  this.twitter.getUserTimeline(source.getUrl());			
+			/*for (Status status : statuses) {
+				System.out.println(status.getId() + "-" +status.getUser().getName() + ":" + status.getText());
+			}*/
 
-			ResponseList<Status> responseList = twitter.getUserTimeline(screenName,new Paging(1, timeLinePages));
+			ResponseList<Status> responseList = twitter.getUserTimeline(source.getUrl(),paging);
+
 			for (Status b : responseList) {
-				documentCol.add(b.getText());
-				System.out.println(b.getText());
+				DocumentDTO document = new DocumentDTO(EDataFolder.DOWNLOAD_TWITTER.getPath(),
+														String.valueOf(this.atomicSequence)+".txt");
+				this.atomicSequence.incrementAndGet();
+				document.setLazyData(b.getText());
+				document.setPublishedDate(b.getCreatedAt());
+				document.setDownloadDate(new Date());
+				document.setSource(source.getUrl());
+				documentCol.add(document);
 			}
+			if(responseList.size()>0){
+				source.setSinceId(responseList.get(0).getId());
+				source.setLastQuery(responseList.get(0).getCreatedAt());
+				PersistenceFacade.getInstance().updateSource(source);
+			}
+			
 		} catch (TwitterException e) {
 			logger.error("Error in getTwitterDocuments:" + e.getErrorMessage()+
 						"StatusCode:" + e.getStatusCode());
