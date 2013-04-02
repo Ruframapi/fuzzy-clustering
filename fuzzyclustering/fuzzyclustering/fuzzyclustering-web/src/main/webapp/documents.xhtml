@@ -7,10 +7,10 @@
 		<h:form id="form2">
 			<p:panelGrid columns="2" styleClass="align_top">
 
-				<p:dataTable id="documents" value="#{documents.documentsColl}"
+				<p:dataTable id="documents" value="#{documents.documents}"
 					var="document" selection="#{documents.document}"
 					selectionMode="single" rowKey="#{document.name}"
-					paginator="true" rows="10">
+					paginator="true" rows="10" lazy="true">
 					<p:ajax event="rowSelect" listener="#{documents.onRowSelect}"
 						update=":form2:dataFile" />
 					<f:facet name="header">  
@@ -27,6 +27,24 @@
 							<h:outputText value="Path" />
 						</f:facet>
 						<h:outputText value="#{document.path}" />
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="Source" />
+						</f:facet>
+						<h:outputText value="#{document.source}" />
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="Fecha de Publicacion" />
+						</f:facet>
+						<h:outputText value="#{document.publishedDate}" />
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="Fecha de Descarga" />
+						</f:facet>
+						<h:outputText value="#{document.downloadDate}" />
 					</p:column>
 
 					<f:facet id="footer" name="footer">

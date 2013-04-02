@@ -14,6 +14,7 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
 import org.apache.log4j.Logger;
+import org.fuzzyclustering.web.managed.documents.DocumentsManagedBean;
 
 import co.edu.sanmartin.fuzzyclustering.ir.facade.IRFacade;
 import co.edu.sanmartin.persistence.constant.EDataFolder;

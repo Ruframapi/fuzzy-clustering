@@ -15,7 +15,10 @@ public enum ESystemProperty {
 	MYSQL_DATABASE("mysql.database", "Nombre de la base de datos"),
 	MYSQL_SERVER("mysql.server", "Servidor de Mysql"),
 	MYSQL_USER("mysql.user","Usuario de Mysql"),
-	MYSQL_PASSWORD("mysql.password", "Contrasenia de Mysql");
+	MYSQL_PASSWORD("mysql.password", "Contrasenia de Mysql"),
+	WEB_SERVER_IP("webserver.ip", "Direccion Ip del Servidor Web"),
+	WEB_SERVER_PORT("webserver.port", "Direccion Ip del Servidor Web"),
+	WEB_SERVER_CONTEXT("webserver.context", "Direccion Ip del Servidor Web");
 
 	private String propertyName;
 

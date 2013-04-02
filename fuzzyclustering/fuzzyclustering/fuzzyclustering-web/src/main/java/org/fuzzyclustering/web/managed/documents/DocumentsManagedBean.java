@@ -1,13 +1,15 @@
-package org.fuzzyclustering.web.managed;
+package org.fuzzyclustering.web.managed.documents;
 
 import java.io.Serializable;
 import java.util.Collection;
 
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.bean.ViewScoped;
 
 import org.primefaces.event.SelectEvent;
+import org.primefaces.model.LazyDataModel;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
@@ -58,6 +60,16 @@ public class DocumentsManagedBean implements Serializable {
 		}
 		this.document.setLazyData(stringBuilder.toString());
 	}
+
+	private DocumentsLazyDataModel documentsModel = null;
+	
+	public DocumentsLazyDataModel getDocuments(){
+		if(documentsModel == null){
+			documentsModel = new DocumentsLazyDataModel();
+		}
+		return documentsModel;
+	}
+
 	
 	
 }

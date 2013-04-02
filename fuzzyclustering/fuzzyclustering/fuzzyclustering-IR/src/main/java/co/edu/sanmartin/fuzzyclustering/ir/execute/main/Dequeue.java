@@ -1,4 +1,4 @@
-package co.edu.sanmartin.fuzzyclustering.ir.execute;
+package co.edu.sanmartin.fuzzyclustering.ir.execute.main;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

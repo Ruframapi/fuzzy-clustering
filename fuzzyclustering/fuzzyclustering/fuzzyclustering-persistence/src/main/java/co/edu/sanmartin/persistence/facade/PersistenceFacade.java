@@ -16,11 +16,13 @@ import co.edu.sanmartin.persistence.constant.EQueueStatus;
 import co.edu.sanmartin.persistence.constant.ESourceType;
 import co.edu.sanmartin.persistence.dao.DocumentDAO;
 import co.edu.sanmartin.persistence.dao.PropertyDAO;
+import co.edu.sanmartin.persistence.dao.QueryDocumentDAO;
 import co.edu.sanmartin.persistence.dao.QueueDAO;
 import co.edu.sanmartin.persistence.dao.SourceDAO;
 import co.edu.sanmartin.persistence.dao.StopwordDAO;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.PropertyDTO;
+import co.edu.sanmartin.persistence.dto.QueryDocumentDTO;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.dto.StopwordDTO;
@@ -43,6 +45,7 @@ public class PersistenceFacade {
 	private StopwordDAO stopwordDAO;
 	private QueueDAO queueDAO;
 	private DocumentDAO documentDAO;
+	private QueryDocumentDAO queryDocumentDAO;
 	private FileManager fileManager;
 	
 
@@ -52,6 +55,7 @@ public class PersistenceFacade {
 		this.propertyDAO = new PropertyDAO();
 		this.queueDAO = new QueueDAO();
 		this.documentDAO = new DocumentDAO();
+		this.queryDocumentDAO = new QueryDocumentDAO();
 		this.fileManager = new FileManager();
 		logger.debug("Facade Persistence Initialized");
 	}
@@ -153,6 +157,28 @@ public class PersistenceFacade {
 	public void truncateDocument() throws SQLException {
 		this.documentDAO.truncate();
 	}
+	
+	public DocumentDTO selectDocumentById(int idDocument){
+		return this.documentDAO.selectDocumentById(idDocument);
+	}
+	
+	public Collection<DocumentDTO> getPaginateDocumentsColl(long startId, int limit){
+		return this.documentDAO.getPaginateDocumentsColl(startId, limit);
+	}
+	
+	public Collection<DocumentDTO> getDocumentsForClean(){
+		return this.documentDAO.getDocumentsForClean();
+	}
+	public void insertQueryDocument(QueryDocumentDTO queryDocument) throws SQLException {
+		this.queryDocumentDAO.insert(queryDocument);
+	}
+	
+	
+	
+	public void truncateQueryDocument() throws SQLException {
+		this.queryDocumentDAO.truncate();
+	}
+	
 
 	public void createFolder(String folderPath) {
 		fileManager.createFolder(folderPath);
@@ -222,6 +248,7 @@ public class PersistenceFacade {
 		propertyDAO.createTable(true);
 		queueDAO.createTable(true);
 		documentDAO.createTable(true);
+		queryDocumentDAO.createTable(true);
 		this.refreshMemoryData();
 	}
 	
@@ -232,6 +259,8 @@ public class PersistenceFacade {
 		stopwordDAO.backupTable();
 		sourceDAO.backupTable();
 		propertyDAO.backupTable();
+		queueDAO.backupTable();
+		documentDAO.backupTable();
 	}
 	
 	/**
