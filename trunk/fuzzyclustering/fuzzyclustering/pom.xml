@@ -13,5 +13,6 @@
     <module>fuzzyclustering-IR</module>
     <module>fuzzyclustering-web</module>
     <module>fuzzyclustering-machinelearning</module>
+    <module>fuzzyclustring-cleaner</module>
   </modules>
 </project>

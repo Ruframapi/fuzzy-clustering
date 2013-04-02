@@ -1,4 +1,5 @@
-package co.edu.sanmartin.fuzzyclustering.ir.execute;
+package co.edu.sanmartin.fuzzyclustering.ir.execute.main;
+
 
 /**
  * Clase que arranca el sistema de descarga de Noticias

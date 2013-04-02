@@ -34,7 +34,9 @@
 			<p:commandButton value="Descargar"
 				actionListener="#{irDownload.download}"></p:commandButton>
 			<p:commandButton value="Eliminar"
-				actionListener="#{irDownload.deleteDownloadSources}"></p:commandButton>
+				actionListener="#{irDownload.deleteDownloadSources}" disabled="true"></p:commandButton>
+			<p:commandButton value="Recargar Configuracion"
+				actionListener="#{irDownload.reloadSettings}"></p:commandButton>
 				
 			<p:poll interval="10" update="dataListEnqueue,dataListActive,resume" listener="#{irDownload.poolListener}" /> 
 		</h:form>

@@ -17,6 +17,7 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
 import org.apache.log4j.Logger;
+import org.fuzzyclustering.web.managed.documents.DocumentsManagedBean;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EModule;
@@ -58,6 +59,18 @@ public class IRDownloadManagedBean implements Serializable {
 		//WebscrapingFacade.getInstance().downloadSources();
 	}
 	
+	public void reloadSettings(){
+		logger.debug("Reloading Settings");
+		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+				"Actualizacion Configuracion", "Cargando los cambios a las variables de configuracion");
+		this.addQueueDownload(EQueueEvent.RELOAD_DATA_MEMORY);
+		FacesContext.getCurrentInstance().addMessage(null, msg);
+	}
+	
+	/**
+	 * Adiciona una cola en el webscrapping
+	 * @param queueEvent tipo de evento a encolar
+	 */
 	private void addQueueDownload(EQueueEvent queueEvent){
 		QueueDTO queue = new QueueDTO();
 		queue.setModule(EModule.WEBSCRAPPING);
@@ -89,7 +102,9 @@ public class IRDownloadManagedBean implements Serializable {
 		}
 	}
 	
-	
+	/**
+	 * Actualiza la información de las descargas
+	 */
 	public void poolListener(){
 		PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
 		Collection<QueueDTO> enqueueColl = new ArrayList<QueueDTO>();
@@ -111,6 +126,8 @@ public class IRDownloadManagedBean implements Serializable {
 	public int getDownloadDocumentAmount() {
 		return downloadDocumentAmount;
 	}
+	
+
 	
 	
 	

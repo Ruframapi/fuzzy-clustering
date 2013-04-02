@@ -13,6 +13,7 @@ public class DocumentDTO implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 97645150680592259L;
+	private int id;
 	private String path;
     private String name;
     private String nameWithoutExtension;
@@ -20,12 +21,27 @@ public class DocumentDTO implements Serializable{
     private String source;
     private Date downloadDate;
     private Date publishedDate;
+    private Date cleanDate;
     
+    
+    public DocumentDTO() {
+    	
+    }
     
 	public DocumentDTO(String path, String name) {
 		this.path = path;
 		this.name = name;
 		this.nameWithoutExtension = this.setFileNameWithOutExtension();
+	}
+
+	
+	
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public String getPath() {
@@ -79,6 +95,16 @@ public class DocumentDTO implements Serializable{
 	public void setPublishedDate(Date publishedDate) {
 		this.publishedDate = publishedDate;
 	}
+	
+	
+
+	public Date getCleanDate() {
+		return cleanDate;
+	}
+
+	public void setCleanDate(Date cleanDate) {
+		this.cleanDate = cleanDate;
+	}
 
 	/**
 	 * Retorna la ruta completa del archivo
@@ -102,6 +128,7 @@ public class DocumentDTO implements Serializable{
 		String[] fileNameColl = fileName.split(System.getProperty("file.separator")+".");
 		return fileNameColl[0];
 	}
+
 
     
     

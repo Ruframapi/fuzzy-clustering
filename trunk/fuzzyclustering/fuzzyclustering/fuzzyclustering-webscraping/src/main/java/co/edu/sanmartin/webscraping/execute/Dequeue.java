@@ -15,6 +15,8 @@ import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
 import co.edu.sanmartin.persistence.constant.ESourceType;
+import co.edu.sanmartin.persistence.constant.ESystemProperty;
+import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.PropertyDTO;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
@@ -40,6 +42,18 @@ public class Dequeue implements Runnable{
 	 */
 	public Dequeue(){
 		persistenceFacade = PersistenceFacade.getInstance();
+		try {
+			this.cancelActiveQueue(EQueueEvent.DOWNLOAD_RSS);
+			this.cancelActiveQueue(EQueueEvent.DOWNLOAD_TWITTER);
+			this.cancelActiveQueue(EQueueEvent.CLEAN_DOWNLOAD);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.error(e);
+		}
+		
+		int initDocumentId = persistenceFacade.getDownloadDocumentAmount()+1;
+		logger.info("Init Queue documentId:"+initDocumentId);
+		sequence.set(initDocumentId);
 	}
 	
 	public void initProcess(){
@@ -93,6 +107,12 @@ public class Dequeue implements Runnable{
 			case CLEAN_DOWNLOAD:
 				this.cleanDownload();
 				break;
+			case RELOAD_DATA_MEMORY:
+				this.reloadDataMemory(queueDTO);
+				break;
+			case QUERY_DOCUMENT:
+				this.reloadDataMemory(queueDTO);
+				break;
 			}
 			persistenceFacade.updateQueue(queueDTO);
 		}
@@ -106,15 +126,21 @@ public class Dequeue implements Runnable{
 	 * @throws SQLException
 	 */
 	private void cancelDownload(QueueDTO queueDTO, EQueueEvent queueEvent) throws SQLException{
-
+		this.cancelActiveQueue(queueEvent);
+		queueDTO.setStatus(EQueueStatus.SUCESS);
+	}
+	
+	/**
+	 * Cancela las colas pendientes para reiniciar la aplicacion con una nueva orden de descarga
+	 */
+	private void cancelActiveQueue(EQueueEvent queueEvent) throws SQLException{
 		Collection<QueueDTO> queueActive = 
 				this.persistenceFacade.getQueueByStatus(queueEvent, EQueueStatus.ENQUEUE);
 		for (QueueDTO queueDTO2 : queueActive) {
+			logger.info("Queue Cancelled id:" +queueDTO2.getId());
 			queueDTO2.setStatus(EQueueStatus.CANCELLED);
 			persistenceFacade.updateQueue(queueDTO2);
 		}
-		queueDTO.setStatus(EQueueStatus.SUCESS);
-		
 	}
 	
 	/**
@@ -153,6 +179,13 @@ public class Dequeue implements Runnable{
 		threadPool.executeThreadPool(ESourceType.TWITTER);
 		persistenceFacade.updateQueue(queueDTO);
 		this.addNewQueueEvent(EQueueEvent.DOWNLOAD_TWITTER);
+	}
+	
+	public void reloadDataMemory(QueueDTO queueDTO) throws PropertyValueNotFoundException, SQLException{
+		queueDTO.setStatus(EQueueStatus.ACTIVE);
+		persistenceFacade.refreshMemoryData();
+		persistenceFacade.updateQueue(queueDTO);
+		logger.info("Memory Data Reloaded");
 	}
 	
 	/**
@@ -195,6 +228,33 @@ public class Dequeue implements Runnable{
 		
 		cal.add(Calendar.SECOND, rssTimeDelay.intValue());
 		return cal.getTime();
+	}
+	
+	private void queryDocumentAsynch(int idDocument){
+		try {
+			PersistenceFacade persistence = PersistenceFacade.getInstance();
+			persistence.truncateQueryDocument();
+			DocumentDTO document = persistence.selectDocumentById(idDocument);
+			if(document!=null){
+				StringBuilder filePath = new StringBuilder();
+				try {
+					filePath.append(persistence.getProperty(ESystemProperty.MAIN_PATH).getValue());
+				} catch (PropertyValueNotFoundException e) {
+					// TODO Auto-generated catch block
+					logger.error(e);
+				}
+				filePath.append(System.getProperty(System.getProperty("file.separator")));
+				filePath.append(document.getCompletePath());
+				//persistence.readFile(fileName)
+			}
+			
+			
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.error(e);
+		}
+		
 	}
 }
 
