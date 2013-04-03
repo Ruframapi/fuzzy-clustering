@@ -46,7 +46,7 @@ public class IRCleanManagedBean implements Serializable {
 				"Inicializa Proceso de Limpieza de textos", "Procesando los documentos descargados.");
 		FacesContext.getCurrentInstance().addMessage(null, msg);
 		try{
-			IRFacade.getInstance().cleanText();
+			//IRFacade.getInstance().cleanText();
 			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 					"Proceso Finalizado", "Se realizo correctamente la generación de indices.");
 			FacesContext.getCurrentInstance().addMessage(null, msg);

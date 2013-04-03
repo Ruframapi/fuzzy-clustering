@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EProperty;
+import co.edu.sanmartin.persistence.constant.ESourceType;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
@@ -88,14 +89,14 @@ public class RssScraping{
 						for (SyndContentImpl content : contents) {
 							documentData.append(content.getValue());
 						}
-						DocumentDTO documentDTO = new DocumentDTO(EDataFolder.DOWNLOAD_RSS.getPath(), 
-																	String.valueOf(atomicSequence)+".txt");
+						DocumentDTO document = new DocumentDTO(String.valueOf(atomicSequence)+".txt");
 						this.atomicSequence.incrementAndGet();
-						documentDTO.setLazyData(documentData.toString());
-						documentDTO.setDownloadDate(new Date());
-						documentDTO.setPublishedDate(entry.getPublishedDate());
-						documentDTO.setSource(source.getUrl());
-						documentCol.add(documentDTO);
+						document.setLazyData(documentData.toString());
+						document.setDownloadDate(new Date());
+						document.setPublishedDate(entry.getPublishedDate());
+						document.setSource(source.getUrl());
+						document.setSourceType(ESourceType.RSS);
+						documentCol.add(document);
 						
 					}
 				}
@@ -120,7 +121,7 @@ public class RssScraping{
 		
 		for (DocumentDTO documentDTO : documentContent) {
 			logger.debug("Creating new file:"+ documentDTO.getName());
-			persistenceFacade.writeFile(EDataFolder.DOWNLOAD_RSS, documentDTO.getName(), documentDTO.getLazyData());
+			persistenceFacade.writeFile(EDataFolder.DOWNLOAD, documentDTO.getName(), documentDTO.getLazyData());
 			persistenceFacade.insertDocument(documentDTO);
 		}
 

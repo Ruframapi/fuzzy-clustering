@@ -1,20 +1,16 @@
 package co.edu.sanmartin.fuzzyclustering.ir.test;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import co.edu.sanmartin.fuzzyclustering.ir.execute.CleanerThreadPool;
 import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
 import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
 import co.edu.sanmartin.fuzzyclustering.ir.index.MutualInformation;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.Cleaner;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.stemmer.Stemmer;
-import co.edu.sanmartin.fuzzyclustering.ir.normalize.stemmer.snowball.SnowballStemmer;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.file.BigMatrixFileManager;
 
@@ -24,13 +20,6 @@ public class IRTest {
 		BasicConfigurator.configure();
 	}
 
-	@Test
-	//@Ignore
-	public void cleanTest() {
-		CleanerThreadPool threadPool = new CleanerThreadPool();
-		threadPool.executeThreadPool();
-	}
-	
 	@Test
 	public void cleanTextLexicon(){
 		Cleaner cleaner = new Cleaner();

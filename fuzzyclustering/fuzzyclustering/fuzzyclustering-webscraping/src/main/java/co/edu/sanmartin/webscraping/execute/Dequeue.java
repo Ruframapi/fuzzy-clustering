@@ -244,7 +244,7 @@ public class Dequeue implements Runnable{
 					logger.error(e);
 				}
 				filePath.append(System.getProperty(System.getProperty("file.separator")));
-				filePath.append(document.getCompletePath());
+				//filePath.append(document.getCompletePath());
 				//persistence.readFile(fileName)
 			}
 			

@@ -154,6 +154,10 @@ public class PersistenceFacade {
 		this.documentDAO.insert(document);
 	}
 	
+	public void updateDocument(DocumentDTO document) throws SQLException{
+		this.documentDAO.update(document);
+	}
+	
 	public void truncateDocument() throws SQLException {
 		this.documentDAO.truncate();
 	}
