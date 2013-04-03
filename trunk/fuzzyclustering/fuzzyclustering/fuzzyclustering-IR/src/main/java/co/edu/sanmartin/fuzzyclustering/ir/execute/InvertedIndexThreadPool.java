@@ -54,7 +54,7 @@ public class InvertedIndexThreadPool {
 		for (DocumentDTO file : fileCol) {
 			PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
 			StringBuilder dataFile = new StringBuilder();
-			dataFile.append(persistenceFacade.readFile(file.getCompletePath()));
+			dataFile.append(persistenceFacade.readFile(EDataFolder.CLEAN,file.getName()));
 			dataMap.put(file.getNameWithoutExtension(), dataFile);
 		}
 

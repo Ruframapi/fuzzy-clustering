@@ -4,6 +4,7 @@ package org.fuzzyclustering.web.managed;
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
@@ -42,7 +43,7 @@ public class IRDownloadManagedBean implements Serializable {
 	
 	
 	public void load(){
-		documents.loadDocuments(EDataFolder.DOWNLOAD_RSS);
+		documents.loadDocuments(EDataFolder.DOWNLOAD);
 	}
 
 	public void setDocuments(DocumentsManagedBean documents) {
@@ -53,8 +54,10 @@ public class IRDownloadManagedBean implements Serializable {
 		logger.debug("Start download process");
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Inicializa Proceso de Descarga", "Consultando las fuentes de información...");
-		this.addQueueDownload(EQueueEvent.DOWNLOAD_RSS);
-		this.addQueueDownload(EQueueEvent.DOWNLOAD_TWITTER);
+		Calendar calendar = Calendar.getInstance();
+		this.addQueueDownload(EQueueEvent.DOWNLOAD_RSS, calendar.getTime());
+		calendar.add(Calendar.SECOND, 30);
+		this.addQueueDownload(EQueueEvent.DOWNLOAD_TWITTER, calendar.getTime());
 		FacesContext.getCurrentInstance().addMessage(null, msg);
 		//WebscrapingFacade.getInstance().downloadSources();
 	}
@@ -63,7 +66,7 @@ public class IRDownloadManagedBean implements Serializable {
 		logger.debug("Reloading Settings");
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Actualizacion Configuracion", "Cargando los cambios a las variables de configuracion");
-		this.addQueueDownload(EQueueEvent.RELOAD_DATA_MEMORY);
+		this.addQueueDownload(EQueueEvent.RELOAD_DATA_MEMORY, new Date());
 		FacesContext.getCurrentInstance().addMessage(null, msg);
 	}
 	
@@ -71,11 +74,11 @@ public class IRDownloadManagedBean implements Serializable {
 	 * Adiciona una cola en el webscrapping
 	 * @param queueEvent tipo de evento a encolar
 	 */
-	private void addQueueDownload(EQueueEvent queueEvent){
+	private void addQueueDownload(EQueueEvent queueEvent, Date date){
 		QueueDTO queue = new QueueDTO();
 		queue.setModule(EModule.WEBSCRAPPING);
 		queue.setEvent(queueEvent);
-		queue.setInitDate(new Date());
+		queue.setInitDate(date);
 		queue.setStatus(EQueueStatus.ENQUEUE);
 		try {
 			PersistenceFacade.getInstance().insertQueue(queue);

@@ -7,7 +7,7 @@
 		<version>1.0</version>
 	</parent>
 	<artifactId>fuzzyclustering-persistence</artifactId>
-	<name>fuzzyClustering-persistence</name>
+	<name>fuzzyclustering-persistence</name>
 	
 			<dependencies>
 				<dependency>

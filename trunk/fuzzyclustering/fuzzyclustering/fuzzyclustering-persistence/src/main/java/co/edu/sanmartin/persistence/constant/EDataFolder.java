@@ -9,10 +9,7 @@ public  enum EDataFolder {
 	
 	DATA_ROOT("dataRoot",System.getProperty("file.separator")+"data"),
 	CLEAN("clean",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"clean"), 
-	DOWNLOAD_RSS("download",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"download"+System.getProperty("file.separator")+"rss"),
-	DOWNLOAD_TWITTER("download",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"download"+System.getProperty("file.separator")+"twitter"),
-	ORIGINAL_RSS("original",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"original"+System.getProperty("file.separator")+"rss"),
-	ORIGINAL_TWITTER("original",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"original"+System.getProperty("file.separator")+"twitter"),
+	DOWNLOAD("download",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"download"),
 	INVERTED_INDEX("inverted index",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"invertedindex"),
 	MATRIX("matrix",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"matrix"),
 	MACHINE_LEARNING("machine learning", System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"machinelearning"),
@@ -38,5 +35,20 @@ public  enum EDataFolder {
 	public static Collection<EDataFolder> toList(){
 		List<EDataFolder> list = Arrays.asList(EDataFolder.values()); 
 		return list;
+	}
+	
+	/**
+	 * Retorna la enumeracion de acuerdo al valor del path
+	 * @return
+	 */
+	public EDataFolder getFromPath(String path){
+		EDataFolder folder = null;
+		for (EDataFolder dataFolder : EDataFolder.toList()) {
+			if(dataFolder.getPath().equals(path)){
+				folder = dataFolder;
+				break;
+			}
+		}
+		return folder;
 	}
 }

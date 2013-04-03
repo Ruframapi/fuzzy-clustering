@@ -8,6 +8,7 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.constant.EDatabase;
 import co.edu.sanmartin.persistence.constant.ESystemProperty;
@@ -22,6 +23,7 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
  */
 public class ConnectionDataSourcePoolMySQL {
 
+	Logger logger = Logger.getLogger(ConnectionDataSourcePoolMySQL.class);
 	/** Pool de conexiones */
 	private DataSource dataSource;
 
@@ -49,6 +51,7 @@ public class ConnectionDataSourcePoolMySQL {
 		basicDataSource.setUrl("jdbc:mysql://"+server+"/"+databaseName);
 		// Opcional. Sentencia SQL que le puede servir a BasicDataSource
 		// para comprobar que la conexion es correcta.
+		logger.info("Init DataSource Server:"+ server);
 		basicDataSource.setValidationQuery("select 1");
 		dataSource = basicDataSource;
 	}

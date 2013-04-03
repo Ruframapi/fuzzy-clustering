@@ -158,7 +158,7 @@ public class FileManager {
 			System.out.println("There is not file Path:" + folderPath);
 		} else {
 			for (int i = 0; i < fileList.length; i++) {
-				DocumentDTO document = new DocumentDTO(folderPath,fileList[i]);
+				DocumentDTO document = new DocumentDTO(fileList[i]);
 				fileListColl.add(document);
 			}
 		}
@@ -205,5 +205,7 @@ public class FileManager {
 		}
     	return folderPath.toString();
 	}
+	
+	
 
 }

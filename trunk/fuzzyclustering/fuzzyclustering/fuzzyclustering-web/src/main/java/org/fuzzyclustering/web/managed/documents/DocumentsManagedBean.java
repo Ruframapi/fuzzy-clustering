@@ -52,13 +52,14 @@ public class DocumentsManagedBean implements Serializable {
 	
 	public void onRowSelect(SelectEvent event){
 		StringBuilder stringBuilder = new StringBuilder();
-		String documentData = PersistenceFacade.getInstance().readFile(document.getCompletePath());
+		/*String documentData = PersistenceFacade.getInstance().readFile(document.getCompletePath());
 		stringBuilder.append(documentData);
 		int position = 0;
 		while((position+=100)<documentData.length()){
 			stringBuilder.insert(position+10, " ");
 		}
 		this.document.setLazyData(stringBuilder.toString());
+		*/
 	}
 
 	private DocumentsLazyDataModel documentsModel = null;

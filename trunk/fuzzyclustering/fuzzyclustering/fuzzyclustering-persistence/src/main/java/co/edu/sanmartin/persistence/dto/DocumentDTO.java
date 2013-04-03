@@ -3,6 +3,8 @@ package co.edu.sanmartin.persistence.dto;
 import java.io.Serializable;
 import java.util.Date;
 
+import co.edu.sanmartin.persistence.constant.ESourceType;
+
 /**
  * DTO de los documentos que se almacenan en archivos de texto en el sistema
  * @author Ricardo
@@ -14,7 +16,7 @@ public class DocumentDTO implements Serializable{
 	 */
 	private static final long serialVersionUID = 97645150680592259L;
 	private int id;
-	private String path;
+	private ESourceType sourceType;
     private String name;
     private String nameWithoutExtension;
     private String lazyData;
@@ -28,13 +30,10 @@ public class DocumentDTO implements Serializable{
     	
     }
     
-	public DocumentDTO(String path, String name) {
-		this.path = path;
+	public DocumentDTO(String name) {
 		this.name = name;
 		this.nameWithoutExtension = this.setFileNameWithOutExtension();
 	}
-
-	
 	
 	public int getId() {
 		return id;
@@ -44,12 +43,6 @@ public class DocumentDTO implements Serializable{
 		this.id = id;
 	}
 
-	public String getPath() {
-		return path;
-	}
-	public void setPath(String path) {
-		this.path = path;
-	}
 	public String getName() {
 		return name;
 	}
@@ -77,7 +70,13 @@ public class DocumentDTO implements Serializable{
 		this.source = source;
 	}
 	
-	
+	public ESourceType getSourceType() {
+		return sourceType;
+	}
+
+	public void setSourceType(ESourceType sourceType) {
+		this.sourceType = sourceType;
+	}
 
 	public Date getDownloadDate() {
 		return downloadDate;
@@ -104,18 +103,6 @@ public class DocumentDTO implements Serializable{
 
 	public void setCleanDate(Date cleanDate) {
 		this.cleanDate = cleanDate;
-	}
-
-	/**
-	 * Retorna la ruta completa del archivo
-	 * @return
-	 */
-	public String getCompletePath(){
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append(this.path);
-		stringBuilder.append(System.getProperty("file.separator"));
-		stringBuilder.append(this.name);
-		return stringBuilder.toString();
 	}
 	
 	/**

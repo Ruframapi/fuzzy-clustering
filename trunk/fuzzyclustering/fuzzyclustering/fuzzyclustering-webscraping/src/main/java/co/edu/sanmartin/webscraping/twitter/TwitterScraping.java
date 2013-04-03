@@ -21,6 +21,7 @@ import twitter4j.auth.AccessToken;
 import twitter4j.conf.ConfigurationBuilder;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EProperty;
+import co.edu.sanmartin.persistence.constant.ESourceType;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
@@ -148,7 +149,7 @@ public class TwitterScraping {
 	    	PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
 	    	for (DocumentDTO documentDTO : documentContent) {	
 	    		logger.debug("Creating new twitter file:"+ documentDTO.getName());
-	    		persistenceFacade.writeFile(EDataFolder.DOWNLOAD_TWITTER, documentDTO.getName(), documentDTO.getLazyData());
+	    		persistenceFacade.writeFile(EDataFolder.DOWNLOAD, documentDTO.getName(), documentDTO.getLazyData());
 	    		persistenceFacade.insertDocument(documentDTO);
 			}
     	}
@@ -182,13 +183,13 @@ public class TwitterScraping {
 			ResponseList<Status> responseList = twitter.getUserTimeline(source.getUrl(),paging);
 
 			for (Status b : responseList) {
-				DocumentDTO document = new DocumentDTO(EDataFolder.DOWNLOAD_TWITTER.getPath(),
-														String.valueOf(this.atomicSequence)+".txt");
+				DocumentDTO document = new DocumentDTO(String.valueOf(this.atomicSequence)+".txt");
 				this.atomicSequence.incrementAndGet();
 				document.setLazyData(b.getText());
 				document.setPublishedDate(b.getCreatedAt());
 				document.setDownloadDate(new Date());
 				document.setSource(source.getUrl());
+				document.setSourceType(ESourceType.TWITTER);
 				documentCol.add(document);
 			}
 			if(responseList.size()>0){

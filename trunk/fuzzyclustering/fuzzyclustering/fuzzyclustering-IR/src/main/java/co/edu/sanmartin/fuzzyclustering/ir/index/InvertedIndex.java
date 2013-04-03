@@ -108,7 +108,7 @@ public class InvertedIndex {
 		PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
 		Collection<DocumentDTO> fileList = persistenceFacade.getFileList(EDataFolder.INVERTED_INDEX);
 		for (DocumentDTO fileName : fileList) {
-			data.append(persistenceFacade.readFile(fileName.getCompletePath())); 
+			data.append(persistenceFacade.readFile(EDataFolder.CLEAN,fileName.getName())); 
 		}
 		if(data.length()>0){
 			this.invertedIndexData = data.toString();

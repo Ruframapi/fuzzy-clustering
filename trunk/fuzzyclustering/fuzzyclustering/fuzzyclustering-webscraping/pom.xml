@@ -6,7 +6,7 @@
 		<artifactId>fuzzyclustering</artifactId>
 		<version>1.0</version>
 	</parent>
-	<artifactId>fuzzyClustering-webscraping</artifactId>
+	<artifactId>fuzzyclustering-webscraping</artifactId>
 	<dependencies>
 		<dependency>
 			<groupId>log4j</groupId>

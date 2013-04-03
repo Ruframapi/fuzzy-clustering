@@ -11,7 +11,7 @@
 	<artifactId>fuzzyclustering-web</artifactId>
 	<packaging>war</packaging>
 
-	<name>fuzzyClustering-web</name>
+	<name>fuzzyclustering-web</name>
 
 	<properties>
 		<endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>

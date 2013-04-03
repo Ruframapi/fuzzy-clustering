@@ -20,6 +20,7 @@ public enum EProperty {
 	WEB_SCRAPPING_RSS_DOWNLOAD_TIME("webscraping.rss.download.time","tiempo entre busquedas de noticicas RSS"),
 	WEB_SCRAPPING_TWITTER_DOWNLOAD_TIME("webscraping.twitter.download.time","tiempo entre busquedas de noticicas RSS"),
 	WEB_SCRAPPING_THREAD_NUMBER("webscrapin.thread.number", "Numero de Hilos de Descarga"),
+	CLEAN_THREAD_NUMBER("clean.thread.number", "Numero de Hilos de Proceso de Limpieza"),
 	INVERTED_INDEX_THREAD_NUMBER("inverted.index.thread.number", "Numero de Hilos de Indices Invertidos"),
 	IR_DELETE_ADVERBS("ir.delete.adverbs", "Elimina Adverbios"),
 	IR_DELETE_CONJUNCTIONS("ir.delete.conjunctions", "Elimina Conjunciones"),
