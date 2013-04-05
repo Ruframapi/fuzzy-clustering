@@ -34,11 +34,6 @@
 			<artifactId>fuzzyclustering-persistence</artifactId>
 			<version>1.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.3-alpha1</version>
-		</dependency>
 	</dependencies>
 	<build>
 		<!-- La seccion de pluginManagement permite la creación de las librerias 

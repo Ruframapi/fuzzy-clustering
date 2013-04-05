@@ -3,8 +3,14 @@ package co.edu.sanmartin.persistence.file;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Scanner;
@@ -23,7 +29,7 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
  */
 public class FileManager {
 
-	private static Logger log = Logger.getRootLogger();
+	private static Logger logger = Logger.getRootLogger();
 
 	/**
 	 * Escribe un archivo en disco en caso de existir lo elimina y crea uno nuevo
@@ -47,13 +53,13 @@ public class FileManager {
 			bufferWritter.write(data);
 			bufferWritter.flush();
 			bufferWritter.close();
-			log.info("Write file Done");
+			logger.info("Write file Done");
 
 		} catch (IOException e) {
-			log.error("Error in write file", e);
+			logger.error("Error in write file", e);
 		}
 	}
-	
+
 	/**
 	 * Escribe un archivo en disco
 	 * @param destinationProperty propiedad con el path de destino
@@ -61,10 +67,10 @@ public class FileManager {
 	 * @param data información del archivo
 	 */
 	public void writeFile(EDataFolder dataFolder, String fileName, String data){
-		
-    	this.writeFile(this.getFolderPath(dataFolder), fileName, data);
+
+		this.writeFileNio(this.getFolderPath(dataFolder), fileName, data);
 	}
-	
+
 	/**
 	 * Elimina la carpeta especificada
 	 * @param dataFolder
@@ -74,7 +80,7 @@ public class FileManager {
 		File file = new File(dataPath);
 		file.delete();
 	}
-	
+
 	/**
 	 * Elimina un archivo de la carpeta especificada
 	 * @param dataFolder carpeta de origen del archivo
@@ -100,7 +106,7 @@ public class FileManager {
 		stringBuider.append(this.getFolderPath(dataFolder));
 		stringBuider.append(System.getProperty("file.separator"));
 		stringBuider.append(fileName);
-    	return this.readFile(stringBuider.toString());
+		return this.readFileNio(stringBuider.toString());
 	}
 
 	/**
@@ -109,7 +115,7 @@ public class FileManager {
 	 * @return el contenido del archivo
 	 */
 	public String readFile(String fileName) {
-		log.info("Reading from file.");
+		logger.info("Reading from file." + fileName);
 		StringBuilder text = new StringBuilder();
 		String NL = System.getProperty("line.separator");
 		Scanner scanner = null;
@@ -119,7 +125,7 @@ public class FileManager {
 				text.append(scanner.nextLine() + NL);
 			}
 		} catch (Exception e) {
-			log.error("Error in readFile", e);
+			logger.error("Error in readFile", e);
 		} finally {
 			scanner.close();
 		}
@@ -136,14 +142,14 @@ public class FileManager {
 		File folder = new File(folderPath);
 		boolean result = false;
 		if (!folder.exists()) {
-			log.info("creating directory:" + folderPath);
+			logger.info("creating directory:" + folderPath);
 			result = folder.mkdirs();
 		}
 		if (result) {
-			log.info("directory created:" + folderPath);
+			logger.info("directory created:" + folderPath);
 		}
 	}
-	
+
 	/**
 	 * Retorna la lista de archivos de un directorio
 	 * @param folderPath
@@ -176,7 +182,7 @@ public class FileManager {
 				path.length());
 		return fileName;
 	}
-	
+
 	/**
 	 * Extrae el nombre del archivo sin extension a partir del path
 	 * @param path ruta en disco del archivo
@@ -188,7 +194,7 @@ public class FileManager {
 		String[] fileNameColl = fileName.split(System.getProperty("file.separator")+".");
 		return fileNameColl[0];
 	}
-	
+
 	/**
 	 * Retorna el path de las carpetas que gestiona el sistema
 	 * @param dataFolder enumeracion con las diferentes carpetas del sistema
@@ -196,16 +202,90 @@ public class FileManager {
 	 */
 	public String getFolderPath(EDataFolder dataFolder){
 		StringBuilder folderPath = new StringBuilder();
-    	try {
-    		folderPath.append(PersistenceFacade.getInstance().getProperty(ESystemProperty.MAIN_PATH).getValue());
-    		folderPath.append(dataFolder.getPath());
+		try {
+			folderPath.append(PersistenceFacade.getInstance().getProperty(ESystemProperty.MAIN_PATH).getValue());
+			folderPath.append(dataFolder.getPath());
 		} catch (PropertyValueNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	return folderPath.toString();
+		return folderPath.toString();
 	}
-	
-	
 
+
+	public void readFile() throws IOException{
+
+		String name= "D:\\RicardoC\\fuzzyclustering\\data\\download\\4.txt";
+		FileInputStream fIn;
+		FileChannel fChan;
+		long fSize;
+		ByteBuffer mBuf;
+
+		try {
+			fIn = new FileInputStream(name);
+			fChan = fIn.getChannel();
+			fSize = fChan.size();
+			mBuf = ByteBuffer.allocate((int) fSize);
+			fChan.read(mBuf);
+			mBuf.rewind();
+			for (int i = 0; i < fSize; i++)
+				System.out.print((char) mBuf.get());
+			fChan.close(); 
+			fIn.close(); 
+		} catch (IOException exc) {
+			System.out.println(exc);
+			System.exit(1);
+		}
+	}	
+
+	/**
+	 * Lee un archivo utilizando la libreria java.nio
+	 * @throws Exception
+	 */
+	public String readFileNio(String fileName){
+		String data = null;
+		FileChannel fc  = null;
+		ByteBuffer buff = null;
+		try {
+			buff = ByteBuffer.allocate(1024);
+			fc = new FileInputStream(fileName).getChannel();
+			buff.clear();
+			fc.read(buff);
+			buff.flip();
+			//System.out.println(buff.asCharBuffer());
+			data = new String(buff.array(), Charset.forName("UTF-8"));
+			logger.debug("File Read Nio fileName:" + fileName);
+			//System.out.println(data);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			logger.error("Error in readFileNio",e);
+		}
+		finally{
+			try {
+				fc.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.error("Error in readFileNio",e);
+			}  
+		}
+
+		return data;
+	}
+
+	public void writeFileNio(String folderPath, String fileName, String data){
+
+		try {
+			this.createFolder(folderPath);
+			File file = new File(folderPath + System.getProperty("file.separator") + fileName);
+			if (file.exists()) {
+				file.delete();
+			}
+			FileChannel fc = new FileOutputStream(folderPath + System.getProperty("file.separator") + fileName).getChannel();
+			fc.write(ByteBuffer.wrap(data.getBytes("UTF-8")));
+			fc.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

@@ -57,24 +57,4 @@ public class DocumentsLazyDataModel extends LazyDataModel<DocumentDTO> implement
 		return PAGE_SIZE;
 	};
 
-	
-	@Override
-	public int getRowIndex() {
-		// TODO Auto-generated method stub
-		return super.getRowIndex();
-	}
-	
-	@Override
-	public void setRowIndex(int rowIndex) {
-	    /*
-	     * The following is in ancestor (LazyDataModel):
-	     * this.rowIndex = rowIndex == -1 ? rowIndex : (rowIndex % pageSize);
-	     */
-	    if (rowIndex == -1 || getPageSize() == 0) {
-	        super.setRowIndex(-1);
-	    }
-	    else
-	        super.setRowIndex(rowIndex % getPageSize());
-	}
-
 }

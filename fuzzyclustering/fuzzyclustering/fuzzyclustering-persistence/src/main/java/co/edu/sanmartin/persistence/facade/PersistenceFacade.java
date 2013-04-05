@@ -1,6 +1,7 @@
 package co.edu.sanmartin.persistence.facade;
 
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
@@ -138,6 +139,10 @@ public class PersistenceFacade {
 		this.queueDAO.insert(queue);
 	}
 	
+	public synchronized void deleteQueue(QueueDTO queue) throws SQLException {
+		this.queueDAO.delete(queue);
+	}
+	
 	public int getDownloadDocumentAmount(){
 		return this.documentDAO.getDownloadDocumentAmount();
 	}
@@ -227,6 +232,10 @@ public class PersistenceFacade {
 	
 	public String getFolderPath(EDataFolder dataFolder){
 		return fileManager.getFolderPath(dataFolder);
+	}
+	
+	public Calendar getServerDate(){
+		return queueDAO.getServerDate();
 	}
 
 	

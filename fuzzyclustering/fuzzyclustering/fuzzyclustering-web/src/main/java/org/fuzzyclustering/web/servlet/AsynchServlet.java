@@ -11,7 +11,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.fuzzyclustering.web.managed.StatusManagedBean;
+import org.fuzzyclustering.web.managed.AsynchManagedBean;
+
+import co.edu.sanmartin.persistence.dto.DocumentDTO;
 
 /**
  * Servlet implementation class AsynchServlet
@@ -22,7 +24,7 @@ public class AsynchServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
 	@ManagedProperty(value = "#{status}") 
-	private StatusManagedBean status;
+	private AsynchManagedBean status;
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -37,10 +39,9 @@ public class AsynchServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		
-		if (request.getParameter("status")!=null){
-			HttpSession session = request.getSession(true);
-			session.setAttribute("status", "Downloading: " + new Date().toString());
-		}
+		this.doPost(request, response);
+		
+		
 		//status.setDownloadStatus("Downloading: " + new Date().toString());
 	}
 
@@ -50,17 +51,40 @@ public class AsynchServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		if (request.getParameter("status")!=null){
-			StatusManagedBean bean1 = (StatusManagedBean) getServletContext().getAttribute("status");
+			AsynchManagedBean bean1 = (AsynchManagedBean) getServletContext().getAttribute("asynch");
 			bean1.setDownloadStatus((String) request.getParameter("status"));
+		}
+		if(request.getParameter("originalDocument")!=null){
+			AsynchManagedBean bean1 = (AsynchManagedBean) getServletContext().getAttribute("asynch");
+			DocumentDTO document = new DocumentDTO();
+			document.setLazyData(this.getWrappedData(request.getParameter("originalDocument")));
+			document.setLazyCleanData(this.getWrappedData(request.getParameter("cleanDocument")));
+			document.setName(request.getParameter("documentName"));
+			bean1.setDocument(document);
 		}
 
 	}
+	
+	/**
+	 * Retorna la informacion de los archivos normalizada
+	 * @param data
+	 * @return
+	 */
+	public String getWrappedData(String data){
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append(data);
+		int position = 0;
+		while((position+=110)<data.length()){
+			stringBuilder.insert(position+10, " ");
+		}
+		return stringBuilder.toString();
+	}
 
-	public StatusManagedBean getStatus() {
+	public AsynchManagedBean getStatus() {
 		return status;
 	}
 
-	public void setStatus(StatusManagedBean status) {
+	public void setStatus(AsynchManagedBean status) {
 		this.status = status;
 	}
 	

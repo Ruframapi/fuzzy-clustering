@@ -46,7 +46,7 @@ public class InvertedIndexBuilder {
 	public void printIndex(){
 	
 		for (String term : index) {
-			System.out.print("term");
+			System.out.println("term");
 		}
 	 } // fin
 	
@@ -70,10 +70,16 @@ public class InvertedIndexBuilder {
 			String[] termData = termItem.split(splitToken);
 			if(termData.length==2){
 				String term = termData[0];
-				String document = termData[1];
-				if(term == null || term.equals("") || term.equals("\r\n")){
+				//Si el termino es vacio o si no son caracteres o letras no se tiene en cuenta
+				if(term.length()==0){
 					continue;
 				}
+				if(!Character.isLetterOrDigit(term.charAt(0))){
+					continue;
+				}
+				
+				String document = termData[1];
+
 				if (tempTerm== null){
 					stringBuilder.append(term);
 					stringBuilder.append(";");

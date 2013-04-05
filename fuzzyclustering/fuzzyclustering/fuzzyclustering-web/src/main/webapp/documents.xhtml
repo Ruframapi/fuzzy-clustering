@@ -9,10 +9,9 @@
 
 				<p:dataTable id="documents" value="#{documents.documents}"
 					var="document" selection="#{documents.document}"
-					selectionMode="single" rowKey="#{document.name}"
+					selectionMode="single" rowKey="#{document.id}"
 					paginator="true" rows="10" lazy="true">
-					<p:ajax event="rowSelect" listener="#{documents.onRowSelect}"
-						update=":form2:dataFile" />
+					<p:ajax event="rowSelect" listener="#{documents.onRowSelect}" />
 					<f:facet name="header">  
 			            Listado de Archivos 
 			        </f:facet>
@@ -50,10 +49,25 @@
 					<f:facet id="footer" name="footer">
 					</f:facet>
 				</p:dataTable>
-				<p:panel id="dataFile" header="Informacion del Archivo">
-					<h:outputText value="#{documents.document.lazyData}"></h:outputText>
+				
+				<p:panel id="dataFile">
+				<h:outputText value="#{asynch.documentName}" styleClass="display"></h:outputText>
+				<p:panel header="Archivo Original">
+					<h:outputText value="#{asynch.documentData}" styleClass="display"></h:outputText>
+				</p:panel>
+				<p:panel header="Archivo Normalizado">
+					<h:outputText value="#{asynch.cleanData}" styleClass="display"></h:outputText>
+					<p:separator></p:separator>
+					<p:commandButton value="Normalizar"
+					actionListener="#{documents.normalize}" update=":form2:dataFile"></p:commandButton>
+				</p:panel>
 				</p:panel>
 			</p:panelGrid>
 		</h:form>
+		
 	</p:panel>
+	
+	<p:socket channel="/document">
+<p:ajax event="message" update=":form2:dataFile" />
+</p:socket>
 </ui:composition>

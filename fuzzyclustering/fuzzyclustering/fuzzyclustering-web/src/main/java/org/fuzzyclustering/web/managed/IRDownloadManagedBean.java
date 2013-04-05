@@ -54,7 +54,7 @@ public class IRDownloadManagedBean implements Serializable {
 		logger.debug("Start download process");
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Inicializa Proceso de Descarga", "Consultando las fuentes de información...");
-		Calendar calendar = Calendar.getInstance();
+		Calendar calendar = PersistenceFacade.getInstance().getServerDate();
 		this.addQueueDownload(EQueueEvent.DOWNLOAD_RSS, calendar.getTime());
 		calendar.add(Calendar.SECOND, 30);
 		this.addQueueDownload(EQueueEvent.DOWNLOAD_TWITTER, calendar.getTime());
@@ -95,7 +95,7 @@ public class IRDownloadManagedBean implements Serializable {
 		QueueDTO queue = new QueueDTO();
 		queue.setModule(EModule.WEBSCRAPPING);
 		queue.setEvent(EQueueEvent.CLEAN_DOWNLOAD);
-		queue.setInitDate(new Date());
+		queue.setInitDate(PersistenceFacade.getInstance().getServerDate().getTime());
 		queue.setStatus(EQueueStatus.ENQUEUE);
 		try {
 			PersistenceFacade.getInstance().insertQueue(queue);

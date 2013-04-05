@@ -1,5 +1,6 @@
 package co.edu.sanmartin.persistence.dto;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import co.edu.sanmartin.persistence.constant.EModule;
@@ -11,13 +12,18 @@ import co.edu.sanmartin.persistence.constant.EQueueStatus;
  * @author Ricardo Carvajal Salamanca
  *
  */
-public class QueueDTO {
+public class QueueDTO implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5106959435991648786L;
 	private int id;
 	private EModule module;
 	private Date initDate;
 	private Date processDate;
 	private EQueueEvent event;
 	private EQueueStatus status;
+	private String params;
 	
 	
 	public int getId() {
@@ -57,6 +63,14 @@ public class QueueDTO {
 	public void setStatus(EQueueStatus status) {
 		this.status = status;
 	}
+	public String getParams() {
+		return params;
+	}
+	public void setParams(String params) {
+		this.params = params;
+	}
+	
+	
 	
 	
 }

@@ -2,6 +2,8 @@ package org.fuzzyclustering.web.managed;
 
 
 import java.io.Serializable;
+import java.sql.SQLException;
+import java.util.Date;
 import java.util.regex.PatternSyntaxException;
 
 import javax.annotation.PostConstruct;
@@ -18,6 +20,11 @@ import org.fuzzyclustering.web.managed.documents.DocumentsManagedBean;
 
 import co.edu.sanmartin.fuzzyclustering.ir.facade.IRFacade;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.constant.EModule;
+import co.edu.sanmartin.persistence.constant.EQueueEvent;
+import co.edu.sanmartin.persistence.constant.EQueueStatus;
+import co.edu.sanmartin.persistence.dto.QueueDTO;
+import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
 
 @ManagedBean(name = "irInvertedIndex")
@@ -46,9 +53,9 @@ public class IRInvertedIndexManagedBean implements Serializable {
 				"Inicializa Proceso de Creación de Indices", "Procesando los documentos descargados.");
 		FacesContext.getCurrentInstance().addMessage(null, msg);
 		try{
-			IRFacade.getInstance().createInvertedIndex();
+			this.addQueueDownload(EQueueEvent.GENERATE_INVERTED_INDEX, PersistenceFacade.getInstance().getServerDate().getTime());
 			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
-					"Proceso Finalizado", "Se realizo correctamente la generación de indices.");
+					"Proceso En Curso", ".");
 			FacesContext.getCurrentInstance().addMessage(null, msg);
 		}
 		catch(PatternSyntaxException e){
@@ -57,5 +64,24 @@ public class IRInvertedIndexManagedBean implements Serializable {
 			FacesContext.getCurrentInstance().addMessage(null, msg);
 		}
 		
+	}
+	
+	
+	/**
+	 * Adiciona una cola en el webscrapping
+	 * @param queueEvent tipo de evento a encolar
+	 */
+	private void addQueueDownload(EQueueEvent queueEvent, Date date){
+		QueueDTO queue = new QueueDTO();
+		queue.setModule(EModule.QUERYASYNCH);
+		queue.setEvent(queueEvent);
+		queue.setInitDate(date);
+		queue.setStatus(EQueueStatus.ENQUEUE);
+		try {
+			PersistenceFacade.getInstance().insertQueue(queue);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

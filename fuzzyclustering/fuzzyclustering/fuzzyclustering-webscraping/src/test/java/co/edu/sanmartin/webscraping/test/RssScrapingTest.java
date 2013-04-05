@@ -6,7 +6,6 @@ import org.apache.log4j.BasicConfigurator;
 import org.junit.Test;
 
 import co.edu.sanmartin.persistence.dto.SourceDTO;
-import co.edu.sanmartin.webscraping.execute.CallRemoteServlet;
 import co.edu.sanmartin.webscraping.rss.RssScraping;
 
 /**
@@ -36,18 +35,15 @@ public class RssScrapingTest {
 		//DowloadRSSThreadPool threadPool = new DowloadRSSThreadPool();
 		//threadPool.executeThreadPool();
 	}
-	
+
+
 	@Test
-	public void callRemoteServlet(){
-		try {
-			
-			CallRemoteServlet callRemoteServlet = new CallRemoteServlet();
-			callRemoteServlet.sendDocument();
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+	public void CallRemoteServletTest() throws URISyntaxException{
+		/*CallRemoteServlet rs = new CallRemoteServlet();
+		DocumentDTO document = new DocumentDTO();
+		document.setLazyData("Data");
+		document.setLazyCleanData("Clean");
+		rs.sendDocument(document);
+		*/
 	}
-	
 }
