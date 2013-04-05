@@ -116,7 +116,7 @@ public class InvertedIndexBuilder {
 		this.buildIndex();
 		for (String word : invertedIndex) {
 			stringBuilder.append(word);
-			stringBuilder.append("\n");
+			stringBuilder.append(System.getProperty("line.separator"));
 		}
 		PersistenceFacade.getInstance().writeFile(EDataFolder.INVERTED_INDEX,
 													 "invertedIndex.txt", stringBuilder.toString());

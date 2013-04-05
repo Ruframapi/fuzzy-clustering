@@ -81,8 +81,8 @@ public class BigMatrixFileManager implements Closeable {
     }
 
     public double get(int x, int y) {
-        //assert x >= 0 && x < width;
-       //assert y >= 0 && y < height;
+        assert x >= 0 && x < width;
+        assert y >= 0 && y < height;
         long p = position(x, y) * 8;
         int mapN = (int) (p / MAPPING_SIZE);
         int offN = (int) (p % MAPPING_SIZE);
@@ -92,8 +92,8 @@ public class BigMatrixFileManager implements Closeable {
     }
 
     public void set(int x, int y, double d) {
-       // assert x >= 0 && x < width;
-       // assert y >= 0 && y < height;
+        assert x >= 0 && x < width;
+        assert y >= 0 && y < height;
         long p = position(x, y) * 8;
         int mapN = (int) (p / MAPPING_SIZE);
         int offN = (int) (p % MAPPING_SIZE);
@@ -132,7 +132,7 @@ public class BigMatrixFileManager implements Closeable {
      */
     private void loadMetadata(){
     	String metadata = PersistenceFacade.getInstance().readFile(EDataFolder.MATRIX, getMetadataName());
-    	metadata = metadata.replaceAll("\\r\\n", "");
+    	metadata = metadata.replaceAll(System.getProperty("line.separator"), "");
     	String[] metadataColl = metadata.split(";");
     	
     	HashMap<String,Integer> metaData = new HashMap<String, Integer>();

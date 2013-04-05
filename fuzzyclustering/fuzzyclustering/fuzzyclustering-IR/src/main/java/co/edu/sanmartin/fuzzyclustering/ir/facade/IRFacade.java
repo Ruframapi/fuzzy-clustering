@@ -1,5 +1,7 @@
 package co.edu.sanmartin.fuzzyclustering.ir.facade;
 
+import java.io.IOException;
+
 import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
 import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
 
@@ -11,7 +13,7 @@ import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
 public class IRFacade {
 
 	private static IRFacade instance;
-	InvertedIndex indexManager;
+	private InvertedIndex invertedIndex;
 	private IRFacade(){
 		
 	}
@@ -24,13 +26,14 @@ public class IRFacade {
 	}
 
 	public void createInvertedIndex(){
-		indexManager = new InvertedIndex();
+		invertedIndex = new InvertedIndex();
 		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool();
 		Thread thread=new Thread(threadPool);
 		thread.start();
 	}
 	
-	public int[][] getTermTermMatrix(){
-		return indexManager.getTermTermMatrix();
+	public void buildTermTermBigMatrix(boolean persist) throws IOException{
+		this.invertedIndex.buildTermTermBigMatrix(persist);
 	}
+
 }

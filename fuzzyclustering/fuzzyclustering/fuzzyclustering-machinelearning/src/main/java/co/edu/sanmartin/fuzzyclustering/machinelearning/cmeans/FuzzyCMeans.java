@@ -52,7 +52,7 @@ public class FuzzyCMeans {
 	public FuzzyCMeans( String fileNameMatrix, int centroidsAmount, int iterationsAmount, int mValue){
 		//TODO Terminar Metodo
 		PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
-		String[] data = persistenceFacade.readFile(fileNameMatrix).split("\r\n");
+		String[] data = persistenceFacade.readFile(fileNameMatrix).split(System.getProperty("line.separator"));
 		String[][] dataMatrix = null; 
 	//	double dataMatrix = null;
 		for (int i = 0; i < data.length; i++) {
@@ -62,7 +62,7 @@ public class FuzzyCMeans {
 			}
 		}
 		
-		//String[][] filedata = data.split("\r\n");
+		//String[][] filedata = data.split(System.getProperty("line.separator"));
 		
 	}
 	public int getCentroidsAmount() {
@@ -138,7 +138,7 @@ public class FuzzyCMeans {
 			for (int j2 = 0; j2 < centroids[j].length; j2++) {
 				System.out.print(centroids[j][j2]+",");
 			}
-			System.out.print("\r\n");
+			System.out.print(System.getProperty("line.separator"));
 		}
 		
 	}
