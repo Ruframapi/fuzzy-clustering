@@ -12,6 +12,7 @@ import co.edu.sanmartin.fuzzyclustering.ir.index.MutualInformation;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.Cleaner;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.stemmer.Stemmer;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 import co.edu.sanmartin.persistence.file.BigMatrixFileManager;
 
 public class IRTest {
@@ -50,13 +51,13 @@ public class IRTest {
 	@Test
 	public void buildTermTermMatrixTest(){
 		InvertedIndex indexManager = new InvertedIndex();
-		indexManager.buildTermTermMatrix(true, false);
+		indexManager.buildTermTermMatrix(true);
 	}
 	@Test
 	public void buildTermTermBigMatrixTest(){
 		InvertedIndex indexManager = new InvertedIndex();
 		try {
-			indexManager.buildTermTermBigMatrix(true, false);
+			indexManager.buildTermTermBigMatrix(true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -69,6 +70,12 @@ public class IRTest {
 	}
 	
 	@Test
+	public void mutualInformationBigMatrixTest(){
+		MutualInformation mutualInformation = new MutualInformation();
+		mutualInformation.buildMutualInformationBigMatrix();
+	}
+	
+	@Test
 	public void loadTermTermBigMatrixTest(){
 		long start = System.nanoTime();
 		
@@ -76,13 +83,17 @@ public class IRTest {
 			BigMatrixFileManager largeMatrix = 
 					new BigMatrixFileManager();
 			largeMatrix.loadReadOnly(EDataFolder.MATRIX,"termterm.txt");
-			for (int i = 0; i < 10; i++) {
+			double[][] termtermMatrix = new double[largeMatrix.height()][largeMatrix.width()];
+			for (int i = 0; i < largeMatrix.height(); i++) {
 				for (int j = 0; j < largeMatrix.width(); j++) {
-					System.out.print(largeMatrix.get(i, j)+ " ");
+					termtermMatrix[i][j] = largeMatrix.get(i, j);
+					//System.out.print(largeMatrix.get(i, j)+ " ");
 				}
 				System.out.println();
 			}
 			largeMatrix.close();
+			this.saveMatrix(termtermMatrix, "BigMatrixLoad.txt");
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -121,5 +132,22 @@ public class IRTest {
 		int z=0;
 		z=++a+b++;
 		System.out.print(z);
+	}
+	
+	/**
+	 * Almacena la matriz en disco
+	 **/
+	public void saveMatrix(double[][] matrix, String fileName){
+		System.out.print("Init savematrix");
+		StringBuilder data = new StringBuilder();
+		for (int i = 0; i < matrix.length; i++) {;
+			for (int j = 0; j < matrix[i].length; j++) {
+				data.append(matrix[i][j]);
+				data.append(",");
+			}
+			data.append(System.getProperty("line.separator"));
+		}
+		PersistenceFacade.getInstance().writeFile(EDataFolder.MATRIX, 
+													fileName, data.toString());
 	}
 }

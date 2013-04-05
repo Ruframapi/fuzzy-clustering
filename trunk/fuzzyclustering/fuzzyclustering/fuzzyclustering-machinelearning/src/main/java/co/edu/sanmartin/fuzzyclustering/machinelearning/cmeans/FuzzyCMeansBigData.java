@@ -96,7 +96,7 @@ public class FuzzyCMeansBigData {
 			for (int j2 = 0; j2 < centroids[j].length; j2++) {
 				stringBuilder.append(centroids[j][j2]+",");
 			}
-			System.out.print("\r\n");
+			System.out.print(System.getProperty("line.separator"));
 		}
 		PersistenceFacade.getInstance().writeFile(EDataFolder.MACHINE_LEARNING, 
 				stringBuilder.toString(), data.toString());

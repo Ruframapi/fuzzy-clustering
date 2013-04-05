@@ -247,8 +247,8 @@ public class FileManager {
 		FileChannel fc  = null;
 		ByteBuffer buff = null;
 		try {
-			buff = ByteBuffer.allocate(1024);
 			fc = new FileInputStream(fileName).getChannel();
+			buff = ByteBuffer.allocate((int)fc.size());
 			buff.clear();
 			fc.read(buff);
 			buff.flip();
