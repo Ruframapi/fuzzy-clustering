@@ -26,7 +26,8 @@ public class IRFacade {
 	public void createInvertedIndex(){
 		indexManager = new InvertedIndex();
 		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool();
-		threadPool.executeThreadPool();
+		Thread thread=new Thread(threadPool);
+		thread.start();
 	}
 	
 	public int[][] getTermTermMatrix(){

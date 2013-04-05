@@ -33,4 +33,9 @@ public class PersistenceTest {
 		loader.getProperty("test");
 	}
 	
+	@Test
+	public void getServerDateTest(){
+		System.out.print(PersistenceFacade.getInstance().getServerDate().toString());
+	}
+	
 }

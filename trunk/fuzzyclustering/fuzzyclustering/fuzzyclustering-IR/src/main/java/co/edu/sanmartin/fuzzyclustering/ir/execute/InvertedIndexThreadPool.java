@@ -1,6 +1,5 @@
 package co.edu.sanmartin.fuzzyclustering.ir.execute;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,6 +9,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.fuzzyclustering.ir.execute.worker.InvertedIndexWorkerThread;
 import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndexBuilder;
@@ -25,12 +26,15 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
  * @author Ricardo
  *
  */
-public class InvertedIndexThreadPool {
+public class InvertedIndexThreadPool implements Runnable{
 
-	public void executeThreadPool(){
-		
+	Logger logger = Logger.getLogger("InvertedIndexThreadPool");
+
+	public void run() {
+		logger.info("Inicializando construccion del indice invertido");
 		int threadPoolNumber = 10;
-
+		long time_start, time_end;
+		time_start = System.currentTimeMillis();
 		//Se cargan las fuentes rss disponibles
 		try {
 			PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
@@ -46,26 +50,27 @@ public class InvertedIndexThreadPool {
 		
 		InvertedIndexWorkerThread invertedIndexWorkerThread;
 		
-		//Se realiza la limipieza de los archivos
 		ThreadPoolExecutor executor=(ThreadPoolExecutor)Executors.newFixedThreadPool(threadPoolNumber);
 		HashMap<String, StringBuilder> dataMap = new HashMap<String,StringBuilder>();
-		
+		InvertedIndexBuilder index = new InvertedIndexBuilder(new ConcurrentLinkedDeque<String>());
 		//Almacenamos los archivos en memoria
 		for (DocumentDTO file : fileCol) {
 			PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
 			StringBuilder dataFile = new StringBuilder();
 			dataFile.append(persistenceFacade.readFile(EDataFolder.CLEAN,file.getName()));
-			dataMap.put(file.getNameWithoutExtension(), dataFile);
+			invertedIndexWorkerThread = new InvertedIndexWorkerThread(dataFile, file.getNameWithoutExtension(), index);
+			executor.execute(invertedIndexWorkerThread);
+			//dataMap.put(file.getNameWithoutExtension(), dataFile);
 		}
 
-		Iterator<Entry<String, StringBuilder>> it = dataMap.entrySet().iterator();
-		InvertedIndexBuilder index = new InvertedIndexBuilder(new ConcurrentLinkedDeque<String>());
+		/*Iterator<Entry<String, StringBuilder>> it = dataMap.entrySet().iterator();
+		
 		while (it.hasNext()) {
 			Map.Entry<String,StringBuilder> e = (Entry<String, StringBuilder>)it.next();
 			invertedIndexWorkerThread = new InvertedIndexWorkerThread(e.getValue(), e.getKey(), index);
 			executor.execute(invertedIndexWorkerThread);
 		}
-		
+		*/
 		executor.shutdown();
 		try {
 			executor.awaitTermination(10, TimeUnit.SECONDS);
@@ -74,7 +79,13 @@ public class InvertedIndexThreadPool {
 			e.printStackTrace();
 		}
 		index.saveIndex();
+		time_end = System.currentTimeMillis();
+		
+		logger.info("La construccion del indice invertido tomo "+ 
+		( time_end - time_start )/1000 +" segundos" + 
+		(( time_end - time_start )/1000)/60 +" minutos");
 		
 		//invertedIndex.getInstance().printIndex();
+		
 	}
 }

@@ -20,7 +20,7 @@ function handleMessage(data) {
 	<p:layout fullPage="true">
 		<p:layoutUnit position="north" size="50">
 			<h:form>
-			<h:outputText value="#{status.downloadStatus}" styleClass="display"></h:outputText>
+			<h:outputText value="#{asynch.downloadStatus}" styleClass="display"></h:outputText>
 			</h:form>
 			<p:socket onMessage="handleMessage" channel="/status" />
 		</p:layoutUnit>

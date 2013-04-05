@@ -75,8 +75,8 @@ public class Lexicon {
      */
     private String getLexiconPattern(ELexicon lexicon){
     	PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
-    	String adverbs = persistenceFacade.readFile(EDataFolder.LEXICON,lexicon.getFileName());
-		String[] adverbsList = adverbs.split("\r\n");
+    	String word = persistenceFacade.readFile(EDataFolder.LEXICON,lexicon.getFileName());
+		String[] adverbsList = word.split(",");
 		StringBuilder regexPattern = new StringBuilder();
 		
 		for (int i = 0; i < adverbsList.length; i++) {

@@ -20,6 +20,7 @@ public class DocumentDTO implements Serializable{
     private String name;
     private String nameWithoutExtension;
     private String lazyData;
+    private String lazyCleanData;
     private String source;
     private Date downloadDate;
     private Date publishedDate;
@@ -56,6 +57,14 @@ public class DocumentDTO implements Serializable{
 
 	public void setLazyData(String lazyData) {
 		this.lazyData = lazyData;
+	}
+
+	public String getLazyCleanData() {
+		return lazyCleanData;
+	}
+
+	public void setLazyCleanData(String lazyCleanData) {
+		this.lazyCleanData = lazyCleanData;
 	}
 
 	public String getNameWithoutExtension() {

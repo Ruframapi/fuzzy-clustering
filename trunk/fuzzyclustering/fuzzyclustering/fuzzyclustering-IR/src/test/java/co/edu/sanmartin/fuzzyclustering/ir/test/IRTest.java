@@ -30,7 +30,9 @@ public class IRTest {
 	@Test
 	public void invertedIndexText() {
 		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool();
-		threadPool.executeThreadPool();
+		threadPool.run();
+		//Thread thread = new Thread(threadPool);
+		//thread.start();
 	}
 
 	

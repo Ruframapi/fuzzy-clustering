@@ -1,20 +1,11 @@
 package org.fuzzyclustering.web.chart.controller;
 
-import co.edu.sanmartin.fuzzyclustering.ir.facade.IRFacade;
-
-import com.google.gson.Gson;
-
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
-import org.primefaces.model.chart.BubbleChartModel;
-import org.primefaces.model.chart.BubbleChartSeries;
+import co.edu.sanmartin.fuzzyclustering.ir.facade.IRFacade;
  
 /**
  * Chart Controller

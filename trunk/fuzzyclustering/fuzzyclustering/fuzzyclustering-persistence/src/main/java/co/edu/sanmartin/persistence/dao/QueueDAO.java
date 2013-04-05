@@ -2,6 +2,7 @@ package co.edu.sanmartin.persistence.dao;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
@@ -16,7 +17,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 	public void insert(QueueDTO queue) throws SQLException {
 		try {
 			connection = getConnectionPool().getConnection();
-			sQLQuery = "INSERT INTO queue (module, event,initDate,processDate,status) VALUES (?,?,?,?,?)";
+			sQLQuery = "INSERT INTO queue (module, event,initDate,processDate,status, params) VALUES (?,?,?,?,?,?)";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, queue.getModule().name());
 			statement.setString(2, queue.getEvent().name());
@@ -28,6 +29,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 				statement.setDate(4, null);
 			}
 			statement.setString(5, queue.getStatus().name());
+			statement.setString(6, queue.getParams());
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -78,6 +80,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 				queue.setEvent(EQueueEvent.valueOf(rs.getString("event")));
 				queue.setInitDate(rs.getTimestamp("initDate"));
 				queue.setProcessDate(rs.getTimestamp("processDate"));
+				queue.setParams(rs.getString("params"));
 				queue.setStatus(status);
 				queueColl.add(queue);
 			}
@@ -115,6 +118,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 				queue.setEvent(EQueueEvent.valueOf(rs.getString("event")));
 				queue.setInitDate(rs.getTimestamp("initDate"));
 				queue.setProcessDate(rs.getTimestamp("processDate"));
+				queue.setParams(rs.getString("params"));
 				queue.setStatus(status);
 				queueColl.add(queue);
 			}
@@ -152,6 +156,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 				queue.setEvent(EQueueEvent.valueOf(rs.getString("event")));
 				queue.setInitDate(rs.getTimestamp("initDate"));
 				queue.setProcessDate(rs.getTimestamp("processDate"));
+				queue.setParams(rs.getString("params"));
 				queue.setStatus(status);
 				queueColl.add(queue);
 			}
@@ -188,6 +193,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 				queue.setEvent(EQueueEvent.valueOf(rs.getString("event")));
 				queue.setInitDate(rs.getTimestamp("initDate"));
 				queue.setProcessDate(rs.getTimestamp("processDate"));
+				queue.setParams(rs.getString("params"));
 				queue.setStatus(status);
 				queueColl.add(queue);
 			}
@@ -222,7 +228,8 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 					"event VARCHAR(45) NOT NULL ," +
 					"initDate DATETIME NOT NULL ," +
 					"processDate DATETIME ," +
-					"status VARCHAR(45) NOT NULL , " +
+					"status VARCHAR(45) NOT NULL ," +
+					"params VARCHAR(255) NOT NULL, " +
 					"PRIMARY KEY (id) );";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.executeUpdate();
@@ -239,7 +246,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 	public void update(QueueDTO queue) throws SQLException {
 		try {
 			connection = getConnectionPool().getConnection();
-			sQLQuery = "UPDATE queue SET module=?, event=?,initDate=?,processDate=?,status=? WHERE id=?";
+			sQLQuery = "UPDATE queue SET module=?, event=?,initDate=?,processDate=?,status=?,params =? WHERE id=?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1,queue.getModule().name());
 			statement.setString(2, queue.getEvent().name());
@@ -251,7 +258,8 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 				statement.setTimestamp(4, null);
 			}
 			statement.setString(5, queue.getStatus().name());
-			statement.setInt(6, queue.getId());
+			statement.setString(6, queue.getParams());
+			statement.setInt(7, queue.getId());
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -262,8 +270,19 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 	}
 
 	@Override
-	public void delete(QueueDTO object) throws SQLException {
-		// TODO Auto-generated method stub
+	public void delete(QueueDTO queue) throws SQLException {
+		try {
+			connection = getConnectionPool().getConnection();
+			sQLQuery = "DELETE FROM queue WHERE id = ?";
+			statement = connection.prepareStatement(sQLQuery);
+			statement.setInt(1, queue.getId());
+			statement.executeUpdate();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			getConnectionPool().freeConnection(connection);
+		}
 		
 	}
 
@@ -276,6 +295,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 	@Override
 	public Collection<QueueDTO> selectAll() throws SQLException {
 		// TODO Auto-generated method stub
+		
 		return null;
 	}
 	
@@ -289,5 +309,30 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 		super.restoreTable("queue", "id,event,initDate,processDate,status");
 	}
 
+	/**
+	 * Retorna la fecha y hora del servidor de base de datos
+	 * @return
+	 */
+	public Calendar getServerDate(){
+		Calendar serverDate = Calendar.getInstance();
+		try {
+			connection = getConnectionPool().getConnection();
+			sQLQuery = "SELECT NOW() AS SERVER_DATE";
+			statement = connection.prepareStatement(sQLQuery);
+			rs = statement.executeQuery();
+			if(rs.next()){
+				serverDate.setTime(rs.getTimestamp("SERVER_DATE"));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally{
+			getConnectionPool().freeConnection(connection);
+		}
+		
+		return serverDate;
+		
+	}
 
 }

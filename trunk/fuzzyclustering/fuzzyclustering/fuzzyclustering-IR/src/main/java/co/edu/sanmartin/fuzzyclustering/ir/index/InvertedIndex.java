@@ -1,6 +1,7 @@
 package co.edu.sanmartin.fuzzyclustering.ir.index;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,7 +39,7 @@ public class InvertedIndex {
 	private int[][] termTermMatrix;
 	
 	public InvertedIndex(){
-		this.loadData();
+		//this.loadData();
 	}
 	
 	public String getInvertedIndexData() {
@@ -104,11 +105,12 @@ public class InvertedIndex {
 	 * @return
 	 */
 	public void loadData(){
+
 		StringBuilder data = new StringBuilder();
 		PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
 		Collection<DocumentDTO> fileList = persistenceFacade.getFileList(EDataFolder.INVERTED_INDEX);
 		for (DocumentDTO fileName : fileList) {
-			data.append(persistenceFacade.readFile(EDataFolder.CLEAN,fileName.getName())); 
+			data.append(persistenceFacade.readFile(EDataFolder.INVERTED_INDEX,fileName.getName())); 
 		}
 		if(data.length()>0){
 			this.invertedIndexData = data.toString();
@@ -118,6 +120,7 @@ public class InvertedIndex {
 			this.countTermsDocument();
 			this.countDocuments();
 		}
+		
 	}
 	
 	/**

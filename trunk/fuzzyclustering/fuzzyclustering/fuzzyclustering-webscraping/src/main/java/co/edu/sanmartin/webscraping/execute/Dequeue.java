@@ -1,7 +1,7 @@
 package co.edu.sanmartin.webscraping.execute;
 
+import java.net.URISyntaxException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -15,7 +15,6 @@ import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
 import co.edu.sanmartin.persistence.constant.ESourceType;
-import co.edu.sanmartin.persistence.constant.ESystemProperty;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.PropertyDTO;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
@@ -108,9 +107,6 @@ public class Dequeue implements Runnable{
 				this.cleanDownload();
 				break;
 			case RELOAD_DATA_MEMORY:
-				this.reloadDataMemory(queueDTO);
-				break;
-			case QUERY_DOCUMENT:
 				this.reloadDataMemory(queueDTO);
 				break;
 			}
@@ -230,31 +226,6 @@ public class Dequeue implements Runnable{
 		return cal.getTime();
 	}
 	
-	private void queryDocumentAsynch(int idDocument){
-		try {
-			PersistenceFacade persistence = PersistenceFacade.getInstance();
-			persistence.truncateQueryDocument();
-			DocumentDTO document = persistence.selectDocumentById(idDocument);
-			if(document!=null){
-				StringBuilder filePath = new StringBuilder();
-				try {
-					filePath.append(persistence.getProperty(ESystemProperty.MAIN_PATH).getValue());
-				} catch (PropertyValueNotFoundException e) {
-					// TODO Auto-generated catch block
-					logger.error(e);
-				}
-				filePath.append(System.getProperty(System.getProperty("file.separator")));
-				//filePath.append(document.getCompletePath());
-				//persistence.readFile(fileName)
-			}
-			
-			
-			
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			logger.error(e);
-		}
-		
-	}
+	
 }
 
