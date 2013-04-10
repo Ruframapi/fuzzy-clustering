@@ -3,6 +3,8 @@ package co.edu.sanmartin.persistence.dto;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 import co.edu.sanmartin.persistence.constant.ESourceType;
 
 /**
@@ -15,6 +17,7 @@ public class DocumentDTO implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 97645150680592259L;
+	private static Logger logger = Logger.getLogger("DocumentDTO");
 	private int id;
 	private ESourceType sourceType;
     private String name;
@@ -33,7 +36,6 @@ public class DocumentDTO implements Serializable{
     
 	public DocumentDTO(String name) {
 		this.name = name;
-		this.nameWithoutExtension = this.setFileNameWithOutExtension();
 	}
 	
 	public int getId() {
@@ -68,7 +70,8 @@ public class DocumentDTO implements Serializable{
 	}
 
 	public String getNameWithoutExtension() {
-		return nameWithoutExtension;
+		String nombreArchivo=this.name.substring(0,this.name.lastIndexOf("."));
+		return nombreArchivo;	
 	}
 	
 	public String getSource() {
@@ -114,17 +117,6 @@ public class DocumentDTO implements Serializable{
 		this.cleanDate = cleanDate;
 	}
 	
-	/**
-	 * Retorna el nombre del archivo
-	 * @return
-	 */
-	private String setFileNameWithOutExtension(){
-		String fileName = name.substring(name.lastIndexOf(System.getProperty("file.separator")) + 1,
-				name.length());
-		String[] fileNameColl = fileName.split(System.getProperty("file.separator")+".");
-		return fileNameColl[0];
-	}
-
 
     
     

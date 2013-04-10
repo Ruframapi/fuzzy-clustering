@@ -32,9 +32,10 @@ public class InvertedIndexThreadPool implements Runnable{
 
 	public void run() {
 		logger.info("Inicializando construccion del indice invertido");
-		int threadPoolNumber = 10;
+		
 		long time_start, time_end;
 		time_start = System.currentTimeMillis();
+		int threadPoolNumber = 10;
 		//Se cargan las fuentes rss disponibles
 		try {
 			PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
@@ -60,17 +61,8 @@ public class InvertedIndexThreadPool implements Runnable{
 			dataFile.append(persistenceFacade.readFile(EDataFolder.CLEAN,file.getName()));
 			invertedIndexWorkerThread = new InvertedIndexWorkerThread(dataFile, file.getNameWithoutExtension(), index);
 			executor.execute(invertedIndexWorkerThread);
-			//dataMap.put(file.getNameWithoutExtension(), dataFile);
 		}
 
-		/*Iterator<Entry<String, StringBuilder>> it = dataMap.entrySet().iterator();
-		
-		while (it.hasNext()) {
-			Map.Entry<String,StringBuilder> e = (Entry<String, StringBuilder>)it.next();
-			invertedIndexWorkerThread = new InvertedIndexWorkerThread(e.getValue(), e.getKey(), index);
-			executor.execute(invertedIndexWorkerThread);
-		}
-		*/
 		executor.shutdown();
 		try {
 			executor.awaitTermination(10, TimeUnit.SECONDS);
@@ -78,6 +70,7 @@ public class InvertedIndexThreadPool implements Runnable{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		//Guarda el indice invertido
 		index.saveIndex();
 		time_end = System.currentTimeMillis();
 		

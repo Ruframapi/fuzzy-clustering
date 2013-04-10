@@ -42,29 +42,7 @@ public class FuzzyCMeans {
 		this.mValue = mValue;
 	}
 	
-	/**
-	 * Metodo encargado de cargar la matriz double[][] de datos de los conjuntos difusos.
-	 * @param fileNameMatrix
-	 * @param centroidsAmount
-	 * @param iterationsAmount
-	 * @param mValue
-	 */
-	public FuzzyCMeans( String fileNameMatrix, int centroidsAmount, int iterationsAmount, int mValue){
-		//TODO Terminar Metodo
-		PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
-		String[] data = persistenceFacade.readFile(fileNameMatrix).split(System.getProperty("line.separator"));
-		String[][] dataMatrix = null; 
-	//	double dataMatrix = null;
-		for (int i = 0; i < data.length; i++) {
-			String[] components = data[i].split(",");
-			if(i==0){
-		//		dataMatrix = new double[][];
-			}
-		}
-		
-		//String[][] filedata = data.split(System.getProperty("line.separator"));
-		
-	}
+
 	public int getCentroidsAmount() {
 		return centroidsAmount;
 	}

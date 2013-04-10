@@ -8,7 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
-import co.edu.sanmartin.persistence.file.BigMatrixFileManager;
+import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
 
 public class LargeDoubleMatrixTest {
 	
@@ -16,7 +16,7 @@ public class LargeDoubleMatrixTest {
     public void getSetMatrixSmall() throws IOException {
         long start = System.nanoTime();
         final long used0 = usedMemory();
-        BigMatrixFileManager matrix = new BigMatrixFileManager();
+        BigDoubleMatrixFileManager matrix = new BigDoubleMatrixFileManager();
         matrix.loadReadWrite(EDataFolder.MATRIX,"ldm.test", 1000 * 1000, 1000 * 1000);
         for (int i = 0; i < matrix.width(); i++)
             matrix.set(i, i, i);
@@ -35,7 +35,7 @@ public class LargeDoubleMatrixTest {
     public void getSetMatrix() throws IOException {
         long start = System.nanoTime();
         final long used0 = usedMemory();
-        BigMatrixFileManager matrix = new BigMatrixFileManager();
+        BigDoubleMatrixFileManager matrix = new BigDoubleMatrixFileManager();
         matrix.loadReadWrite(EDataFolder.MATRIX,"ldm.test", 100 * 100, 100 * 100);
         for (int i = 0; i < matrix.width(); i++)
             matrix.set(i, i, i);

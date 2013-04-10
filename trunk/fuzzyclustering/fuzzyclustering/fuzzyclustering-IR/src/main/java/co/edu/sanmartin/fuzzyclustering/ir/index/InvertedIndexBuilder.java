@@ -64,7 +64,6 @@ public class InvertedIndexBuilder {
 			try {
 				splitToken = PersistenceFacade.getInstance().getProperty(EProperty.TEXT_SPLIT_TOKEN).getValue();
 			} catch (PropertyValueNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			String[] termData = termItem.split(splitToken);
@@ -107,12 +106,20 @@ public class InvertedIndexBuilder {
 			}
 			
 		}
-		
-		
 	}
+	
+	
+	private void buildResumeIndex(){
+		//Ordena Alfabeticamente el indice
+			
+	}
+	/**
+	 * Metodo encargado de salvar el archivo de texto plano
+	 */
 	public void saveIndex(){
 		
 		StringBuilder stringBuilder = new StringBuilder();
+		//Realiza la construccion del indice invertido
 		this.buildIndex();
 		for (String word : invertedIndex) {
 			stringBuilder.append(word);
