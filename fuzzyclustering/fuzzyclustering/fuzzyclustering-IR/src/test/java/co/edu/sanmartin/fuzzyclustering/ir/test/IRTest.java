@@ -1,19 +1,26 @@
 package co.edu.sanmartin.fuzzyclustering.ir.test;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.Random;
 
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Assert;
 import org.junit.Test;
 
 import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
+import co.edu.sanmartin.fuzzyclustering.ir.facade.IRFacade;
 import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
 import co.edu.sanmartin.fuzzyclustering.ir.index.MutualInformation;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.Cleaner;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.stemmer.Stemmer;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
-import co.edu.sanmartin.persistence.file.BigMatrixFileManager;
+import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
+import co.edu.sanmartin.persistence.file.BigIntegerMatrixFileManager;
 
 public class IRTest {
 
@@ -29,7 +36,7 @@ public class IRTest {
 	
 	
 	@Test
-	public void invertedIndexText() {
+	public void invertedIndexTest() {
 		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool();
 		threadPool.run();
 		//Thread thread = new Thread(threadPool);
@@ -38,9 +45,14 @@ public class IRTest {
 
 	
 	@Test
-	public void termDocumentMatrixTest(){
-		InvertedIndex indexManager = new InvertedIndex();
-		indexManager.getTermDocumentMatrix();
+	public void termDocumentBigMatrixTest(){
+		InvertedIndex invertedIndex = new InvertedIndex();
+		try {
+			invertedIndex.createTermDocumentBigMatrix(true);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Test
@@ -55,9 +67,9 @@ public class IRTest {
 	}
 	@Test
 	public void buildTermTermBigMatrixTest(){
-		InvertedIndex indexManager = new InvertedIndex();
+		InvertedIndex invertedIndex = new InvertedIndex();
 		try {
-			indexManager.buildTermTermBigMatrix(true);
+			invertedIndex.createTermTermBigMatrix(true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -72,7 +84,12 @@ public class IRTest {
 	@Test
 	public void mutualInformationBigMatrixTest(){
 		MutualInformation mutualInformation = new MutualInformation();
-		mutualInformation.buildMutualInformationBigMatrix();
+		try {
+			mutualInformation.buildMutualInformationBigMatrix(true);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Test
@@ -80,19 +97,19 @@ public class IRTest {
 		long start = System.nanoTime();
 		
 		try {
-			BigMatrixFileManager largeMatrix = 
-					new BigMatrixFileManager();
+			BigIntegerMatrixFileManager largeMatrix = 
+					new BigIntegerMatrixFileManager();
 			largeMatrix.loadReadOnly(EDataFolder.MATRIX,"termterm.txt");
-			double[][] termtermMatrix = new double[largeMatrix.height()][largeMatrix.width()];
+			int[][] termtermMatrix = new int[largeMatrix.height()][largeMatrix.width()];
 			for (int i = 0; i < largeMatrix.height(); i++) {
 				for (int j = 0; j < largeMatrix.width(); j++) {
 					termtermMatrix[i][j] = largeMatrix.get(i, j);
 					//System.out.print(largeMatrix.get(i, j)+ " ");
 				}
-				System.out.println();
+				//System.out.println();
 			}
 			largeMatrix.close();
-			this.saveMatrix(termtermMatrix, "BigMatrixLoad.txt");
+			this.saveMatrixInteger(termtermMatrix, "BigMatrixTermTermLoad.txt",100);
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -102,6 +119,62 @@ public class IRTest {
 		System.out.print("Time"+ time);
 	}
 	
+	@Test
+	public void loadTermDocumentBigMatrixTest(){
+		long start = System.nanoTime();
+		
+		try {
+			BigIntegerMatrixFileManager largeMatrix = 
+					new BigIntegerMatrixFileManager();
+			largeMatrix.loadReadOnly(EDataFolder.MATRIX,"termdocument.txt");
+			int[][] termDocument = new int[largeMatrix.height()][largeMatrix.width()];
+			for (int i = 0; i < largeMatrix.height(); i++) {
+				for (int j = 0; j < largeMatrix.width(); j++) {
+					termDocument[i][j] = largeMatrix.get(i, j);
+					//System.out.print(largeMatrix.get(i, j)+ " ");
+				}
+				System.out.println();
+			}
+			largeMatrix.close();
+			this.saveMatrixInteger(termDocument, "BigMatrixTermDocumentLoad.txt",100);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		long time = System.nanoTime() - start;
+		System.out.print("Time"+ time);
+	}
+	
+	
+
+	
+	@Test
+	public void loadPpmiBigMatrixTest(){
+		long start = System.nanoTime();
+		
+		try {
+			BigDoubleMatrixFileManager largeMatrix = 
+					new BigDoubleMatrixFileManager();
+			largeMatrix.loadReadOnly(EDataFolder.MATRIX,"ppmi.txt");
+			double[][] termtermMatrix = new double[largeMatrix.height()][largeMatrix.width()];
+			for (int i = 0; i < largeMatrix.height(); i++) {
+				for (int j = 0; j < largeMatrix.width(); j++) {
+					termtermMatrix[i][j] = largeMatrix.get(i, j);
+					//System.out.print(largeMatrix.get(i, j)+ " ");
+				}
+				System.out.println();
+			}
+			largeMatrix.close();
+			this.saveMatrixDouble(termtermMatrix, "BigMatrixPpmiLoad.txt",0);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		long time = System.nanoTime() - start;
+		System.out.print("Time"+ time);
+	}
 /*	@Test
 	public void queryDocumentTest(){
 		IndexManager indexManager = new IndexManager();
@@ -137,10 +210,13 @@ public class IRTest {
 	/**
 	 * Almacena la matriz en disco
 	 **/
-	public void saveMatrix(double[][] matrix, String fileName){
+	public void saveMatrixInteger(int[][] matrix, String fileName, int matrixLimit){
 		System.out.print("Init savematrix");
 		StringBuilder data = new StringBuilder();
-		for (int i = 0; i < matrix.length; i++) {;
+		if(matrixLimit==0){
+			matrixLimit = matrix.length;
+		}
+		for (int i = 0; i < matrixLimit; i++) {;
 			for (int j = 0; j < matrix[i].length; j++) {
 				data.append(matrix[i][j]);
 				data.append(",");
@@ -149,5 +225,37 @@ public class IRTest {
 		}
 		PersistenceFacade.getInstance().writeFile(EDataFolder.MATRIX, 
 													fileName, data.toString());
+	}
+	
+	
+	/**
+	 * Almacena la matriz en disco
+	 **/
+	public void saveMatrixDouble(double[][] matrix, String fileName, int matrixLimit){
+		System.out.print("Init savematrix");
+		StringBuilder data = new StringBuilder();
+		if(matrixLimit==0){
+			matrixLimit = matrix.length;
+		}
+		for (int i = 0; i < matrixLimit; i++) {;
+			for (int j = 0; j < matrix[i].length; j++) {
+				data.append(matrix[i][j]);
+				data.append(",");
+			}
+			data.append(System.getProperty("line.separator"));
+		}
+		PersistenceFacade.getInstance().writeFile(EDataFolder.MATRIX, 
+													fileName, data.toString());
+	}
+	
+	@Test
+	public void buildAllMatrixTest(){
+		IRFacade irFacade = IRFacade.getInstance();
+		try {
+			irFacade.buildCmeanMatrix();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

@@ -1,37 +1,105 @@
 package co.edu.sanmartin.fuzzyclustering.machinelearning.test;
 
-import java.io.IOException;
+import java.util.Random;
 
+import org.apache.log4j.BasicConfigurator;
 import org.junit.Test;
 
 import co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans.FuzzyCMeans;
 import co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans.FuzzyCMeansBigData;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
-import co.edu.sanmartin.persistence.file.BigMatrixFileManager;
+import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
+import co.edu.sanmartin.persistence.file.BigMatrixFileManager1;
 
 
 public class CMeansBigDataTest {
 
-		
+	public CMeansBigDataTest() {
+		BasicConfigurator.configure();
+	}
 	@Test
 	public void testGenerateCMeansBigData() throws Exception{
 		double[][] data ={{0.58,0.33},{0.90,0.11},{0.68,0.17},{0.11,0.44},{0.47,0.81},{0.24,0.83},
 							{0.09,0.18},{0.82,0.11},{0.65,0.50},{0.09,0.63},{0.98,0.24}};
+		PersistenceFacade.getInstance().deleteFile(EDataFolder.MATRIX, "test.dat");
+		this.saveMatrix(data, "test.dat");
+		BigDoubleMatrixFileManager bigMatrixFileManager = new BigDoubleMatrixFileManager();
+		bigMatrixFileManager.loadReadOnly(EDataFolder.MATRIX, "test.dat");
+		this.printBigMatrix(bigMatrixFileManager);
+		
+		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData("test.dat",2, 200, 2, false);
+		fuzzyCmeans.init();
+		double[][] centroids = {{0.2,0.5},{0.8,0.5}};
+		fuzzyCmeans.setCentroids(centroids);
+		double[][] initMembershipMatrix = new double[11][2];
+		fuzzyCmeans.setMembershipMatrix(initMembershipMatrix);
+		fuzzyCmeans.calculateFuzzyCmeans();
+	};
+	
+	@Test
+	public void testGenerateCMeansBigDataA() throws Exception{
+		double[][] data ={{0.58,0.33},{0.90,0.11},{0.68,0.17},{0.11,0.44},{0.47,0.81},{0.24,0.83},
+							{0.09,0.18},{0.82,0.11},{0.65,0.50},{0.09,0.63},{0.98,0.24}};
+		PersistenceFacade.getInstance().deleteFile(EDataFolder.MATRIX, "test.dat");
+		this.saveMatrix1(data, "test.dat");
+		BigMatrixFileManager1 bigMatrixFileManager = new BigMatrixFileManager1();
+		bigMatrixFileManager.loadReadOnly(EDataFolder.MATRIX, "test.dat");
+		this.printBigMatrix1(bigMatrixFileManager);
+		
+		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData("test.dat",2, 200, 2, false);
+		fuzzyCmeans.init();
+		double[][] centroids = {{0.2,0.5},{0.8,0.5}};
+		fuzzyCmeans.setCentroids(centroids);
+		double[][] initMembershipMatrix = new double[11][2];
+		fuzzyCmeans.setMembershipMatrix(initMembershipMatrix);
+		fuzzyCmeans.calculateFuzzyCmeans();
+	};
+	
+	
+	@Test
+	public void testGenerateCMeansBigData1() throws Exception{
+		double[][] data ={{1.00},{3.00},{4.00},{6.0},{7.0},{10.0}};
+		this.saveMatrix(data, "test.dat");
+		BigDoubleMatrixFileManager bigMatrixFileManager = new BigDoubleMatrixFileManager();
+		bigMatrixFileManager.loadReadOnly(EDataFolder.MATRIX, "test.dat");
+		this.printBigMatrix(bigMatrixFileManager);
+		
+		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData("test.dat",2, 200, 2, false);
+		fuzzyCmeans.init();
+		double[][] centroids = {{2.71},{7.7}};
+		fuzzyCmeans.setCentroids(centroids);
+		
+		//double[][] initMembershipMatrix = {{0.9,0.1},{0.8,0.2},{0.7,0.3},{0.3,0.7},{0.2,0.8},{0.1,0.9}};
+		//fuzzyCmeans.setMembershipMatrix(initMembershipMatrix);
+		fuzzyCmeans.calculateFuzzyCmeans();
+	};
+	
+	@Test
+	public void testGenerateCMeansBigData2() throws Exception{
+		double[][] data ={{1.00},{2.00},{3.00},{4.0},{5.0},{6.0},{7.0},{8.0}
+		,{9.0},{10.0},{11.0},{12.0},{13.0},{14.0},{15.0},{16.0},{16.0},{18.0},{19.0},{20.0}};
 		this.saveMatrix(data, "test.txt");
-		BigMatrixFileManager bigMatrixFileManager = new BigMatrixFileManager();
+		BigDoubleMatrixFileManager bigMatrixFileManager = new BigDoubleMatrixFileManager();
 		bigMatrixFileManager.loadReadOnly(EDataFolder.MATRIX, "test.txt");
 		this.printBigMatrix(bigMatrixFileManager);
 		
-		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(bigMatrixFileManager, 2, 200, 2);
-		fuzzyCmeans.initMembershipMatrix();
-		//double centroids[][] ={{0.2,0.5},{0.8,0.5}};
-		//fuzzyCmeans.setCentroids(centroids);
+		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData("test.txt",3, 200, 1.5, false);
+		fuzzyCmeans.init();
 		fuzzyCmeans.calculateFuzzyCmeans();
-		bigMatrixFileManager.close();
 	};
+
 	
-	private void printBigMatrix(BigMatrixFileManager data){
+	private void printBigMatrix(BigDoubleMatrixFileManager data){
+		for (int i = 0; i < data.height(); i++) {
+			for (int j = 0; j < data.width(); j++) {
+				System.out.print(data.get(i, j)+",");
+			}
+			System.out.println();
+		}
+	}
+	
+	private void printBigMatrix1(BigMatrixFileManager1 data){
 		for (int i = 0; i < data.height(); i++) {
 			for (int j = 0; j < data.width(); j++) {
 				System.out.print(data.get(i, j)+",");
@@ -55,16 +123,42 @@ public class CMeansBigDataTest {
 	 * Almacena la matriz en disco
 	 **/
 	public void saveMatrix(double[][] matrix, String fileName) throws Exception{
-		BigMatrixFileManager bigMatrixFileManager = new BigMatrixFileManager();
-		bigMatrixFileManager.loadReadWrite(EDataFolder.MATRIX, "test.txt",matrix.length,matrix[0].length);
+		BigDoubleMatrixFileManager bigMatrixFileManager = new BigDoubleMatrixFileManager();
+		bigMatrixFileManager.loadReadWrite(EDataFolder.MATRIX, fileName,matrix.length,matrix[0].length);
 		System.out.println("Init savematrix");
 		StringBuilder data = new StringBuilder();
 		for (int i = 0; i < matrix.length; i++) {;
 			for (int j = 0; j < matrix[i].length; j++) {
-				bigMatrixFileManager.set(i, j, matrix[i][j]);
+				bigMatrixFileManager.set(i,j, matrix[i][j]);
 			}
 			
 		}
 		bigMatrixFileManager.close();
 	}
+	
+	/**
+	 * Almacena la matriz en disco
+	 **/
+	public void saveMatrix1(double[][] matrix, String fileName) throws Exception{
+		BigMatrixFileManager1 bigMatrixFileManager = new BigMatrixFileManager1();
+		bigMatrixFileManager.loadReadWrite(EDataFolder.MATRIX, fileName,matrix.length,matrix[0].length);
+		System.out.println("Init savematrix");
+		StringBuilder data = new StringBuilder();
+		for (int i = 0; i < matrix.length; i++) {;
+			for (int j = 0; j < matrix[i].length; j++) {
+				bigMatrixFileManager.set(i,j, matrix[i][j]);
+			}
+		}
+		bigMatrixFileManager.close();
+	}
+	
+	
+	@Test
+	public void calculateCmeansPpmiTest(){
+		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData("ppmi.txt",3, 200, 2, false);
+		fuzzyCmeans.init();
+		fuzzyCmeans.calculateFuzzyCmeans();
+	}
 }
+
+

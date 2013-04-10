@@ -3,15 +3,11 @@ package org.fuzzyclustering.web.managed;
 import java.io.Serializable;
 
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.SessionScoped;
-import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpSession;
 
-import org.fuzzyclustering.web.managed.documents.DocumentsManagedBean;
 import org.primefaces.push.PushContext;
 import org.primefaces.push.PushContextFactory;
 
@@ -29,12 +25,11 @@ public class AsynchManagedBean implements Serializable{
 	private String documentData;
 	private String cleanData;
 	private String documentName;
+	
 
 	@PostConstruct
 	public void init(){
-		//FacesContext ctx = FacesContext.getCurrentInstance();
-		//HttpSession session = (HttpSession) ctx.getExternalContext().getSession(false);
-		//this.downloadStatus = (String) session.getAttribute("status");
+
 	}
 	public String getDownloadStatus() {
 		return downloadStatus;
@@ -63,6 +58,12 @@ public class AsynchManagedBean implements Serializable{
 		return documentName;
 	}
 	
+	public void sendMessageAsynch(String message){
+		
+		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+				"Mensaje Recibido", message);
+		FacesContext.getCurrentInstance().addMessage(null, msg);
+	}
 	
 	
 

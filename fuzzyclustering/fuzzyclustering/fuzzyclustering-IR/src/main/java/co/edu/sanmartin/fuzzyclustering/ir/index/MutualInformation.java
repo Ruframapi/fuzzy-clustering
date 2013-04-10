@@ -7,7 +7,7 @@ import java.math.RoundingMode;
 import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
-import co.edu.sanmartin.persistence.file.BigMatrixFileManager;
+import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
 
 /**
  * Clase encargada de generar una matrix con el valor del grado
@@ -17,57 +17,55 @@ import co.edu.sanmartin.persistence.file.BigMatrixFileManager;
  *
  */
 public class MutualInformation {
-	Logger logger = Logger.getLogger("MutualInformation");
-	public void buildMutualInformationMatrix(){
-		InvertedIndex invertedIndex = new InvertedIndex();
-		int[][] invertedIndexData = invertedIndex.getTermTermMatrix();
-		double[][] ppmiData = new double[invertedIndex.getTermCount()][invertedIndex.getTermCount()]; 
-		double totalWordDocumentsCount = invertedIndex.getTotaldocumentWordsCount();
-		for (int i = 0; i < invertedIndex.getTermCount(); i++) {
-			for (int j = 0; j < invertedIndex.getTermCount(); j++) {
-				int termCount = invertedIndexData[i][j];
-				double ppmi = this.ppmi(termCount, invertedIndex.getCountByTerm(i), 
-										invertedIndex.getCountByTerm(j), totalWordDocumentsCount);
-				
-				BigDecimal bigDecimal = new BigDecimal(ppmi);
-				bigDecimal = bigDecimal.setScale(2, RoundingMode.HALF_UP);
-				ppmiData[i][j]=bigDecimal.doubleValue();
-			}
-			
-		}
-		invertedIndex.saveMatrix(ppmiData, "ppmi.txt");
-	}
+	private static Logger logger = Logger.getLogger("MutualInformation");
+	public static final String PPMI_FILE_NAME = "ppmi.txt"; 
+	
+	
 	
 	/**
 	 * Crea la matrix PPMI a partir del conjunto de datos de la matrix Termino Termino y
 	 * el indice invertido.
 	 */
-	public void buildMutualInformationBigMatrix(){
+	public void buildMutualInformationBigMatrix(boolean persist) throws IOException{
+		logger.info("Inicializando construccion de Matrix PPMI");
+		long time_start = 0, time_end=0;
+		time_start = System.currentTimeMillis();
 		InvertedIndex invertedIndex = new InvertedIndex();
-		invertedIndex.loadData();
-		BigMatrixFileManager largeMatrix = new BigMatrixFileManager();
+		invertedIndex.loadInvertedIndexData();
+		BigDoubleMatrixFileManager largeMatrixTermTerm = new BigDoubleMatrixFileManager();
+		BigDoubleMatrixFileManager largeMatrixPpmi = new BigDoubleMatrixFileManager();
+		
 		double[][] ppmiData = new double[invertedIndex.getTermCount()][invertedIndex.getTermCount()]; 
 		double totalWordDocumentsCount = invertedIndex.getTotaldocumentWordsCount();
 		try {
-			largeMatrix.loadReadOnly(EDataFolder.MATRIX,"termterm.txt");
+			largeMatrixTermTerm.loadReadOnly(EDataFolder.MATRIX,invertedIndex.TERM_TERM_FILENAME);
+			largeMatrixPpmi.loadReadWrite(EDataFolder.MATRIX,PPMI_FILE_NAME, 
+					largeMatrixTermTerm.height(), largeMatrixTermTerm.width());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error en buildMutualInformationBigMatrix", e);
 		}
-		for (int i = 0; i < largeMatrix.height(); i++) {
-			for (int j = 0; j < largeMatrix.width(); j++) {
-				int termCount = new Double(largeMatrix.get(i, j)).intValue();
+		for (int i = 0; i < largeMatrixTermTerm.height(); i++) {
+			for (int j = 0; j < largeMatrixTermTerm.width(); j++) {
+				int termCount = new Double(largeMatrixTermTerm.get(i, j)).intValue();
 				double ppmi = this.ppmi(termCount, invertedIndex.getCountByTerm(i), 
 										invertedIndex.getCountByTerm(j), totalWordDocumentsCount);
 				
 				BigDecimal bigDecimal = new BigDecimal(ppmi);
 				bigDecimal = bigDecimal.setScale(2, RoundingMode.HALF_UP);
-				ppmiData[i][j]=bigDecimal.doubleValue();
+				
+				largeMatrixPpmi.set(i, j, bigDecimal.doubleValue());
 				
 			}	
 		}
-
-		invertedIndex.saveMatrix(ppmiData, "ppmi.txt");
+		
+		if(persist){
+			largeMatrixPpmi.close();
+		}
+		
+		logger.info("La construccion de la Matrix PPMI tomo "+ 
+				( time_end - time_start )/1000 +" segundos" + 
+				(( time_end - time_start )/1000)/60 +" minutos");
 	}
 	
 	
@@ -91,6 +89,27 @@ public class MutualInformation {
 			}
 		}
 		return ppmi;
+	}
+	
+	@Deprecated
+	public void buildMutualInformationMatrix(){
+		InvertedIndex invertedIndex = new InvertedIndex();
+		int[][] invertedIndexData = invertedIndex.getTermTermMatrix();
+		double[][] ppmiData = new double[invertedIndex.getTermCount()][invertedIndex.getTermCount()]; 
+		double totalWordDocumentsCount = invertedIndex.getTotaldocumentWordsCount();
+		for (int i = 0; i < invertedIndex.getTermCount(); i++) {
+			for (int j = 0; j < invertedIndex.getTermCount(); j++) {
+				int termCount = invertedIndexData[i][j];
+				double ppmi = this.ppmi(termCount, invertedIndex.getCountByTerm(i), 
+										invertedIndex.getCountByTerm(j), totalWordDocumentsCount);
+				
+				BigDecimal bigDecimal = new BigDecimal(ppmi);
+				bigDecimal = bigDecimal.setScale(2, RoundingMode.HALF_UP);
+				ppmiData[i][j]=bigDecimal.doubleValue();
+			}
+			
+		}
+		invertedIndex.saveDoubleMatrix(ppmiData, PPMI_FILE_NAME);
 	}
 	
 }

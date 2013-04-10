@@ -36,7 +36,7 @@ public class ChartTermBean implements Serializable {
      * Load Chart Data
      */
     public void loadChartData() {
-    	IRFacade irFacade = IRFacade.getInstance();
+    	/*IRFacade irFacade = IRFacade.getInstance();
     	int[][] termTermMatrix = irFacade.getTermTermMatrix();
     	
 		StringBuilder stringBuilder = new StringBuilder();
@@ -58,6 +58,8 @@ public class ChartTermBean implements Serializable {
 		 
 		// bubbleModel.add(new BubbleChartSeries("Alfa Romeo", 45, 92, 36));  
 		// bubbleModel.add(new BubbleChartSeries("AM General", 24, 104, 40)); 
+		 * */
+		
     }
  
 }

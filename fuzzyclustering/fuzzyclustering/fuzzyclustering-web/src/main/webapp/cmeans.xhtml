@@ -12,15 +12,15 @@
 			<p:panel>
 				<p:panelGrid columns="2">
 					<p:outputLabel value="Cantidad de Terminos"></p:outputLabel>
-					<p:inputText></p:inputText>
+					<p:inputText value="#{cmean.termAmount}"></p:inputText>
 					<p:outputLabel value="Cantidad de Centroides"></p:outputLabel>
-					<p:inputText></p:inputText>
+					<p:inputText value="#{cmean.centroidsAmount}"></p:inputText>
 					<p:outputLabel value="Iteraciones"></p:outputLabel>
-					<p:inputText></p:inputText>
+					<p:inputText value = "#{cmean.iterationAmount}"></p:inputText>
 					<p:outputLabel value="Valor de Fuzzyficacion"></p:outputLabel>
-					<p:inputText></p:inputText>
+					<p:inputText value = "#{cmean.fuzzyValue}"></p:inputText>
 				</p:panelGrid>
-				<p:commandButton value="Clusterizar"></p:commandButton>
+				<p:commandButton value="Clusterizar" actionListener="#{cmean.generate}"></p:commandButton>
 			</p:panel>
 		</h:form>
 	</ui:define>

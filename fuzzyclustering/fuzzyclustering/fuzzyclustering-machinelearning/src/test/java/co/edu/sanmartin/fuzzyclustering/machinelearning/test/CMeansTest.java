@@ -3,7 +3,7 @@ package co.edu.sanmartin.fuzzyclustering.machinelearning.test;
 import org.junit.Test;
 
 import co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans.FuzzyCMeans;
-import co.edu.sanmartin.persistence.file.BigMatrixFileManager;
+import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
 
 
 public class CMeansTest {

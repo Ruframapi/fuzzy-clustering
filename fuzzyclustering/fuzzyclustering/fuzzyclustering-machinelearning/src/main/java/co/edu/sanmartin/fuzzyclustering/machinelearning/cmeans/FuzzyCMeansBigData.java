@@ -1,10 +1,20 @@
 package co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans;
 
+import java.io.IOException;
 import java.util.Random;
 
+import org.apache.log4j.Logger;
+
+import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
+import co.edu.sanmartin.fuzzyclustering.ir.facade.IRFacade;
+import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.constant.EModule;
+import co.edu.sanmartin.persistence.constant.EQueueEvent;
+import co.edu.sanmartin.persistence.constant.EQueueStatus;
+import co.edu.sanmartin.persistence.dto.QueueDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
-import co.edu.sanmartin.persistence.file.BigMatrixFileManager;
+import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
 
 /**
  * Paso1  Inicializar los centroides ci,i=1,..c. 
@@ -19,30 +29,74 @@ import co.edu.sanmartin.persistence.file.BigMatrixFileManager;
  */
 public class FuzzyCMeansBigData {
 
-	private BigMatrixFileManager data;
+	private static Logger logger = Logger.getLogger("FuzzyCMeansBigData");
+	private BigDoubleMatrixFileManager data;
 	private int centroidsAmount;
 	private int iterationAmount;
-	private int mValue;
+	private double mValue;
 	
+	private double[][] previousCentroids;
 	private double[][] centroids;
 	private double[][] initMembershipMatrix;
 	private double[][] membershipMatrix;
+	private double[] centroidsDistances;
 	
-
-	public FuzzyCMeansBigData(BigMatrixFileManager data, int centroidsAmount, int iterationsAmount, int mValue){
+	
+	/**
+	 * Constructor de la clase
+	 * @param centroidsAmount cantidad de centroides
+	 * @param iterationsAmount cantidad de iteraciones
+	 * @param mValue valor de m generalmente se utiliza 2
+	 */
+	public FuzzyCMeansBigData(BigDoubleMatrixFileManager data, int centroidsAmount, int iterationsAmount, double mValue){
 		
 		this.data = data;
 		this.centroidsAmount = centroidsAmount;
+		this.centroidsDistances = new double[centroidsAmount];
 		this.iterationAmount = iterationsAmount;
 		this.mValue = mValue;
+		
 	}
 	
+	/**
+	 * Constructor de la clase
+	 * @param centroidsAmount cantidad de centroides
+	 * @param iterationsAmount cantidad de iteraciones
+	 * @param mValue valor de m generalmente se utiliza 2
+	 * @param buildMatrix indica si realiza la construccion de las matrices de terminos previa
+	 */
+	public FuzzyCMeansBigData(String fileName, int centroidsAmount, int iterationsAmount, 
+								double mValue, boolean buildMatrix){	
+		
+		try {
+			if(buildMatrix){
+				try {
+					IRFacade.getInstance().buildCmeanMatrix();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					logger.error("Error in FuzzyCMeansBigData",e);
+				}
+			}
+			
+			this.data  = new BigDoubleMatrixFileManager();
+			data.loadReadOnly(EDataFolder.MATRIX, fileName);
+			this.centroidsAmount = centroidsAmount;
+			this.iterationAmount = iterationsAmount;
+			this.centroidsDistances = new double[centroidsAmount];
+			this.mValue = mValue;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logger.error("Error in load FuzzyCMeansBigData",e);
+		}
+		
+	}
 	
+
 	public int getCentroidsAmount() {
 		return centroidsAmount;
 	}
 	
-	public int getmValue() {
+	public double getmValue() {
 		return mValue;
 	}
 	
@@ -52,8 +106,8 @@ public class FuzzyCMeansBigData {
 	}
 	
 	
-	public void setInitMembershipMatrix(double[][] initMembershipMatrix) {
-		this.initMembershipMatrix = initMembershipMatrix;
+	public void setMembershipMatrix(double[][] membershipMatrix) {
+		this.membershipMatrix = membershipMatrix;
 	}
 	/**
 	 * Inicicializa la matrix de numeros aletorios y genera los
@@ -63,7 +117,6 @@ public class FuzzyCMeansBigData {
 		try {
 			this.initMembershipMatrix();
 			this.calculateCentroids();
-			//this.initCentroids();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -74,33 +127,47 @@ public class FuzzyCMeansBigData {
 	 * Metodo encargado de realizar el calculo de los conjuntos difusos
 	 */
 	public void calculateFuzzyCmeans(){
-		
+		logger.info("Inicializando proceso de clusterizacion C-Means");
+		this.sendMessageAsynch("Inicializando proceso de clusterizacion C-Means");
+		long time_start, time_end;
+		time_start = System.currentTimeMillis();
 		this.membershipMatrix = new double[data.height()][centroidsAmount];
 		for (int i = 0; i < this.iterationAmount; i++) {
+			this.saveDoubleMatrix(this.initMembershipMatrix, "relationship"+i+".txt");
 			this.calculateMembershipMatrix();
 			this.initMembershipMatrix = membershipMatrix.clone();
 			this.membershipMatrix = new double[data.height()][centroidsAmount];
-			this.saveCentroides();
 			this.calculateCentroids();
 			
 		}
-		System.out.print("Finalizo");
+		
+		this.saveDoubleMatrix(this.centroids, "centroids.txt");
+		time_end = System.currentTimeMillis();
+		
+		String result = "El proceso de clusterizacion Tomo "+ 
+		( time_end - time_start )/1000 +" segundos" + 
+		(( time_end - time_start )/1000)/60 +" minutos";
+		
+		logger.info(result);
+		this.sendMessageAsynch(result);
 	}
+
 	
 	/**
 	 * Guarda los centroides en disco.
 	 */
-	public void saveCentroides(){
+	public void printCentroides(){
+		logger.info("Nuevos Centroides Calculados");
 		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append(System.getProperty("line.separator"));
 		for (int j = 0; j < centroids.length; j++) {
+			stringBuilder.append("Centroide:" + j +" - " );
 			for (int j2 = 0; j2 < centroids[j].length; j2++) {
 				stringBuilder.append(centroids[j][j2]+",");
 			}
-			System.out.print(System.getProperty("line.separator"));
+			stringBuilder.append(System.getProperty("line.separator"));
 		}
-		PersistenceFacade.getInstance().writeFile(EDataFolder.MACHINE_LEARNING, 
-				stringBuilder.toString(), data.toString());
-		
+		logger.info("Nuevos Centroides:"+stringBuilder.toString());
 	}
 
 	/**
@@ -112,16 +179,28 @@ public class FuzzyCMeansBigData {
 		Random random = new Random();
 		for(int i = 0; i< initMembershipMatrix.length; i++){
 			for (int j = 0; j < initMembershipMatrix[i].length; j++) {
-				this.initMembershipMatrix[i][j]=random.nextDouble();
-				
+				random.setSeed(System.nanoTime());
+				double randomValue = random.nextDouble()*random.nextInt(100);
+				if(randomValue== 0.0){
+					randomValue = random.nextDouble();
+				}
+				this.initMembershipMatrix[i][j]=randomValue;
 			}
+			
 		}
+		logger.trace("Finish Init Membership Matrix");
 	}
 	
 	/**
 	 * Metodo encargado de cargar los centroides basado en la matrix de pertenencia
 	 */
 	public void calculateCentroids(){
+		if(centroids!=null && centroids.length>0){
+			this.previousCentroids = centroids.clone();
+		}
+		else{
+			this.previousCentroids = new double[centroidsAmount][data.width()];
+		}
 		this.centroids = new double[centroidsAmount][data.width()];
 		for (int h = 0; h < centroidsAmount; h++) {
 			int i = 0;
@@ -137,10 +216,43 @@ public class FuzzyCMeansBigData {
 				}
 				this.centroids[h][i]=dividend/divisor;
 			}
-			
 		}
+		this.calculateDistances();
+		//this.printCentroides();
 	}
-	
+	/**
+	 * Metodo encargado de calcular las distancias entre dos vectores
+	 * Si la distancia es mayor a la tolerancia continua de lo contrario
+	 * deja las iteraciones en -1
+	 */
+	private void calculateDistances() {
+		double tolerance = 0.0000001;
+		double[] newCentroidsDistances = new double[this.centroidsAmount];
+		for (int i = 0; i < centroids.length; i++) {
+			double distanceCentroid = DistanceFunctions.getEuclideanDistance(this.centroids[i], this.previousCentroids[i]);
+			logger.info("Centroid " + i + " - Resultado de la diferencia entre vectores:" + distanceCentroid);
+			newCentroidsDistances[i]= distanceCentroid;
+		}
+		
+		//Se verifica el cambio de la distancia euclidiana de los centroids
+		boolean finishProcess = true;
+		for (int i = 0; i < centroidsDistances.length; i++) {
+			double diferenceCentroidsIteration = Math.abs(centroidsDistances[i]-newCentroidsDistances[i]);
+			logger.info("Previos Centroid vs new Centroid " + i + " - Distance:" + diferenceCentroidsIteration);
+			if(diferenceCentroidsIteration>tolerance){
+				finishProcess = false;
+				break;
+			}
+		}
+		if(finishProcess == true){
+			this.iterationAmount=-1;
+			logger.info("Proceso Finalizado Los Centroides de la iteracion " +
+						"anterior y la actual son menores a :" + tolerance);
+		}
+		
+		this.centroidsDistances = newCentroidsDistances.clone();
+	}
+
 	/**
 	 * Calcula los centroides iniciales del conjunto difuso
 	 * @param dataVector
@@ -209,11 +321,40 @@ public class FuzzyCMeansBigData {
 			for (int j = 0; j < dataVector.length; j++) {
 				double dataValue = dataVector[j];
 				double centroidValue = centroids[i][j];
-				xiVi[i]+=Math.pow(dataValue-centroidValue,this.mValue);
+				//TODO REVISAR
+				xiVi[i]+=Math.pow((Math.abs(dataValue-centroidValue)),this.mValue);
 			}
 		}
 		return xiVi;
 		
-	}	
+	}
+	
+	
+	/**
+	 * Almacena la matriz en disco
+	 **/
+	public void saveDoubleMatrix(double[][] matrix, String fileName){
+		StringBuilder data = new StringBuilder();
+		for (int i = 0; i < matrix.length; i++) {
+		for (int j = 0; j < matrix[i].length; j++) {
+			data.append(matrix[i][j]);
+			if(j+1<matrix[i].length){
+				data.append(";");
+			}
+		}
+		data.append(System.getProperty("line.separator"));
+		}
+		PersistenceFacade.getInstance().writeFile(EDataFolder.MACHINE_LEARNING, 
+				fileName, data.toString());
+	}
+	
+	public void sendMessageAsynch(String message){
+		QueueDTO queue = new QueueDTO();
+		queue.setInitDate(PersistenceFacade.getInstance().getServerDate().getTime());
+		queue.setEvent(EQueueEvent.SEND_MESSAGE);
+		queue.setModule(EModule.QUERYASYNCH);
+		queue.setParams(message);
+		queue.setStatus(EQueueStatus.ENQUEUE);
+	}
 	
 }

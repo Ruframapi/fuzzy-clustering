@@ -1,21 +1,18 @@
 package co.edu.sanmartin.fuzzyclustering.ir.index;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
+import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
-import co.edu.sanmartin.persistence.constant.EProperty;
-import co.edu.sanmartin.persistence.constant.ESystemProperty;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
-import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
-import co.edu.sanmartin.persistence.file.BigMatrixFileManager;
+import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
+import co.edu.sanmartin.persistence.file.BigIntegerMatrixFileManager;
 
 /**
  * Clase encargada de cargar en memoria el indice invertido
@@ -23,7 +20,8 @@ import co.edu.sanmartin.persistence.file.BigMatrixFileManager;
  *
  */
 public class InvertedIndex {
-	
+	public static String TERM_TERM_FILENAME="termterm.txt";
+	public static String TERM_DOCUMENT_FILENAME="termdocument.txt";
 	Logger logger = Logger.getLogger("InvertedIndex");
 	//Archivo de indices invertidos
 	private String invertedIndexData;
@@ -39,11 +37,11 @@ public class InvertedIndex {
 	private int totalDocumentsCount;
 	//Matrix Termino Termino en Memoria
 	private int[][] termTermMatrix;
-	
+
 	public InvertedIndex(){
 		//this.loadData();
 	}
-	
+
 	public String getInvertedIndexData() {
 		return invertedIndexData;
 	}
@@ -84,7 +82,7 @@ public class InvertedIndex {
 		this.termDocumentCount = termDocumentCount;
 	}
 
-	
+
 	public int getTotalDocumentsCount() {
 		return totalDocumentsCount;
 	}
@@ -92,44 +90,18 @@ public class InvertedIndex {
 	public void setTotalDocumentsCount(int totalDocumentsCount) {
 		this.totalDocumentsCount = totalDocumentsCount;
 	}
-	
-	public int[][] getTermTermMatrix() {
-		this.loadData();
-		if(this.termTermMatrix==null || this.termTermMatrix.length==0){
-			this.buildTermTermMatrix(false);
-		}
-		
-		return this.termTermMatrix;
-	}
-	
-	public void loadTermTermBigMatrixTest(){
-		long start = System.nanoTime();
-		
-		try {
-			BigMatrixFileManager largeMatrix = 
-					new BigMatrixFileManager();
-			largeMatrix.loadReadOnly(EDataFolder.MATRIX,"termterm.txt");
-			for (int i = 0; i < 10; i++) {
-				for (int j = 0; j < largeMatrix.width(); j++) {
-					System.out.print(largeMatrix.get(i, j)+ " ");
-				}
-				System.out.println();
-			}
-			largeMatrix.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		long time = System.nanoTime() - start;
-		System.out.print("Time"+ time);
-	}
 
+	public void createInvertedIndex(){
+		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool();
+		Thread thread=new Thread(threadPool);
+		thread.start();
+	}
 
 	/**
 	 * Retorna la informacion del archivo de indices invertidos
 	 * @return
 	 */
-	public void loadData(){
+	public void loadInvertedIndexData(){
 
 		StringBuilder data = new StringBuilder();
 		PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
@@ -145,9 +117,85 @@ public class InvertedIndex {
 			this.countTermsDocument();
 			this.countDocuments();
 		}
-		
+
 	}
 	
+	/**
+	 * Retorna la matrix termino termino a partir de la matrix de terminos utilizando mapeo de archivos en memoria
+	 * @param datos del indice invertido
+	 * @return
+	 * @throws IOException 
+	 */
+	public void createTermTermBigMatrix(boolean persist) throws IOException{
+		logger.info("Inicializando construccion de Matrix Termino Termino");
+		long time_start = 0, time_end=0;
+		time_start = System.currentTimeMillis();
+		//Se almacena en memoria los punteros de los documentos para no volver a recorrer la lista
+		HashMap<Integer,ArrayList<int[]>> documentsPointers = new HashMap<Integer,ArrayList<int[]>>();
+		try{	
+			this.loadInvertedIndexData();
+			BigIntegerMatrixFileManager largeMatrix = 
+					new BigIntegerMatrixFileManager();
+			largeMatrix.loadReadWrite(EDataFolder.MATRIX,TERM_TERM_FILENAME, termCount, termCount);
+			for (int i = 0; i < termCount; ++i) {
+				String termData = termList[i];
+				String[] row = termData.split(";");
+				logger.debug("Construyendo vector para termino:"  + row[0] );
+				String[] documents = row[1].split(",");
+				for (int j = 0; j < documents.length; j++) {
+					int documentId = Integer.parseInt(documents[j]);
+					ArrayList<int[]> termsByDocument = null;
+					if(documentsPointers.get(documentId)==null){
+						documentsPointers.put(documentId, this.queryTermsByDocument(documentId));
+					}
+					termsByDocument = documentsPointers.get(documentId);
+					
+					for (int[] termDocument : termsByDocument) {
+						documentsPointers.put(documentId, termsByDocument);
+						int relatedTerm = termDocument[0];
+						if(i!=relatedTerm){ 
+							int value = termDocument[1];
+							largeMatrix.set(i, relatedTerm, value);
+						}
+					}
+				}
+			}
+			if(persist){
+				largeMatrix.close();
+			}
+		}catch(Throwable e){
+			logger.error("Error in createTermTermBigMatrix",e);
+		}
+		logger.info("La construccion de la Matrix Termino Termino tomo "+ 
+				( time_end - time_start )/1000 +" segundos" + 
+				(( time_end - time_start )/1000)/60 +" minutos");
+	}
+
+	/**
+	 * Carga la matrix termino termino utilizando MappedFiles
+	 */
+	public void loadTermTermBigMatrix(){
+		long start = System.nanoTime();
+
+		try {
+			BigDoubleMatrixFileManager largeMatrix = 
+					new BigDoubleMatrixFileManager();
+			largeMatrix.loadReadOnly(EDataFolder.MATRIX,TERM_TERM_FILENAME);
+			for (int i = 0; i < 10; i++) {
+				for (int j = 0; j < largeMatrix.width(); j++) {
+					System.out.print(largeMatrix.get(i, j)+ " ");
+				}
+				System.out.println();
+			}
+			largeMatrix.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		long time = System.nanoTime() - start;
+		System.out.print("Time"+ time);
+	}
+
 	/**
 	 * Metodo encargado de contar la cantidad de terminos de todo el indice
 	 */
@@ -159,9 +207,9 @@ public class InvertedIndex {
 			totalTerms+=Integer.parseInt(row[2]);
 		}
 		this.totaldocumentWordsCount = totalTerms;
-		
+
 	}
-	
+
 	/**
 	 * Metodo encargado de contar la cantidad de terminos en todos los terminos
 	 * @param termId
@@ -175,7 +223,7 @@ public class InvertedIndex {
 			termDocumentCount[i]=Integer.parseInt(row[2]);
 		}
 	}
-	
+
 	/**
 	 * Cuenta los documentos que han generado el indice invertidos
 	 */
@@ -186,17 +234,16 @@ public class InvertedIndex {
 			String termData = termList[i];
 			String[] row = termData.split(";");
 			String[] documents = row[1].split(",");
-	    	//Comienza en 1 por el el mismo termino no se tiene en cuenta
-	    	for (int j = 0; j < documents.length; j++) {
-	    		int documentId = Integer.parseInt(documents[j]);
-	    		if(documentId>maxDocument){
-	    			maxDocument=documentId;
-	    		}
+			//Comienza en 1 por el el mismo termino no se tiene en cuenta
+			for (int j = 0; j < documents.length; j++) {
+				int documentId = Integer.parseInt(documents[j]);
+				if(documentId>maxDocument){
+					maxDocument=documentId;
+				}
 			}
 		}
 		this.totalDocumentsCount = maxDocument;
 	}
-	
 
 	/**
 	 * Retorna la matrix  documento termino a partir del indice invertido
@@ -204,83 +251,49 @@ public class InvertedIndex {
 	 * @param datos del indice invertido
 	 * @return
 	 */
-	public int[][] getTermDocumentMatrix(){
+	public void createTermDocumentBigMatrix(boolean persist) throws Exception{
+		this.loadInvertedIndexData();
+		BigIntegerMatrixFileManager largeMatrix = 
+				new BigIntegerMatrixFileManager();
+		largeMatrix.loadReadWrite(EDataFolder.MATRIX,TERM_DOCUMENT_FILENAME, termCount,this.totalDocumentsCount+1);
+		for (int i = 0; i < termCount; ++i) {
+			String termData = termList[i];
+			String[] row = termData.split(";");
+			String[] documents = row[1].split(",");
+			for (int j = 0; j < documents.length; j++) {
+				int documentId = Integer.parseInt(documents[j]);
+				//Filas terminos, columnas documentos
+				largeMatrix.set(i, documentId, largeMatrix.get(i,documentId)+1);
+			}
+		}
+		if(persist){
+			largeMatrix.close();
+		}
+	}
+
+	/**
+	 * Retorna la matrix  documento termino a partir del indice invertido
+	 * Filas = documentos, Columnas = Terminos
+	 * @param datos del indice invertido
+	 * @return
+	 */
+	@Deprecated
+	public void createTermDocumentMatrix(){
+		this.loadInvertedIndexData();
 		int[][] termArray =  new int[this.totalDocumentsCount+1][termCount];
 		for (int i = 0; i < termCount; ++i) {
 			String termData = termList[i];
 			String[] row = termData.split(";");
-	    	String[] documents = row[1].split(",");
-	    	for (int j = 0; j < documents.length; j++) {
-	    		int documentId = Integer.parseInt(documents[j]);
+			String[] documents = row[1].split(",");
+			for (int j = 0; j < documents.length; j++) {
+				int documentId = Integer.parseInt(documents[j]);
 				termArray[documentId][i]=termArray[documentId][i]+1;
 			}
 		}
 		this.saveMatrix(termArray,"termdocument.txt");
-	    return termArray;	
- 	
 	}
+
 	
-	/**
-	 * Retorna la matrix termino termino a partir de la matrix de terminos utilizando mapeo de archivos en memoria
-	 * @param datos del indice invertido
-	 * @return
-	 * @throws IOException 
-	 */
-	public void buildTermTermBigMatrix(boolean persist) throws IOException{
-		this.loadData();
-		BigMatrixFileManager largeMatrix = 
-				new BigMatrixFileManager();
-		largeMatrix.loadReadWrite(EDataFolder.MATRIX,"termterm.txt", termCount, termCount);
-		for (int i = 0; i < termCount; ++i) {
-			String termData = termList[i];
-			String[] row = termData.split(";");
-			String[] documents = row[1].split(",");
-	    	for (int j = 0; j < documents.length; j++) {
-	    		int documentId = Integer.parseInt(documents[j]);
-	    		ArrayList<int[]> termsByDocument = this.queryTermsByDocument(documentId);
-	    		for (int[] termDocument : termsByDocument) {
-	    			int relatedTerm = termDocument[0];
-	    			if(i!=relatedTerm){ 
-	    				int value = termDocument[1];
-	    				largeMatrix.set(i, relatedTerm, (double)value);
-	    			}
-				}
-	    	}
-		}
-		if(persist){
-			//this.saveMatrix(termtermMatrix,"termterm.txt");
-			largeMatrix.close();
-		}
-	}
-	/**
-	 * Retorna la matrix termino termino a partir de la matrix termino
-	 * documento.
-	 * @param datos del indice invertido
-	 * @return
-	 */
-	public void buildTermTermMatrix(boolean persist ){
-		this.loadData();
-		int[][] termtermMatrix = new int[termCount][termCount];
-		for (int i = 0; i < termCount; ++i) {
-			String termData = termList[i];
-			String[] row = termData.split(";");
-			String[] documents = row[1].split(",");
-	    	for (int j = 0; j < documents.length; j++) {
-	    		int documentId = Integer.parseInt(documents[j]);
-	    		ArrayList<int[]> termsByDocument = this.queryTermsByDocument(documentId);
-	    		for (int[] termDocument : termsByDocument) {
-	    			int relatedTerm = termDocument[0];
-	    			if(i!=relatedTerm){ 
-	    				termtermMatrix[i][relatedTerm]= termDocument[1];
-	    			}
-				}
-	    	}
-		}
-		if(persist){
-			this.saveMatrix(termtermMatrix,"termterm1.txt");
-		}
-		this.termTermMatrix = termtermMatrix;
-	}
 
 	/**
 	 * Retorna el listado de documentos que contiene el termino especificado
@@ -295,47 +308,114 @@ public class InvertedIndex {
 			int indexTerm = i;
 			int count = 0;
 			String[] documents = row[1].split(",");
-	    	for (int j = 0; j < documents.length; j++) {
-	    		int documentId = Integer.parseInt(documents[j]);
-	    		if(documentId == queryDocumentId){
-	    			count++;
-	    		}
+			for (int j = 0; j < documents.length; j++) {
+				int documentId = Integer.parseInt(documents[j]);
+				if(documentId == queryDocumentId){
+					count++;
+				}
 			}
-	    	if(count>0){
-	    		termResult[0]=indexTerm;
-	    		termResult[1]=count;
-		    	terms.add(termResult);
+			if(count>0){
+				termResult[0]=indexTerm;
+				termResult[1]=count;
+				terms.add(termResult);
 				count = 0;
 				termResult = new int[2];
-	    	}
-	    	
+			}
+
 		}
 		return terms;
 	}
-	
+
 	/**
-	 * Almacena la matriz en disco
+	 * Retorna la cantidad de cada termino en los documentos del universo
+	 * @param termId identificacion del termino
+	 * @return
+	 */
+	public int getCountByTerm(int termId){
+		return termDocumentCount[termId];
+	}
+
+	/**
+	 * Retorna la matrix termino termino a partir de la matrix termino
+	 * documento.
+	 * @param datos del indice invertido
+	 * @return
+	 * @deprecated se cambia para construir los archivos utilizando mapped files
+	 */
+	@Deprecated
+	public void buildTermTermMatrix(boolean persist ){
+		this.loadInvertedIndexData();
+		int[][] termtermMatrix = new int[termCount][termCount];
+		for (int i = 0; i < termCount; ++i) {
+			String termData = termList[i];
+			String[] row = termData.split(";");
+			String[] documents = row[1].split(",");
+			for (int j = 0; j < documents.length; j++) {
+				int documentId = Integer.parseInt(documents[j]);
+				ArrayList<int[]> termsByDocument = this.queryTermsByDocument(documentId);
+				for (int[] termDocument : termsByDocument) {
+					int relatedTerm = termDocument[0];
+					if(i!=relatedTerm){ 
+						termtermMatrix[i][relatedTerm]= termDocument[1];
+					}
+				}
+			}
+		}
+		if(persist){
+			this.saveMatrix(termtermMatrix,"termterm1.txt");
+		}
+		this.termTermMatrix = termtermMatrix;
+	}
+
+
+
+	/**
+	 * Almacena la matriz en disco como archivo plano
 	 **/
+	@Deprecated
 	public void saveMatrix(int[][] matrix, String fileName){
 		System.out.print("Init savematrix");
 		StringBuilder data = new StringBuilder();
 		for (int i = 0; i < matrix.length; i++) {;
-			for (int j = 0; j < matrix[i].length; j++) {
-				data.append(matrix[i][j]);
-				data.append(",");
-			}
-			data.append(System.getProperty("line.separator"));
+		for (int j = 0; j < matrix[i].length; j++) {
+			data.append(matrix[i][j]);
+			data.append(",");
+		}
+		data.append(System.getProperty("line.separator"));
 		}
 		PersistenceFacade.getInstance().writeFile(EDataFolder.MATRIX, 
-													fileName, data.toString());
+				fileName, data.toString());
 	}
-	
+
+	/**
+	 * Almacena la matriz en disco
+	 **/
+	@Deprecated
+	public void saveDoubleMatrix(double[][] matrix, String fileName){
+		StringBuilder data = new StringBuilder();
+		for (int i = 0; i < matrix.length; i++) {;
+		for (int j = 0; j < matrix[i].length; j++) {
+			data.append(matrix[i][j]);
+			data.append(",");
+		}
+		data.append(System.getProperty("line.separator"));
+		}
+		PersistenceFacade.getInstance().writeFile(EDataFolder.MATRIX, 
+				fileName, data.toString());
+	}
+
+	/**
+	 * Almacena la matrix en disco utilizando mapeo de archivos
+	 * @param matrix
+	 * @param fileName
+	 */
+	@Deprecated
 	public void saveBigMatrix(int[][] matrix, String fileName){
 		long start = System.nanoTime();
-		
+
 		try {
-			BigMatrixFileManager largeMatrix = 
-					new BigMatrixFileManager();
+			BigDoubleMatrixFileManager largeMatrix = 
+					new BigDoubleMatrixFileManager();
 			largeMatrix.loadReadWrite(EDataFolder.MATRIX,fileName, matrix.length, matrix[0].length);
 			for (int i = 0; i < matrix.length; i++) {
 				for (int j = 0; j < matrix[i].length; j++) {
@@ -350,30 +430,13 @@ public class InvertedIndex {
 		System.out.print("Time"+ time);
 	}
 	
-	/**
-	 * Almacena la matriz en disco
-	 **/
-	public void saveMatrix(double[][] matrix, String fileName){
-		StringBuilder data = new StringBuilder();
-		for (int i = 0; i < matrix.length; i++) {;
-			for (int j = 0; j < matrix[i].length; j++) {
-				data.append(matrix[i][j]);
-				data.append(",");
-			}
-			data.append(System.getProperty("line.separator"));
+	@Deprecated
+	public int[][] getTermTermMatrix() {
+		this.loadInvertedIndexData();
+		if(this.termTermMatrix==null || this.termTermMatrix.length==0){
+			//this.buildTermTermMatrix(false);
 		}
-		PersistenceFacade.getInstance().writeFile(EDataFolder.MATRIX, 
-													fileName, data.toString());
+		return this.termTermMatrix;
 	}
-	
-	/**
-	 * Retorna la cantidad de cada termino en los documentos del universo
-	 * @param termId identificacion del termino
-	 * @return
-	 */
-	public int getCountByTerm(int termId){
-		return termDocumentCount[termId];
-		
-	}
-	
+
 }
