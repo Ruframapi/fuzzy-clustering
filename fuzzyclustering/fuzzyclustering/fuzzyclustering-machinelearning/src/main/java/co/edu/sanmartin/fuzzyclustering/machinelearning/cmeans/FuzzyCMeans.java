@@ -142,12 +142,11 @@ public class FuzzyCMeans {
 	public void calculateCentroids(){
 		this.centroids = new double[centroidsAmount][data[0].length];
 		for (int h = 0; h < centroidsAmount; h++) {
-			int i = 0;
+
 			double dividend = 0.00;
 			double divisor = 0.00;
-			for (i = 0; i < data[0].length; i++) {
-				int j = 0;
-				for ( j=0; j < data.length; j++) {
+			for ( int i = 0; i < data[0].length; i++) {
+				for ( int j=0; j < data.length; j++) {
 					double membership = Math.pow(initMembershipMatrix[j][h],mValue);
 					double centroidComponent = data[j][i]*membership;
 					dividend+=centroidComponent;

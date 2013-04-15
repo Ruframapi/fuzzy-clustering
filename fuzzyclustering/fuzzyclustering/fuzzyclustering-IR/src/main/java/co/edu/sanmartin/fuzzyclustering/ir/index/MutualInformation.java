@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
+import co.edu.sanmartin.persistence.file.BigIntegerMatrixFileManager;
 
 /**
  * Clase encargada de generar una matrix con el valor del grado
@@ -32,13 +33,12 @@ public class MutualInformation {
 		time_start = System.currentTimeMillis();
 		InvertedIndex invertedIndex = new InvertedIndex();
 		invertedIndex.loadInvertedIndexData();
-		BigDoubleMatrixFileManager largeMatrixTermTerm = new BigDoubleMatrixFileManager();
+		BigIntegerMatrixFileManager largeMatrixTermTerm = new BigIntegerMatrixFileManager();
 		BigDoubleMatrixFileManager largeMatrixPpmi = new BigDoubleMatrixFileManager();
-		
-		double[][] ppmiData = new double[invertedIndex.getTermCount()][invertedIndex.getTermCount()]; 
+	
 		double totalWordDocumentsCount = invertedIndex.getTotaldocumentWordsCount();
 		try {
-			largeMatrixTermTerm.loadReadOnly(EDataFolder.MATRIX,invertedIndex.TERM_TERM_FILENAME);
+			largeMatrixTermTerm.loadReadOnly(EDataFolder.MATRIX,InvertedIndex.TERM_TERM_FILENAME);
 			largeMatrixPpmi.loadReadWrite(EDataFolder.MATRIX,PPMI_FILE_NAME, 
 					largeMatrixTermTerm.height(), largeMatrixTermTerm.width());
 		} catch (IOException e) {
@@ -47,7 +47,7 @@ public class MutualInformation {
 		}
 		for (int i = 0; i < largeMatrixTermTerm.height(); i++) {
 			for (int j = 0; j < largeMatrixTermTerm.width(); j++) {
-				int termCount = new Double(largeMatrixTermTerm.get(i, j)).intValue();
+				int termCount = largeMatrixTermTerm.get(i, j);
 				double ppmi = this.ppmi(termCount, invertedIndex.getCountByTerm(i), 
 										invertedIndex.getCountByTerm(j), totalWordDocumentsCount);
 				
@@ -58,11 +58,11 @@ public class MutualInformation {
 				
 			}	
 		}
-		
+		largeMatrixTermTerm.close();
 		if(persist){
 			largeMatrixPpmi.close();
 		}
-		
+		time_end = System.currentTimeMillis();
 		logger.info("La construccion de la Matrix PPMI tomo "+ 
 				( time_end - time_start )/1000 +" segundos" + 
 				(( time_end - time_start )/1000)/60 +" minutos");
