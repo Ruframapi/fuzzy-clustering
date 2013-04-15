@@ -139,7 +139,7 @@ public class InvertedIndex {
 			largeMatrix.loadReadWrite(EDataFolder.MATRIX,TERM_TERM_FILENAME, termCount, termCount);
 			for (int i = 0; i < termCount; ++i) {
 				String termData = termList[i];
-				String[] row = termData.split(";");
+				String[] row = termData.split("\t");
 				logger.debug("Construyendo vector para termino:"  + row[0] );
 				String[] documents = row[1].split(",");
 				for (int j = 0; j < documents.length; j++) {
@@ -166,6 +166,7 @@ public class InvertedIndex {
 		}catch(Throwable e){
 			logger.error("Error in createTermTermBigMatrix",e);
 		}
+		time_end = System.currentTimeMillis();
 		logger.info("La construccion de la Matrix Termino Termino tomo "+ 
 				( time_end - time_start )/1000 +" segundos" + 
 				(( time_end - time_start )/1000)/60 +" minutos");
@@ -203,7 +204,7 @@ public class InvertedIndex {
 		int totalTerms = 0;
 		for (int i = 0; i < termCount; ++i) {
 			String termData = termList[i];
-			String[] row = termData.split(";");
+			String[] row = termData.split("\t");
 			totalTerms+=Integer.parseInt(row[2]);
 		}
 		this.totaldocumentWordsCount = totalTerms;
@@ -219,7 +220,7 @@ public class InvertedIndex {
 		this.termDocumentCount = new int[this.termCount];
 		for (int i = 0; i < termCount; ++i) {
 			String termData = termList[i];
-			String[] row = termData.split(";");
+			String[] row = termData.split("\t");
 			termDocumentCount[i]=Integer.parseInt(row[2]);
 		}
 	}
@@ -232,7 +233,7 @@ public class InvertedIndex {
 		int maxDocument = 0;
 		for (int i = 0; i < termCount; ++i) {
 			String termData = termList[i];
-			String[] row = termData.split(";");
+			String[] row = termData.split("\t");
 			String[] documents = row[1].split(",");
 			//Comienza en 1 por el el mismo termino no se tiene en cuenta
 			for (int j = 0; j < documents.length; j++) {
@@ -258,7 +259,7 @@ public class InvertedIndex {
 		largeMatrix.loadReadWrite(EDataFolder.MATRIX,TERM_DOCUMENT_FILENAME, termCount,this.totalDocumentsCount+1);
 		for (int i = 0; i < termCount; ++i) {
 			String termData = termList[i];
-			String[] row = termData.split(";");
+			String[] row = termData.split("\t");
 			String[] documents = row[1].split(",");
 			for (int j = 0; j < documents.length; j++) {
 				int documentId = Integer.parseInt(documents[j]);
@@ -283,7 +284,7 @@ public class InvertedIndex {
 		int[][] termArray =  new int[this.totalDocumentsCount+1][termCount];
 		for (int i = 0; i < termCount; ++i) {
 			String termData = termList[i];
-			String[] row = termData.split(";");
+			String[] row = termData.split("\t");
 			String[] documents = row[1].split(",");
 			for (int j = 0; j < documents.length; j++) {
 				int documentId = Integer.parseInt(documents[j]);
@@ -303,7 +304,7 @@ public class InvertedIndex {
 		ArrayList<int[]> terms = new ArrayList<int[]>();
 		for (int i = 0; i < termCount; ++i) {
 			String termData = termList[i];
-			String[] row = termData.split(";");
+			String[] row = termData.split("\t");
 			int[] termResult = new int[2];
 			int indexTerm = i;
 			int count = 0;
@@ -348,7 +349,7 @@ public class InvertedIndex {
 		int[][] termtermMatrix = new int[termCount][termCount];
 		for (int i = 0; i < termCount; ++i) {
 			String termData = termList[i];
-			String[] row = termData.split(";");
+			String[] row = termData.split("\t");
 			String[] documents = row[1].split(",");
 			for (int j = 0; j < documents.length; j++) {
 				int documentId = Integer.parseInt(documents[j]);

@@ -77,14 +77,66 @@ public class CMeansBigDataTest {
 	
 	@Test
 	public void testGenerateCMeansBigData2() throws Exception{
-		double[][] data ={{1.00},{2.00},{3.00},{4.0},{5.0},{6.0},{7.0},{8.0}
-		,{9.0},{10.0},{11.0},{12.0},{13.0},{14.0},{15.0},{16.0},{16.0},{18.0},{19.0},{20.0}};
+		//double[][] data ={{1.00},{2.00},{3.00},{4.0},{5.0},{6.0},{7.0},{8.0}
+		//,{9.0},{10.0},{11.0},{12.0},{13.0},{14.0},{15.0},{16.0},{16.0},{18.0},{19.0},{20.0}};
+		double[][] data ={{0.00},{0.00},{0.00},{0.0},{0.0},{0.0},{0.0},{0.0}
+		,{0.0},{0.0},{0.0},{0.0},{0.0},{0.0},{15.0},{16.0},{16.0},{18.0},{19.0},{20.0}};
 		this.saveMatrix(data, "test.txt");
 		BigDoubleMatrixFileManager bigMatrixFileManager = new BigDoubleMatrixFileManager();
 		bigMatrixFileManager.loadReadOnly(EDataFolder.MATRIX, "test.txt");
 		this.printBigMatrix(bigMatrixFileManager);
 		
 		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData("test.txt",3, 200, 1.5, false);
+		fuzzyCmeans.init();
+		fuzzyCmeans.calculateFuzzyCmeans();
+	};
+	
+	@Test
+	public void testGenerateCMeansReducedNio() throws Exception{
+		
+		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData("reducidaNio.txt",3, 200, 2, false);
+		fuzzyCmeans.init();
+		fuzzyCmeans.calculateFuzzyCmeans();
+	};
+	@Test
+	public void testGenerateCMeansReducedSample() throws Exception{
+		String dataFile = PersistenceFacade.getInstance().readFile(EDataFolder.MATRIX,"reducida.txt");
+		String[] rowVector = dataFile.split(System.getProperty("line.separator"));
+		int height = rowVector.length;
+		int width = rowVector[0].split(";").length;
+		double [][] matrix = new double[height][width];
+		for (int i = 0; i < height; i++) {
+			String[] columnVector = rowVector[i].split(";");
+			for (int j = 0; j < width; j++) {
+				matrix[i][j] = Double.parseDouble(columnVector[j]);
+			}
+		}
+		
+		this.saveMatrix(matrix, "reducidaNio.txt");
+		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData("reducidaNio.txt",10, 200, 2, false);
+		fuzzyCmeans.init();
+		fuzzyCmeans.calculateFuzzyCmeans();
+	};
+	@Test
+	public void testGenerateCMeansBigDataFile() throws Exception{
+		String dataFile = PersistenceFacade.getInstance().readFile(EDataFolder.MATRIX,"test.txt");
+		String[] rowVector = dataFile.split(System.getProperty("line.separator"));
+		int height = rowVector.length;
+		int width = rowVector[0].split(",").length;
+		double [][] matrix = new double[height][width];
+		for (int i = 0; i < height; i++) {
+			String[] columnVector = rowVector[i].split(",");
+			for (int j = 0; j < width; j++) {
+				matrix[i][j] = Double.parseDouble(columnVector[j]);
+			}
+		}
+		
+		this.saveMatrix(matrix, "testNio.txt");
+		BigDoubleMatrixFileManager bigMatrixFileManager = new BigDoubleMatrixFileManager();
+		bigMatrixFileManager.loadReadOnly(EDataFolder.MATRIX, "testNio.txt");
+		this.printBigMatrix(bigMatrixFileManager);
+		
+		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData("testNio.txt",10, 200, 2, false);
 		fuzzyCmeans.init();
 		fuzzyCmeans.calculateFuzzyCmeans();
 	};
@@ -135,6 +187,9 @@ public class CMeansBigDataTest {
 		}
 		bigMatrixFileManager.close();
 	}
+	
+	
+	
 	
 	/**
 	 * Almacena la matriz en disco

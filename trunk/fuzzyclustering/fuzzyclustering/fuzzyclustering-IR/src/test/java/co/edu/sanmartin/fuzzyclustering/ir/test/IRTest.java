@@ -3,6 +3,8 @@ package co.edu.sanmartin.fuzzyclustering.ir.test;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Random;
@@ -82,7 +84,7 @@ public class IRTest {
 	}
 	
 	@Test
-	public void mutualInformationBigMatrixTest(){
+	public void buildMutualInformationBigMatrixTest(){
 		MutualInformation mutualInformation = new MutualInformation();
 		try {
 			mutualInformation.buildMutualInformationBigMatrix(true);
@@ -147,21 +149,38 @@ public class IRTest {
 	}
 	
 	
-
+	/**
+	 * Almacena la matriz en disco
+	 **/
+	public void saveMatrix(double[][] matrix, String fileName) throws Exception{
+		BigDoubleMatrixFileManager bigMatrixFileManager = new BigDoubleMatrixFileManager();
+		bigMatrixFileManager.loadReadWrite(EDataFolder.MATRIX, fileName,matrix.length,matrix[0].length);
+		System.out.println("Init savematrix");
+		StringBuilder data = new StringBuilder();
+		for (int i = 0; i < matrix.length; i++) {;
+			for (int j = 0; j < matrix[i].length; j++) {
+				bigMatrixFileManager.set(i,j, matrix[i][j]);
+			}
+			
+		}
+		bigMatrixFileManager.close();
+	}
 	
 	@Test
 	public void loadPpmiBigMatrixTest(){
 		long start = System.nanoTime();
-		
+		int limit = 0;
 		try {
 			BigDoubleMatrixFileManager largeMatrix = 
 					new BigDoubleMatrixFileManager();
 			largeMatrix.loadReadOnly(EDataFolder.MATRIX,"ppmi.txt");
-			double[][] termtermMatrix = new double[largeMatrix.height()][largeMatrix.width()];
-			for (int i = 0; i < largeMatrix.height(); i++) {
+			if(limit==0){
+				limit = largeMatrix.height();
+			}
+			double[][] termtermMatrix = new double[limit][largeMatrix.width()];
+			for (int i = 0; i < limit; i++) {
 				for (int j = 0; j < largeMatrix.width(); j++) {
 					termtermMatrix[i][j] = largeMatrix.get(i, j);
-					//System.out.print(largeMatrix.get(i, j)+ " ");
 				}
 				System.out.println();
 			}
@@ -175,6 +194,101 @@ public class IRTest {
 		long time = System.nanoTime() - start;
 		System.out.print("Time"+ time);
 	}
+	
+
+	@Test
+	public void buildReducedMatrixPpmi() throws Exception{
+		int dimensionNueva =20;
+		BigDoubleMatrixFileManager largeMatrix = 
+				new BigDoubleMatrixFileManager();
+		largeMatrix.loadReadOnly(EDataFolder.MATRIX,"ppmi.txt");
+		double[][] matrixReduced = new double[largeMatrix.height()][dimensionNueva];
+		double[][] newMatrix = new double[largeMatrix.height()][matrixReduced[0].length];
+		Random random = new Random();
+		for (int i = 0; i < matrixReduced.length; i++) {
+			random.setSeed(System.nanoTime());
+			for (int j = 0; j < matrixReduced[i].length; j++) {
+				int multiplier = 1;
+				//if (random.nextBoolean()==false)multiplier = -1;
+				matrixReduced[i][j]=random.nextInt(2)*multiplier;
+			}
+		}
+		
+	        //se necesitan tres instrucciones for para multiplicar cada
+	        //fila de la una matriz por las columnas de la otra
+		for(int i = 0; i < largeMatrix.height(); i++){
+            for (int j = 0; j < matrixReduced.length; j++){
+                for (int k = 0; k < matrixReduced[0].length; k++){
+                    newMatrix [i][k] += largeMatrix.get(i,j)*matrixReduced[j][k];
+                }
+            }
+        }
+		
+		this.saveMatrixDouble(newMatrix, "reducida.txt", 0);
+		largeMatrix.close();
+	}
+	
+	@Test
+	public void buildReducedSampleMatrix() throws Exception{
+		int dimensionNueva =2;
+		double[][] data ={{1.0,2.0,3.0,4.0,5.0},{6.0,7.0,8.0,9.0,10}};
+		this.saveMatrix(data, "testdimensiones.txt");
+		BigDoubleMatrixFileManager largeMatrix = 
+				new BigDoubleMatrixFileManager();
+		largeMatrix.loadReadOnly(EDataFolder.MATRIX,"testdimensiones.txt");
+		
+		
+		double[][] matrixReduced = {{1.0,2.0},{3.0,4.0},{5.0,6.0},{7.0,8.0},{9.0,10.0}};
+		double[][] newMatrix = new double[largeMatrix.height()][matrixReduced[0].length];
+	        //se necesitan tres instrucciones for para multiplicar cada
+	        //fila de la una matriz por las columnas de la otra
+		for(int i = 0; i < largeMatrix.height(); i++){
+            for (int j = 0; j < matrixReduced.length; j++){
+                for (int k = 0; k < matrixReduced[0].length; k++){
+                    newMatrix [i][k] += largeMatrix.get(i,j)*matrixReduced[j][k];
+                }
+            }
+        }
+		
+		this.saveMatrixDouble(newMatrix, "reducida.txt", 0);
+	}
+
+	
+	@Test
+	public void buildReducedMatrix() throws Exception{
+		int dimensionNueva =2;
+		double[][] data ={{1.00,1.00},{0.00,1.00}};
+		this.saveMatrix(data, "testdimensiones.txt");
+		BigDoubleMatrixFileManager largeMatrix = 
+				new BigDoubleMatrixFileManager();
+		largeMatrix.loadReadOnly(EDataFolder.MATRIX,"testdimensiones.txt");
+		double[][] matrixReduced = new double[largeMatrix.height()][dimensionNueva];
+		double[][] newMatrix = new double[matrixReduced.length][matrixReduced[0].length];
+		Random random = new Random();
+		for (int i = 0; i < matrixReduced.length; i++) {
+			random.setSeed(System.nanoTime());
+			for (int j = 0; j < matrixReduced[i].length; j++) {
+				matrixReduced[i][j]=random.nextInt(2);
+			}
+		}
+		
+	        //se necesitan tres instrucciones for para multiplicar cada
+	        //fila de la una matriz por las columnas de la otra
+        for(int i = 0; i < matrixReduced.length; i++){
+            for (int j = 0; j < largeMatrix.width(); j++){
+                for (int k = 0; k < matrixReduced[0].length; k++){
+                    newMatrix [i][j] += matrixReduced[i][k] * largeMatrix.get(k,j);
+                }
+            }
+        }
+		
+		this.saveMatrixDouble(newMatrix, "reducida.txt", 0);
+	}
+	
+	
+	
+	
+	
 /*	@Test
 	public void queryDocumentTest(){
 		IndexManager indexManager = new IndexManager();
@@ -221,7 +335,7 @@ public class IRTest {
 				data.append(matrix[i][j]);
 				data.append(",");
 			}
-			data.append(System.getProperty("line.separator"));
+			data.append("\t");
 		}
 		PersistenceFacade.getInstance().writeFile(EDataFolder.MATRIX, 
 													fileName, data.toString());
@@ -239,13 +353,17 @@ public class IRTest {
 		}
 		for (int i = 0; i < matrixLimit; i++) {;
 			for (int j = 0; j < matrix[i].length; j++) {
-				data.append(matrix[i][j]);
-				data.append(",");
+				BigDecimal bigDecimal = new BigDecimal(matrix[i][j]);
+				bigDecimal = bigDecimal.setScale(2, RoundingMode.HALF_UP);
+				data.append(bigDecimal);
+				if(j+1<matrix[i].length){
+					data.append(";");
+				}
 			}
 			data.append(System.getProperty("line.separator"));
 		}
 		PersistenceFacade.getInstance().writeFile(EDataFolder.MATRIX, 
-													fileName, data.toString());
+												  fileName, data.toString());
 	}
 	
 	@Test

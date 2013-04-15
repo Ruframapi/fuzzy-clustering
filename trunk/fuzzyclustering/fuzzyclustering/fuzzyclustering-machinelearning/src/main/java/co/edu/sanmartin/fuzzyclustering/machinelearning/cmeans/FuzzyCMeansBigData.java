@@ -40,6 +40,7 @@ public class FuzzyCMeansBigData {
 	private double[][] initMembershipMatrix;
 	private double[][] membershipMatrix;
 	private double[] centroidsDistances;
+	Random random = new Random();
 	
 	
 	/**
@@ -133,15 +134,18 @@ public class FuzzyCMeansBigData {
 		time_start = System.currentTimeMillis();
 		this.membershipMatrix = new double[data.height()][centroidsAmount];
 		for (int i = 0; i < this.iterationAmount; i++) {
-			this.saveDoubleMatrix(this.initMembershipMatrix, "relationship"+i+".txt");
+			//this.saveDoubleMatrix(this.initMembershipMatrix, "relationship"+i+".txt");
+			this.saveDoubleMatrix(this.centroids, "centroids"+i+".txt");
 			this.calculateMembershipMatrix();
 			this.initMembershipMatrix = membershipMatrix.clone();
 			this.membershipMatrix = new double[data.height()][centroidsAmount];
 			this.calculateCentroids();
 			
+			
 		}
 		
 		this.saveDoubleMatrix(this.centroids, "centroids.txt");
+		this.saveDoubleMatrix(this.initMembershipMatrix, "relationship.txt");
 		time_end = System.currentTimeMillis();
 		
 		String result = "El proceso de clusterizacion Tomo "+ 
@@ -175,12 +179,13 @@ public class FuzzyCMeansBigData {
 	 * 
 	 */
 	public void initMembershipMatrix(){
+		logger.trace("Init Random Membership Matrix");
 		this.initMembershipMatrix = new double[data.height()][centroidsAmount];
-		Random random = new Random();
+		
 		for(int i = 0; i< initMembershipMatrix.length; i++){
 			for (int j = 0; j < initMembershipMatrix[i].length; j++) {
 				random.setSeed(System.nanoTime());
-				double randomValue = random.nextDouble()*random.nextInt(100);
+				double randomValue = random.nextDouble();
 				if(randomValue== 0.0){
 					randomValue = random.nextDouble();
 				}
