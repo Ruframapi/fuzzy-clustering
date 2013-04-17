@@ -24,10 +24,11 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
  * @author Ricardo Carvajal Salamanca
  *
  */
-public class BigMatrixFileManager implements Closeable {
+public class BigMatrixFileManager1 implements Closeable {
 	private static final String METADATA_NAME = "META_DATA";
 	private static final String METADATA_ITEM1 = "height";
 	private static final String METADATA_ITEM2 = "width";
+	//op1 >> op2 Desplaza los bits de op1 a la izquierda op2 veces
     private static final int MAPPING_SIZE = 1 << 30;
     private RandomAccessFile raf;
     private int width;
@@ -40,6 +41,7 @@ public class BigMatrixFileManager implements Closeable {
     							 int height, int width) throws IOException{
     	this.fileName = fileName;
     	String folderPath = PersistenceFacade.getInstance().getFolderPath(dataFolder);
+    	PersistenceFacade.getInstance().createFolder(folderPath);
     	this.raf = new RandomAccessFile(folderPath + System.getProperty("file.separator") + fileName, "rw");
     	this.loadFile(MapMode.READ_WRITE,height,width);
     }
@@ -80,6 +82,30 @@ public class BigMatrixFileManager implements Closeable {
         return height;
     }
 
+   /* public double get(int x, int y) {
+        assert x >= 0 && x < width;
+        assert y >= 0 && y < height;
+        long p = position(x, y) * 8;
+        int mapN = (int) (p / MAPPING_SIZE);
+        int offN = (int) (p % MAPPING_SIZE);
+        return mappings.get(mapN).getDouble(offN);
+        //return mappings.get(x).getDouble(y);
+        
+    }
+
+    public void set(int x, int y, double d) {
+        assert x >= 0 && x < width;
+        assert y >= 0 && y < height;
+        long p = position(x, y) * 8;
+        int mapN = (int) (p / MAPPING_SIZE);
+        int offN = (int) (p % MAPPING_SIZE);
+        mappings.get(mapN).putDouble(offN, d);
+       //mappings.get(x).putDouble(y, d);
+        
+    }
+    
+    */
+    
     public double get(int x, int y) {
         assert x >= 0 && x < width;
         assert y >= 0 && y < height;
@@ -101,6 +127,7 @@ public class BigMatrixFileManager implements Closeable {
        //mappings.get(x).putDouble(y, d);
         
     }
+    
 
     public void close() throws IOException {
         for (MappedByteBuffer mapping : mappings)
