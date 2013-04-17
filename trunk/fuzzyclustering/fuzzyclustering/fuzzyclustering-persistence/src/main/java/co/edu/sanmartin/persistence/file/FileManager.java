@@ -242,7 +242,7 @@ public class FileManager {
 	 * Lee un archivo utilizando la libreria java.nio
 	 * @throws Exception
 	 */
-	public String readFileNio(String fileName){
+	public String readFileNio(String fileName) {
 		String data = null;
 		FileChannel fc  = null;
 		ByteBuffer buff = null;

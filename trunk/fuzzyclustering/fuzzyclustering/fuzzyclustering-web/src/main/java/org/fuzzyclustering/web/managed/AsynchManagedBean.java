@@ -8,6 +8,8 @@ import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
 
+import org.apache.log4j.Logger;
+import org.primefaces.component.outputlabel.OutputLabel;
 import org.primefaces.push.PushContext;
 import org.primefaces.push.PushContextFactory;
 
@@ -17,15 +19,14 @@ import co.edu.sanmartin.persistence.dto.DocumentDTO;
 @ApplicationScoped
 public class AsynchManagedBean implements Serializable{
 
-	/**
-	 * 
-	 */
+	private static Logger logger = Logger.getLogger("AsynchManagedBean");
 	private static final long serialVersionUID = -4274203108208588123L;
 	private String downloadStatus = "test";
 	private String documentData;
 	private String cleanData;
 	private String documentName;
-	
+	private OutputLabel originalDataLabel;
+	private OutputLabel cleanDataLabel;
 
 	@PostConstruct
 	public void init(){
@@ -40,12 +41,30 @@ public class AsynchManagedBean implements Serializable{
 		PushContext pushContext = PushContextFactory.getDefault().getPushContext();  
         pushContext.push("/status", downloadStatus); 
 	}
+	
+	
 	public void setDocument(DocumentDTO document) {
-		this.documentData = document.getLazyData();
-		this.cleanData = document.getLazyCleanData();
-		this.documentName= document.getName();
-		PushContext pushContext = PushContextFactory.getDefault().getPushContext();  
-        pushContext.push("/document", document); 
+		try{
+			this.documentData = document.getLazyData();
+			this.cleanData = document.getLazyCleanData();
+			this.documentName= document.getName();
+			
+			//getOriginalDataLabel().setValue(this.documentData);
+			//getCleanDataLabel().setValue(this.cleanData);
+			//isValid = calculate isValid
+			
+			//RequestContext requestContext = RequestContext.getCurrentInstance();
+			//requestContext.update("originalDataLabel");
+			//requestContext.update("cleanDataLabel");
+	
+			
+			PushContext pushContext = PushContextFactory.getDefault().getPushContext();  
+	        pushContext.push("/document", document); 
+	        
+		}catch(Exception e){
+			logger.error("Error in AsynchManagedBean setDocument",e);
+		}
+        
 	}
 	
 	public String getDocumentData() {
@@ -58,11 +77,22 @@ public class AsynchManagedBean implements Serializable{
 		return documentName;
 	}
 	
+	public OutputLabel getOriginalDataLabel() {
+		return originalDataLabel;
+	}
+	public void setOriginalDataLabel(OutputLabel originalDataLabel) {
+		this.originalDataLabel = originalDataLabel;
+	}
+	public OutputLabel getCleanDataLabel() {
+		return cleanDataLabel;
+	}
+	public void setCleanDataLabel(OutputLabel cleanDataLabel) {
+		this.cleanDataLabel = cleanDataLabel;
+	}
 	public void sendMessageAsynch(String message){
-		
-		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
-				"Mensaje Recibido", message);
-		FacesContext.getCurrentInstance().addMessage(null, msg);
+		logger.info("Sending Message Asynch" + message);
+		PushContext pushContext = PushContextFactory.getDefault().getPushContext(); 
+		pushContext.push("/notifications", new FacesMessage("Test", "Test"));
 	}
 	
 	

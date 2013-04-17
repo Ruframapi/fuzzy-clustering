@@ -7,6 +7,7 @@ import java.math.RoundingMode;
 import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
 import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
 import co.edu.sanmartin.persistence.file.BigIntegerMatrixFileManager;
 
@@ -29,6 +30,7 @@ public class MutualInformation {
 	 */
 	public void buildMutualInformationBigMatrix(boolean persist) throws IOException{
 		logger.info("Inicializando construccion de Matrix PPMI");
+		SendMessageAsynch.sendMessage("Creando PPMI Matriz");
 		long time_start = 0, time_end=0;
 		time_start = System.currentTimeMillis();
 		InvertedIndex invertedIndex = new InvertedIndex();
@@ -63,9 +65,11 @@ public class MutualInformation {
 			largeMatrixPpmi.close();
 		}
 		time_end = System.currentTimeMillis();
-		logger.info("La construccion de la Matrix PPMI tomo "+ 
+		String finalMessage = "La construccion de la Matrix PPMI tomo "+ 
 				( time_end - time_start )/1000 +" segundos" + 
-				(( time_end - time_start )/1000)/60 +" minutos");
+				(( time_end - time_start )/1000)/60 +" minutos";
+		logger.info(finalMessage);
+		SendMessageAsynch.sendMessage("Creando PPMI Matriz");
 	}
 	
 	

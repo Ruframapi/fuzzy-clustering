@@ -30,14 +30,10 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 @ManagedBean(name = "irInvertedIndex")
 @ViewScoped
 public class IRInvertedIndexManagedBean implements Serializable {
+	private static final long serialVersionUID = 2591152720434384133L;
 	private static Logger logger = Logger.getRootLogger();
 	@ManagedProperty(value = "#{documents}") 
 	private DocumentsManagedBean documents;
-	
-	/*@PostConstruct
-	public void load(){
-		documents.loadDocuments(EDataFolder.ORIGINAL_RSS);
-	}*/
 	
 	public void load(){
 		documents.loadDocuments(EDataFolder.INVERTED_INDEX);
@@ -64,6 +60,70 @@ public class IRInvertedIndexManagedBean implements Serializable {
 			FacesContext.getCurrentInstance().addMessage(null, msg);
 		}
 		
+	}
+	
+	/**
+	 * Envia la solicitud de creación de la matrix Termino Termino
+	 */
+	public void buildTermTermMatrix(){
+		logger.debug("Start download process");
+		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+				"Inicializa Proceso de Creación de Matrix Termino Termino", "");
+		FacesContext.getCurrentInstance().addMessage(null, msg);
+		try{
+			this.addQueueDownload(EQueueEvent.GENERATE_TERM_TERM_MATRIX, PersistenceFacade.getInstance().getServerDate().getTime());
+			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+					"Proceso En Curso", ".");
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+		catch(PatternSyntaxException e){
+			msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Error al realizar el proceso", e.getDescription());
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+	}
+	
+	/**
+	 * Envia la solicitud de la creación de la matrix PPMI
+	 */
+	public void buildPPMIMatrix(){
+		logger.debug("Start download process");
+		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+				"Inicializa Proceso de Creación de Matrix PPMI", "");
+		FacesContext.getCurrentInstance().addMessage(null, msg);
+		try{
+			this.addQueueDownload(EQueueEvent.GENERATE_PPMI_MATRIX, PersistenceFacade.getInstance().getServerDate().getTime());
+			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+					"Proceso En Curso", ".");
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+		catch(PatternSyntaxException e){
+			msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Error al realizar el proceso", e.getDescription());
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+	}
+	
+	/**
+	 * Envia la solicitud de las matrices necesarias para generar los CMeans
+	 */
+	public void buildCmeansAllMatrix(){
+		logger.debug("Start download process");
+		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+				"Creacion de Matrices", "Iniciando el proceso de creacion de las matrices necesarias para " +
+						"la ejecucion de los algoritmos C-Mmeans");
+		FacesContext.getCurrentInstance().addMessage(null, msg);
+		try{
+			this.addQueueDownload(EQueueEvent.GENERATE_ALL_MATRIX, PersistenceFacade.getInstance().getServerDate().getTime());
+			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+					"Proceso En Curso", ".");
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+		catch(PatternSyntaxException e){
+			msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Error al realizar el proceso", e.getDescription());
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
 	}
 	
 	

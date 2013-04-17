@@ -11,6 +11,7 @@ import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
 import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
 import co.edu.sanmartin.persistence.file.BigIntegerMatrixFileManager;
 
@@ -128,6 +129,7 @@ public class InvertedIndex {
 	 */
 	public void createTermTermBigMatrix(boolean persist) throws IOException{
 		logger.info("Inicializando construccion de Matrix Termino Termino");
+		SendMessageAsynch.sendMessage("Creando Matriz de Terminos");
 		long time_start = 0, time_end=0;
 		time_start = System.currentTimeMillis();
 		//Se almacena en memoria los punteros de los documentos para no volver a recorrer la lista
@@ -167,9 +169,12 @@ public class InvertedIndex {
 			logger.error("Error in createTermTermBigMatrix",e);
 		}
 		time_end = System.currentTimeMillis();
-		logger.info("La construccion de la Matrix Termino Termino tomo "+ 
+		String finalMessage = "La construccion de la Matrix Termino Termino tomo "+ 
 				( time_end - time_start )/1000 +" segundos" + 
-				(( time_end - time_start )/1000)/60 +" minutos");
+				(( time_end - time_start )/1000)/60 +" minutos";
+		logger.info(finalMessage);
+		SendMessageAsynch.sendMessage(finalMessage);
+		
 	}
 
 	/**

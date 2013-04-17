@@ -3,7 +3,6 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:p="http://primefaces.org/ui">
-
 	<h:form>
 		<p:menubar>
 			<p:submenu label="Configuracion" icon="ui-icon-document">
@@ -14,24 +13,27 @@
 				<p:menuitem value="Origenes de Datos" url="source.xhtml" />
 				<p:menuitem value="Stop Words" url="stopwords.xhtml" />
 				<p:menuitem value="Parametros de Configuracion" url="setup.xhtml" />
-				<p:menuitem value="Copiar Configuraciones" actionListener="#{setup.backupSystem}" />
-				<p:menuitem value="Restaurar Configuracion" actionListener="#{setup.restoreSystem}" />
+				<p:menuitem value="Copiar Configuraciones"
+					actionListener="#{setup.backupSystem}" />
+				<p:menuitem value="Restaurar Configuracion"
+					actionListener="#{setup.restoreSystem}" />
 				<p:separator />
 				<p:menuitem value="Salir" url="index.xhtml" />
 			</p:submenu>
-			<p:submenu label="Recuperacion de Informacion" icon="ui-icon-document">
-				<p:menuitem value="Descarga de archivos" url="irdownload.xhtml"/>
-				<p:menuitem value="Indice Invertido" url="irinvertedindex.xhtml" />
-				<p:menuitem value="Matrices de Terminos" url="irmatrix.xhtml" />
+			<p:submenu label="Recuperacion de Informacion"
+				icon="ui-icon-document">
+				<p:menuitem value="Descarga de archivos" url="irdownload.xhtml" />
+				<p:menuitem value="Generacion de Indices" url="irinvertedindex.xhtml" />
 			</p:submenu>
 			<p:submenu label="Clustering" icon="ui-icon-document">
-				<p:menuitem value="Generar Conjuntos Difusos C-Means" url="cmeans.xhtml" />
+				<p:menuitem value="Generar Conjuntos Difusos C-Means"
+					url="cmeans.xhtml" />
 			</p:submenu>
 		</p:menubar>
 		<!-- <p:messages id="messages" showDetail="true" autoUpdate="true"
 		closable="true" /> -->
-		<p:growl id="messages" showDetail="true" sticky="true"
-			autoUpdate="true" />
+		<p:growl widgetVar="growl" id="messages" showDetail="true"
+			sticky="true" autoUpdate="true" />
 		<p:confirmDialog id="confirmDialog"
 			message="Esta seguro de eliminar todos los datos y configuraciones del sistema?"
 			header="Proceso de eliminacion de informacion" severity="alert"
@@ -44,4 +46,5 @@
 				onclick="confirmation.hide()" type="button" />
 		</p:confirmDialog>
 	</h:form>
+	<p:socket onMessage="notificationMessage" channel="/notifications" />
 </ui:composition>

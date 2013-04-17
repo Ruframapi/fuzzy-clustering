@@ -2,29 +2,57 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:p="http://primefaces.org/ui" template="templates/irtemplate.xhtml">
+	xmlns:p="http://primefaces.org/ui" template="templates/template.xhtml">
 	<f:metadata>
-	<f:event listener="#{irInvertedIndex.load}" type="preRenderView" />
+		<f:event listener="#{irInvertedIndex.load}" type="preRenderView" />
 	</f:metadata>
-	<ui:define name="headDocuments">
+	<ui:define name="context">
+		<ui:include src="contextmenu.xhtml" />
+	</ui:define>
+	<ui:define name="content">
 		<h:form id="documentForm">
 			<p:growl id="growl" showDetail="true" />
-			<p:panel header="Construccion de Indice Invertido">
-			<p:panelGrid columns="2" >
-				
+			<p:panel header="Proceso de construccion de indices de terminos">
 				<p:panelGrid columns="2">
-					<p:outputLabel>Documentos normalizados:</p:outputLabel>
-					<p:outputLabel>0</p:outputLabel>
-					<p:outputLabel>Tiempo de Limipieza:</p:outputLabel>
-					<p:outputLabel>0</p:outputLabel>
+				<f:facet name="header"> Indice Invertido</f:facet>
+					<p:panelGrid columns="2">
+						<p:outputLabel>Total Terminos:</p:outputLabel>
+						<p:outputLabel>0</p:outputLabel>
+						<p:outputLabel>Tiempo de Generacion:</p:outputLabel>
+						<p:outputLabel>0</p:outputLabel>
+					</p:panelGrid>
+					<p:commandButton value="Generar"
+						actionListener="#{irInvertedIndex.buildInvertedIndex}">
+					</p:commandButton>
 				</p:panelGrid>
-				<p:commandButton value="Generar Indice" actionListener="#{irInvertedIndex.buildInvertedIndex}"> </p:commandButton>
-			</p:panelGrid>
+				<p:panelGrid columns="2">
+					<f:facet name="header"> Matrix Termino - Termino</f:facet>
+					<p:panelGrid columns="2">
+						<p:outputLabel>Total Terminos:</p:outputLabel>
+						<p:outputLabel>0</p:outputLabel>
+						<p:outputLabel>Tiempo de Generacion:</p:outputLabel>
+						<p:outputLabel>0</p:outputLabel>
+					</p:panelGrid>
+					<p:commandButton value="Generar"
+						actionListener="#{irInvertedIndex.buildInvertedIndex}">
+					</p:commandButton>
+				</p:panelGrid>
+				<p:panelGrid columns="2">
+					<f:facet name="header"> Matrix Mutual Information PPMI</f:facet>
+					<p:panelGrid columns="2">
+						<p:outputLabel>Total Terminos:</p:outputLabel>
+						<p:outputLabel>0</p:outputLabel>
+						<p:outputLabel>Tiempo de Generacion:</p:outputLabel>
+						<p:outputLabel>0</p:outputLabel>
+					</p:panelGrid>
+					<p:commandButton value="Generar"
+						actionListener="#{irInvertedIndex.buildInvertedIndex}">
+					</p:commandButton>
+				</p:panelGrid>
+				<p:commandButton value="Generar Todos"
+						actionListener="#{irInvertedIndex.buildInvertedIndex}">
+					</p:commandButton>
 			</p:panel>
 		</h:form>
 	</ui:define>
-	<ui:define name="documents">
-		<ui:include src="documents.xhtml" />
-	</ui:define>
-
 </ui:composition>

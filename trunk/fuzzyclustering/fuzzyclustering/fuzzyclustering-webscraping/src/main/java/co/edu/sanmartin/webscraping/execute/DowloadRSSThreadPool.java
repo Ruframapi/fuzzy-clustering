@@ -18,6 +18,7 @@ import co.edu.sanmartin.persistence.dto.QueueDTO;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
 import co.edu.sanmartin.webscraping.execute.worker.RssDownloadWorkerThread;
 import co.edu.sanmartin.webscraping.execute.worker.TwitterDownloadWorkerThread;
 
@@ -72,5 +73,6 @@ public class DowloadRSSThreadPool {
 		}
 		this.queue.setStatus(EQueueStatus.SUCESS);
 		executor.shutdown();
+		SendMessageAsynch.sendMessage("Nuevas Noticias Rss Descargadas. Total" + rssSequence.get());
 	}
 }
