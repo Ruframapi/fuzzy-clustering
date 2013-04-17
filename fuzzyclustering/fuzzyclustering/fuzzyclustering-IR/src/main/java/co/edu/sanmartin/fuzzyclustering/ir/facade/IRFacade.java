@@ -1,19 +1,11 @@
 package co.edu.sanmartin.fuzzyclustering.ir.facade;
 
 import java.io.IOException;
-import java.sql.SQLException;
-
-import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
-import co.edu.sanmartin.fuzzyclustering.ir.index.CmeansMatrixBuilder;
 import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
 import co.edu.sanmartin.fuzzyclustering.ir.index.MutualInformation;
-import co.edu.sanmartin.persistence.constant.EModule;
-import co.edu.sanmartin.persistence.constant.EQueueEvent;
-import co.edu.sanmartin.persistence.constant.EQueueStatus;
-import co.edu.sanmartin.persistence.dto.QueueDTO;
-import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
 
 /**
  * Fachada que gestiona los procesos de recuperación de la informacion (Information Retrieval)
@@ -57,7 +49,18 @@ public class IRFacade {
 	 * Construye todas las matrices necesarias para la construcion de los conjuntos difusos
 	 */
 	public void buildCmeanMatrix() throws Exception{
-		CmeansMatrixBuilder builder = new CmeansMatrixBuilder();
-		builder.build();
+		try {
+			InvertedIndex invertedIndex = new InvertedIndex();
+			InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool();
+			threadPool.run();
+			invertedIndex.createTermTermBigMatrix(true);
+			MutualInformation mutualInformation = new MutualInformation();
+			mutualInformation.buildMutualInformationBigMatrix(true);
+			SendMessageAsynch.sendMessage("PPMI Matriz Creada");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		SendMessageAsynch.sendMessage("Proceso Finalizado");
 	}
 }

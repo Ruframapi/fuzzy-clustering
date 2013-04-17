@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
@@ -28,7 +29,7 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
  *
  */
 @ManagedBean(name = "documents")
-@ViewScoped
+@SessionScoped
 public class DocumentsManagedBean implements Serializable {
 	/**
 	 * 
@@ -39,7 +40,7 @@ public class DocumentsManagedBean implements Serializable {
 	private DocumentDTO document;
 	private String originalDataDocument;
 	private String cleanDataDocument;
-
+	
 	public Collection<DocumentDTO> getDocumentsColl() {
 		return documentsColl;
 	}

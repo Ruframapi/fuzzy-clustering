@@ -20,6 +20,7 @@ import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.PropertyDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
 
 /**
  * Thead pool con fin de crear un pool de 10 hilos para la descarga de los documentos
@@ -32,7 +33,7 @@ public class InvertedIndexThreadPool implements Runnable{
 
 	public void run() {
 		logger.info("Inicializando construccion del indice invertido");
-		
+		SendMessageAsynch.sendMessage("Creando Indice Invertido");
 		long time_start, time_end;
 		time_start = System.currentTimeMillis();
 		int threadPoolNumber = 10;
@@ -74,11 +75,12 @@ public class InvertedIndexThreadPool implements Runnable{
 		index.saveIndex();
 		time_end = System.currentTimeMillis();
 		
-		logger.info("La construccion del indice invertido tomo "+ 
-		( time_end - time_start )/1000 +" segundos" + 
-		(( time_end - time_start )/1000)/60 +" minutos");
+		String finalMessage = "La construccion del indice invertido tomo "+ 
+				( time_end - time_start )/1000 +" segundos" + 
+				(( time_end - time_start )/1000)/60 +" minutos";
+		logger.info(finalMessage);
 		
-		//invertedIndex.getInstance().printIndex();
+		SendMessageAsynch.sendMessage(finalMessage);
 		
 	}
 }

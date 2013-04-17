@@ -21,6 +21,7 @@ import co.edu.sanmartin.persistence.dto.QueueDTO;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
 
 /**
  * Clase que arranca el sistema de descarga de Noticias

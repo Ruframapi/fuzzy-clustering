@@ -15,6 +15,8 @@ import javax.servlet.http.HttpSession;
 import org.fuzzyclustering.web.managed.AsynchManagedBean;
 import javax.faces.context.FacesContext;
 import org.fuzzyclustering.web.managed.FacesContextBuilder;
+import org.fuzzyclustering.web.managed.documents.DocumentsManagedBean;
+import org.primefaces.component.outputlabel.OutputLabel;
 
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 
@@ -25,9 +27,7 @@ import co.edu.sanmartin.persistence.dto.DocumentDTO;
 
 public class AsynchServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
-	@ManagedProperty(value = "#{status}") 
-	private AsynchManagedBean status;
+
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -43,8 +43,6 @@ public class AsynchServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		
 		this.doPost(request, response);
-		
-		
 		//status.setDownloadStatus("Downloading: " + new Date().toString());
 	}
 
@@ -65,12 +63,16 @@ public class AsynchServlet extends HttpServlet {
 			document.setLazyCleanData(this.getWrappedData(request.getParameter("cleanDocument")));
 			document.setName(request.getParameter("documentName"));
 			bean1.setDocument(document);
+			
+			/*DocumentsManagedBean documents = (DocumentsManagedBean) FacesContext.getCurrentInstance().
+					getExternalContext().getSessionMap().get("documents");
+			documents.setOriginalDataDocument(this.getWrappedData(request.getParameter("originalDocument")));
+			*/
 		}
 		if(request.getParameter("message")!=null){
 			AsynchManagedBean bean1 = (AsynchManagedBean) getServletContext().getAttribute("asynch");
 			bean1.sendMessageAsynch(request.getParameter("message"));
 		}
-
 	}
 	
 	/**
@@ -83,20 +85,9 @@ public class AsynchServlet extends HttpServlet {
 		stringBuilder.append(data);
 		int position = 0;
 		while((position+=110)<data.length()){
-			stringBuilder.insert(position+10, " ");
+			stringBuilder.insert(position-10, " ");
 		}
 		return stringBuilder.toString();
 	}
-
-	public AsynchManagedBean getStatus() {
-		return status;
-	}
-
-	public void setStatus(AsynchManagedBean status) {
-		this.status = status;
-	}
 	
-	
-	
-
 }
