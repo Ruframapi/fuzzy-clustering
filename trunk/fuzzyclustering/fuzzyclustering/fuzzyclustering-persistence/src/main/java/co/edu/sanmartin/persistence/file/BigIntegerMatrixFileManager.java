@@ -127,7 +127,7 @@ public class BigIntegerMatrixFileManager implements Closeable{
     	stringBuilder.append(fileName);
     	stringBuilder.append("_");
     	stringBuilder.append(this.METADATA_NAME);
-    	stringBuilder.append(".txt");
+    	stringBuilder.append(".dat");
     	return stringBuilder.toString();
     }
 

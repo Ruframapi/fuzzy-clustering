@@ -39,7 +39,7 @@ public class IRTest {
 	
 	@Test
 	public void invertedIndexTest() {
-		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool();
+		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(2);
 		threadPool.run();
 		//Thread thread = new Thread(threadPool);
 		//thread.start();
@@ -156,12 +156,10 @@ public class IRTest {
 		BigDoubleMatrixFileManager bigMatrixFileManager = new BigDoubleMatrixFileManager();
 		bigMatrixFileManager.loadReadWrite(EDataFolder.MATRIX, fileName,matrix.length,matrix[0].length);
 		System.out.println("Init savematrix");
-		StringBuilder data = new StringBuilder();
 		for (int i = 0; i < matrix.length; i++) {;
 			for (int j = 0; j < matrix[i].length; j++) {
 				bigMatrixFileManager.set(i,j, matrix[i][j]);
 			}
-			
 		}
 		bigMatrixFileManager.close();
 	}
@@ -370,7 +368,7 @@ public class IRTest {
 	public void buildAllMatrixTest(){
 		IRFacade irFacade = IRFacade.getInstance();
 		try {
-			irFacade.buildCmeanMatrix();
+			irFacade.buildCmeanMatrix(0);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

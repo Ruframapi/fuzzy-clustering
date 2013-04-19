@@ -14,7 +14,6 @@
     <module>fuzzyclustering-web</module>
     <module>fuzzyclustering-machinelearning</module>
     <module>fuzzyclustering-cleaner</module>
-    
-    <module>fuzzyclustering-queryasinch</module>
+    <module>fuzzyclustering-queryasynch</module>
   </modules>
 </project>

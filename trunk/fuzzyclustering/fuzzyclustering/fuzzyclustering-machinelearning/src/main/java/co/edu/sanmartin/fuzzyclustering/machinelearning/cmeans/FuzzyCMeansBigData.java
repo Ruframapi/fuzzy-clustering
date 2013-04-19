@@ -68,17 +68,8 @@ public class FuzzyCMeansBigData {
 	 */
 	public FuzzyCMeansBigData(String fileName, int centroidsAmount, int iterationsAmount, 
 								double mValue, boolean buildMatrix){	
-		
-		try {
-			if(buildMatrix){
-				try {
-					IRFacade.getInstance().buildCmeanMatrix();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					logger.error("Error in FuzzyCMeansBigData",e);
-				}
-			}
-			
+		logger.info("Init FuzzyCMeansBigData Method");
+		try {			
 			this.data  = new BigDoubleMatrixFileManager();
 			data.loadReadOnly(EDataFolder.MATRIX, fileName);
 			this.centroidsAmount = centroidsAmount;
@@ -135,7 +126,7 @@ public class FuzzyCMeansBigData {
 		this.membershipMatrix = new double[data.height()][centroidsAmount];
 		for (int i = 0; i < this.iterationAmount; i++) {
 			//this.saveDoubleMatrix(this.initMembershipMatrix, "relationship"+i+".txt");
-			this.saveDoubleMatrix(this.centroids, "centroids"+i+".txt");
+			//this.saveDoubleMatrix(this.centroids, "centroids"+i+".txt");
 			this.calculateMembershipMatrix();
 			this.initMembershipMatrix = membershipMatrix.clone();
 			this.membershipMatrix = new double[data.height()][centroidsAmount];
@@ -143,9 +134,8 @@ public class FuzzyCMeansBigData {
 			
 			
 		}
-		
-		this.saveDoubleMatrix(this.centroids, "centroids.txt");
-		this.saveDoubleMatrix(this.initMembershipMatrix, "relationship.txt");
+		PersistenceFacade.getInstance().saveMatrixDouble(this.centroids, EDataFolder.MACHINE_LEARNING, "centroids.txt", 0, 4);
+		PersistenceFacade.getInstance().saveMatrixDouble(this.initMembershipMatrix, EDataFolder.MACHINE_LEARNING, "relationship.txt", 0, 4);
 		time_end = System.currentTimeMillis();
 		
 		String result = "El proceso de clusterizacion Tomo "+ 
@@ -339,18 +329,8 @@ public class FuzzyCMeansBigData {
 	 * Almacena la matriz en disco
 	 **/
 	public void saveDoubleMatrix(double[][] matrix, String fileName){
-		StringBuilder data = new StringBuilder();
-		for (int i = 0; i < matrix.length; i++) {
-		for (int j = 0; j < matrix[i].length; j++) {
-			data.append(matrix[i][j]);
-			if(j+1<matrix[i].length){
-				data.append(";");
-			}
-		}
-		data.append(System.getProperty("line.separator"));
-		}
-		PersistenceFacade.getInstance().writeFile(EDataFolder.MACHINE_LEARNING, 
-				fileName, data.toString());
+		
+		PersistenceFacade.getInstance().saveMatrixDouble(matrix, EDataFolder.MACHINE_LEARNING, fileName, 0, 2);
 	}
 	
 	public void sendMessageAsynch(String message){

@@ -34,6 +34,7 @@ public class Main{
 	public static void main ( String args[]){
 		logger.info("Init QueryAsynch App");
 		Dequeue dequeue = new Dequeue();
-		dequeue.run();
+		Thread thread = new Thread(dequeue);
+		thread.start();
 	}
 }

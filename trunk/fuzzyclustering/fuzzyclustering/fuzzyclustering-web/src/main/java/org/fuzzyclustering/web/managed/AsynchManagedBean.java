@@ -92,7 +92,7 @@ public class AsynchManagedBean implements Serializable{
 	public void sendMessageAsynch(String message){
 		logger.info("Sending Message Asynch" + message);
 		PushContext pushContext = PushContextFactory.getDefault().getPushContext(); 
-		pushContext.push("/notifications", new FacesMessage("Test", "Test"));
+		pushContext.push("/notifications", new FacesMessage("Mensaje del Servidor Remoto", message));
 	}
 	
 	

@@ -20,7 +20,7 @@ import co.edu.sanmartin.persistence.file.BigIntegerMatrixFileManager;
  */
 public class MutualInformation {
 	private static Logger logger = Logger.getLogger("MutualInformation");
-	public static final String PPMI_FILE_NAME = "ppmi.txt"; 
+	public static final String PPMI_FILE_NAME = "ppmi.dat"; 
 	
 	
 	

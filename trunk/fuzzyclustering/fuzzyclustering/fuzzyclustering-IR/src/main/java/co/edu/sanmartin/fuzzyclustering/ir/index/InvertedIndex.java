@@ -21,8 +21,8 @@ import co.edu.sanmartin.persistence.file.BigIntegerMatrixFileManager;
  *
  */
 public class InvertedIndex {
-	public static String TERM_TERM_FILENAME="termterm.txt";
-	public static String TERM_DOCUMENT_FILENAME="termdocument.txt";
+	public static String TERM_TERM_FILENAME="termterm.dat";
+	public static String TERM_DOCUMENT_FILENAME="termdocument.dat";
 	Logger logger = Logger.getLogger("InvertedIndex");
 	//Archivo de indices invertidos
 	private String invertedIndexData;
@@ -92,8 +92,13 @@ public class InvertedIndex {
 		this.totalDocumentsCount = totalDocumentsCount;
 	}
 
-	public void createInvertedIndex(){
-		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool();
+	/*
+	 * Crea el indice invertido utilizando Thread Pool 
+	 * @param minTermsOcurrences cantidad minima de ocurrencias que debe tener un termino para almacenarse 
+	 * en el indice invertido
+	 */
+	public void createInvertedIndex(int minTermsOcurrences){
+		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(minTermsOcurrences);
 		Thread thread=new Thread(threadPool);
 		thread.start();
 	}

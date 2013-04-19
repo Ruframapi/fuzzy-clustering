@@ -3,6 +3,7 @@ package co.edu.sanmartin.fuzzyclustering.ir.facade;
 import java.io.IOException;
 
 import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
+import co.edu.sanmartin.fuzzyclustering.ir.index.DimensionallyReduced;
 import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
 import co.edu.sanmartin.fuzzyclustering.ir.index.MutualInformation;
 import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
@@ -16,6 +17,7 @@ public class IRFacade {
 
 	private static IRFacade instance;
 	private InvertedIndex invertedIndex = new InvertedIndex();
+	
 	private IRFacade(){
 		
 	}
@@ -27,8 +29,8 @@ public class IRFacade {
 		return instance;
 	}
 
-	public void createInvertedIndex(){
-		invertedIndex.createInvertedIndex();
+	public void createInvertedIndex(int minTermsOcurrences){
+		invertedIndex.createInvertedIndex(minTermsOcurrences);
 	}
 	
 	public void createTermTermBigMatrix(boolean persist) throws IOException{
@@ -46,12 +48,26 @@ public class IRFacade {
 	}
 	
 	/**
+	 * Realiza el proceso de reducción de dimensionalidad
+	 * @param fileName
+	 * @param newDimension
+	 * @param saveReadable
+	 * @param reableRowsAmount
+	 */
+	public void reducedDimensionPPMIMatrix(int newDimension, 
+			boolean saveReadable, int reableRowsAmount){
+		DimensionallyReduced dimensionally = new DimensionallyReduced();
+		dimensionally.reducedDimensionDoubleMatrix(MutualInformation.PPMI_FILE_NAME, 
+				newDimension, saveReadable, reableRowsAmount);
+	}
+	
+	/**
 	 * Construye todas las matrices necesarias para la construcion de los conjuntos difusos
 	 */
-	public void buildCmeanMatrix() throws Exception{
+	public void buildCmeanMatrix(int minQuantiryTerms) throws Exception{
 		try {
 			InvertedIndex invertedIndex = new InvertedIndex();
-			InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool();
+			InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(minQuantiryTerms);
 			threadPool.run();
 			invertedIndex.createTermTermBigMatrix(true);
 			MutualInformation mutualInformation = new MutualInformation();
@@ -63,4 +79,7 @@ public class IRFacade {
 		}
 		SendMessageAsynch.sendMessage("Proceso Finalizado");
 	}
+	
+	
+	
 }

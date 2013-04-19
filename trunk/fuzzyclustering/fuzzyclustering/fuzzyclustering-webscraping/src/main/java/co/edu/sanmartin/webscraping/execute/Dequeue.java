@@ -111,7 +111,13 @@ public class Dequeue implements Runnable{
 				this.reloadDataMemory(queueDTO);
 				break;
 			}
-			persistenceFacade.updateQueue(queueDTO);
+			
+			try {
+				PersistenceFacade.getInstance().deleteQueue(queueDTO);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 	}
@@ -135,8 +141,12 @@ public class Dequeue implements Runnable{
 				this.persistenceFacade.getQueueByStatus(queueEvent, EQueueStatus.ENQUEUE);
 		for (QueueDTO queueDTO2 : queueActive) {
 			logger.info("Queue Cancelled id:" +queueDTO2.getId());
-			queueDTO2.setStatus(EQueueStatus.CANCELLED);
-			persistenceFacade.updateQueue(queueDTO2);
+			try {
+				PersistenceFacade.getInstance().deleteQueue(queueDTO2);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	

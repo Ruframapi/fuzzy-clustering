@@ -2,26 +2,18 @@ package co.edu.sanmartin.queryasynch.execute;
 
 import java.net.URISyntaxException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.fuzzyclustering.ir.facade.IRFacade;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EModule;
-import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
-import co.edu.sanmartin.persistence.constant.ESourceType;
-import co.edu.sanmartin.persistence.constant.ESystemProperty;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
-import co.edu.sanmartin.persistence.dto.PropertyDTO;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
-import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
@@ -30,7 +22,6 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
  * @author Ricardo Carvajal Salamanca
  *
  */
-
 
 public class Dequeue implements Runnable{
 
@@ -49,9 +40,9 @@ public class Dequeue implements Runnable{
 			logger.error(e);
 		}
 	}
-	
+
 	public void initProcess(){
-		
+
 	}
 	public void run() {
 		// TODO Auto-generated method stub
@@ -82,7 +73,7 @@ public class Dequeue implements Runnable{
 	 * @throws PropertyValueNotFoundException 
 	 */
 	public void executeQueue() throws SQLException, PropertyValueNotFoundException{
-
+		
 		Collection<QueueDTO> queueCol = 
 				this.persistenceFacade.getQueueByStatusDate(EModule.QUERYASYNCH, 
 						EQueueStatus.ENQUEUE, new Date());
@@ -94,39 +85,190 @@ public class Dequeue implements Runnable{
 			case GENERATE_INVERTED_INDEX:
 				this.generateInvertedIndex(queueDTO);
 				break;
+			case GENERATE_TERM_TERM_MATRIX:
+				this.generateTermTermMatrix(queueDTO);
+				break;
+			case GENERATE_PPMI_MATRIX:
+				this.generatePPMIMatrix(queueDTO);
+				break;
+			case GENERATE_ALL_MATRIX:
+				this.generateCmeansMatrix(queueDTO);
+				break;
+			case GENERATE_REDUCED_PPMI_MATRIX:
+				this.generateReducedPPMIMatrix(queueDTO);
+				break;
+			case SEND_MESSAGE:
+				this.sendMessage(queueDTO);
+				break;
 			}
 		}
-		
+
 	}
-	
-	private void generateInvertedIndex(QueueDTO queueDTO) {
-		// TODO Auto-generated method stub
-		IRFacade irFacade = IRFacade.getInstance();
-		irFacade.createInvertedIndex();	
+
+	/**
+	 * Realiza la reduccion de dimensionalidad de la Matrix PPMI
+	 * @param queueDTO
+	 */
+	private void generateReducedPPMIMatrix(QueueDTO queueDTO) {
+		logger.info("Init generateReducedPPMIMatrix");
 		try {
-			PersistenceFacade.getInstance().deleteQueue(queueDTO);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			String[] params = queueDTO.getParams().split(",");
+			int newDimension = Integer.parseInt(params[0]);
+			Boolean saveReadable  = Boolean.parseBoolean(params[1]);
+			int readableRowsAmount = Integer.parseInt(params[2]);
+			IRFacade irFacade = IRFacade.getInstance();
+			irFacade.reducedDimensionPPMIMatrix(newDimension, saveReadable, readableRowsAmount);
+		} catch (Exception e) {
+			logger.error("Error in generateReducedPPMIMatrix",e);
+		}
+		finally{
+			try {
+				PersistenceFacade.getInstance().deleteQueue(queueDTO);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
 	/**
+	 * Envia un mensaje al cliente
+	 * @param queueDTO
+	 */
+	private void sendMessage(QueueDTO queueDTO) {
+		// TODO Auto-generated method stub
+		try {
+			CallRemoteServlet callRemoteServlet = new CallRemoteServlet();
+			callRemoteServlet.sendMessage(queueDTO.getParams());
+		} catch (Exception e) {
+			logger.error("Error in generateInvertedIndex",e);
+		}
+		finally{
+			try {
+				PersistenceFacade.getInstance().deleteQueue(queueDTO);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * Envia la solicitud de creación del indice invertido
+	 * @param queueDTO
+	 */
+	private void generateInvertedIndex(QueueDTO queueDTO) {
+		// TODO Auto-generated method stub
+		
+		try {
+			int minTermsOcurrences = Integer.parseInt(queueDTO.getParams());
+			IRFacade irFacade = IRFacade.getInstance();
+			irFacade.createInvertedIndex(minTermsOcurrences);	
+			PersistenceFacade.getInstance().deleteQueue(queueDTO);
+		} catch (Exception e) {
+			logger.error("Error in generateInvertedIndex",e);
+		}
+		finally{
+			try {
+				PersistenceFacade.getInstance().deleteQueue(queueDTO);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * Envia la solicitud de creación de la matrix termino termino
+	 * @param queueDTO
+	 */
+	private void generateTermTermMatrix(QueueDTO queueDTO) {
+		logger.trace("Init generateTermTermMatrix Method");
+		try {
+			IRFacade irFacade = IRFacade.getInstance();
+			irFacade.createTermTermBigMatrix(true);	
+		} catch (Exception e) {
+			logger.error("Error in generateTermTermMatrix",e);
+		}
+		finally{
+			try {
+				PersistenceFacade.getInstance().deleteQueue(queueDTO);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * Envia la solicitud de creación de la matrix PPMI
+	 * @param queueDTO
+	 */
+	private void generatePPMIMatrix(QueueDTO queueDTO) {
+		// TODO Auto-generated method stub
+		
+		try {
+			IRFacade irFacade = IRFacade.getInstance();
+			irFacade.createPPMIBigMatrix(true);
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			logger.error("Error in generatePPMIMatrix",e);
+		}
+		finally{
+			try {
+				PersistenceFacade.getInstance().deleteQueue(queueDTO);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * Envia la solicitud de creación de la matrix PPMI
+	 * @param queueDTO
+	 */
+	private void generateCmeansMatrix(QueueDTO queueDTO) {
+		// TODO Auto-generated method stub
+		try {
+			int minTermsOcurrences = Integer.parseInt(queueDTO.getParams());
+			IRFacade irFacade = IRFacade.getInstance();
+			irFacade.buildCmeanMatrix(minTermsOcurrences);
+			PersistenceFacade.getInstance().deleteQueue(queueDTO);
+		} catch (Exception e) {
+			logger.error("Error in generateCmeansMatrix",e);
+		}
+		finally{
+			try {
+				PersistenceFacade.getInstance().deleteQueue(queueDTO);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
+
+
+	/**
 	 * Realiza la consulta de documentos de forma asincronica
 	 * @param queue
+	 * @throws SQLException 
 	 */
-	private void queryDocumentAsynch(QueueDTO queue){
+	private void queryDocumentAsynch(QueueDTO queueDTO) throws SQLException{
+		PersistenceFacade persistence = PersistenceFacade.getInstance();
 		try {
-			PersistenceFacade persistence = PersistenceFacade.getInstance();
 			//persistence.truncateQueryDocument();
-			if(queue.getParams()!=null){
-				int idDocument = Integer.parseInt(queue.getParams());
-				
+			if(queueDTO.getParams()!=null){
+				int idDocument = Integer.parseInt(queueDTO.getParams());
+
 				DocumentDTO document = persistence.selectDocumentById(idDocument);
 				logger.info("QueryDocumentAsynch: id:" + idDocument + " Name:" + document.getName());
 				String lazyData = persistence.readFile(EDataFolder.DOWNLOAD, document.getName());
 				String lazyCleanData = persistence.readFile(EDataFolder.CLEAN, document.getName());
-				
+
 				if(lazyData.length()>1000) lazyData=lazyData.substring(0, 1000);
 				if(lazyCleanData.length()>1000) lazyCleanData=lazyCleanData.substring(0, 1000);
 				document.setLazyData(lazyData);
@@ -143,14 +285,21 @@ public class Dequeue implements Runnable{
 					}
 				}
 			}
-			persistence.deleteQueue(queue);
-			
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			// TODO Auto-generated catch block
-			logger.error("Error in queryDocumentAsynch" + e);
+			logger.error("Error in queryDocumentAsynch", e);
+		}
+		finally{
+			try {
+				PersistenceFacade.getInstance().deleteQueue(queueDTO);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
-	
+
 	/**
 	 * Cancela las colas pendientes para reiniciar la aplicacion con una nueva orden de descarga
 	 */

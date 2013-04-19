@@ -28,7 +28,12 @@ import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
  *
  */
 public class InvertedIndexThreadPool implements Runnable{
-
+	
+	//Cantidad minima que debe aparecer un termino para almacenarlo en el indice.
+	private int minTermsOcurrences = 0;
+	public InvertedIndexThreadPool(int minTermsOcurrences){
+		this.minTermsOcurrences = minTermsOcurrences;
+	}
 	Logger logger = Logger.getLogger("InvertedIndexThreadPool");
 
 	public void run() {
@@ -72,7 +77,7 @@ public class InvertedIndexThreadPool implements Runnable{
 			e.printStackTrace();
 		}
 		//Guarda el indice invertido
-		index.saveIndex();
+		index.saveIndex(this.minTermsOcurrences);
 		time_end = System.currentTimeMillis();
 		
 		String finalMessage = "La construccion del indice invertido tomo "+ 
