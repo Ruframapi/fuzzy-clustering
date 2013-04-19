@@ -54,20 +54,15 @@ public class DocumentDAO extends AbstractDAO<DocumentDTO>{
 	public synchronized void update(DocumentDTO document) throws SQLException {
 		try {
 			connection = getConnectionPool().getConnection();
-			sQLQuery = "UPDATE document SET sourcetype = ?, name = ?,source = ?,published_date = ?, download_date = ?, clean_date = ? WHERE id = ?";
+			sQLQuery = "UPDATE document SET clean_date = ? WHERE id = ?";
 			statement = connection.prepareStatement(sQLQuery);
-			statement.setString(1, document.getSourceType().name());
-			statement.setString(2, document.getName());
-			statement.setString(3, document.getSource());
-			statement.setTimestamp(4, new Timestamp(document.getPublishedDate().getTime()));
-			statement.setTimestamp(5, new Timestamp(document.getDownloadDate().getTime()));
 			if(document.getCleanDate()==null){
-				statement.setTimestamp(6, null);
+				statement.setTimestamp(1, null);
 			}
 			else{
-				statement.setTimestamp(6, new Timestamp(document.getCleanDate().getTime()));
+				statement.setTimestamp(1, new Timestamp(document.getCleanDate().getTime()));
 			}
-			statement.setInt(7, document.getId());
+			statement.setInt(2, document.getId());
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

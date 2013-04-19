@@ -217,6 +217,15 @@ public class PersistenceFacade {
 	public String readFile(EDataFolder dataFolder, String fileName){
 		return fileManager.readFile(dataFolder, fileName);
 	}
+	
+	public void saveDoubleMatrixNio(double[][] matrix, String fileName) throws Exception{
+		this.fileManager.saveDoubleMatrixNio(matrix, fileName);
+	}
+	
+	public void saveMatrixDouble(double[][] matrix, EDataFolder dataFolder, 
+			String fileName, int matrixLimit, int roundScale){
+		this.fileManager.saveMatrixDouble(matrix, dataFolder, fileName, matrixLimit, roundScale);
+	}
 
 	public Collection<DocumentDTO> getFileList(EDataFolder dataFolder) {
 		return fileManager.getFileList(dataFolder);

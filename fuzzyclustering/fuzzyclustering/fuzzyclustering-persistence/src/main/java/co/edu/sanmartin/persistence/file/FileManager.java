@@ -8,6 +8,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
@@ -213,31 +215,6 @@ public class FileManager {
 	}
 
 
-	public void readFile() throws IOException{
-
-		String name= "D:\\RicardoC\\fuzzyclustering\\data\\download\\4.txt";
-		FileInputStream fIn;
-		FileChannel fChan;
-		long fSize;
-		ByteBuffer mBuf;
-
-		try {
-			fIn = new FileInputStream(name);
-			fChan = fIn.getChannel();
-			fSize = fChan.size();
-			mBuf = ByteBuffer.allocate((int) fSize);
-			fChan.read(mBuf);
-			mBuf.rewind();
-			for (int i = 0; i < fSize; i++)
-				System.out.print((char) mBuf.get());
-			fChan.close(); 
-			fIn.close(); 
-		} catch (IOException exc) {
-			System.out.println(exc);
-			System.exit(1);
-		}
-	}	
-
 	/**
 	 * Lee un archivo utilizando la libreria java.nio
 	 * @throws Exception
@@ -287,5 +264,51 @@ public class FileManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	
+	/**
+	 * Almacena la matriz double en disco utilizando MappedFiles
+	 **/
+	public void saveDoubleMatrixNio(double[][] matrix, String fileName) throws Exception{
+		BigDoubleMatrixFileManager bigMatrixFileManager = new BigDoubleMatrixFileManager();
+		bigMatrixFileManager.loadReadWrite(EDataFolder.MATRIX, fileName,matrix.length,matrix[0].length);
+		System.out.println("Init savematrix");
+		for (int i = 0; i < matrix.length; i++) {;
+			for (int j = 0; j < matrix[i].length; j++) {
+				bigMatrixFileManager.set(i,j, matrix[i][j]);
+			}
+		}
+		bigMatrixFileManager.close();
+	}
+	
+	
+	/**
+	 * Almacena la matriz double en disco human readable
+	 * 
+	 * @param matrix matrix a almacenar
+	 * @param fileName nombre del archivo
+	 * @param matrixLimit limite de filas a almacenar
+	 */
+	public void saveMatrixDouble(double[][] matrix, EDataFolder dataFolder, 
+									String fileName, int matrixLimit, int roundScale){
+		System.out.print("Init savematrix");
+		StringBuilder data = new StringBuilder();
+		if(matrixLimit==0){
+			matrixLimit = matrix.length;
+		}
+		for (int i = 0; i < matrixLimit; i++) {;
+			for (int j = 0; j < matrix[i].length; j++) {
+				BigDecimal bigDecimal = new BigDecimal(matrix[i][j]);
+				bigDecimal = bigDecimal.setScale(roundScale, RoundingMode.HALF_UP);
+				data.append(bigDecimal);
+				if(j+1<matrix[i].length){
+					data.append("\t");
+				}
+			}
+			data.append(System.getProperty("line.separator"));
+		}
+		PersistenceFacade.getInstance().writeFile(dataFolder, 
+												  fileName, data.toString());
 	}
 }

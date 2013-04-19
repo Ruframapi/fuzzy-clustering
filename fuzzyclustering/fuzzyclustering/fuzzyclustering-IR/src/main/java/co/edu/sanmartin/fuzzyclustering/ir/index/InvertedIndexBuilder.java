@@ -1,15 +1,9 @@
 package co.edu.sanmartin.fuzzyclustering.ir.index;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 
 import org.apache.log4j.Logger;
 
@@ -43,14 +37,11 @@ public class InvertedIndexBuilder {
 		return index;
 	}
 
-	public void printIndex(){
-	
-		for (String term : index) {
-			System.out.println("term");
-		}
-	 } // fin
-	
-	private void buildIndex(){
+	/**
+	 * Metodo encargado de ordenar y crear el indice invertido
+	 * @param minQuantityTerms
+	 */
+	private void buildIndex(int minQuantityTerms){
 		//Ordena Alfabeticamente el indice
 		this.invertedIndex = new ArrayList<String>();
 		Collection<String> termCol =  index;
@@ -69,13 +60,6 @@ public class InvertedIndexBuilder {
 			String[] termData = termItem.split(splitToken);
 			if(termData.length==2){
 				String term = termData[0];
-				//Si el termino es vacio o si no son caracteres o letras no se tiene en cuenta
-				if(term.length()==0){
-					continue;
-				}
-				if(!Character.isLetterOrDigit(term.charAt(0))){
-					continue;
-				}
 				
 				String document = termData[1];
 
@@ -91,9 +75,11 @@ public class InvertedIndexBuilder {
 						stringBuilder.append(document);
 					}
 					else{
-						stringBuilder.append("\t");
-						stringBuilder.append(counter);
-						invertedIndex.add(stringBuilder.toString());
+						if(counter >= minQuantityTerms){
+							stringBuilder.append("\t");
+							stringBuilder.append(counter);
+							invertedIndex.add(stringBuilder.toString());
+						}
 						counter = 0;
 						stringBuilder = new StringBuilder();
 						stringBuilder.append(term);
@@ -109,18 +95,14 @@ public class InvertedIndexBuilder {
 	}
 	
 	
-	private void buildResumeIndex(){
-		//Ordena Alfabeticamente el indice
-			
-	}
 	/**
 	 * Metodo encargado de salvar el archivo de texto plano
 	 */
-	public void saveIndex(){
+	public void saveIndex(int minQuantityTerms){
 		
 		StringBuilder stringBuilder = new StringBuilder();
 		//Realiza la construccion del indice invertido
-		this.buildIndex();
+		this.buildIndex(minQuantityTerms);
 		for (String word : invertedIndex) {
 			stringBuilder.append(word);
 			stringBuilder.append(System.getProperty("line.separator"));

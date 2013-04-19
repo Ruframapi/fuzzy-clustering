@@ -7,17 +7,6 @@ import org.junit.Test;
 import co.edu.sanmartin.persistence.file.FileManager;
 
 public class FileManagerTest {
-
-	@Test
-	public void TestReadFileFileChannel(){
-		FileManager fileManager = new FileManager();
-		try {
-			fileManager.readFile();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 	
 	@Test
 	public void TestReadFileFileChannel1(){

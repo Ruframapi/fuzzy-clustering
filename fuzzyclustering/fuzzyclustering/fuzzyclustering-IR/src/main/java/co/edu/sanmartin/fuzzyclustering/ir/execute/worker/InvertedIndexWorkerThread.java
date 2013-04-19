@@ -30,6 +30,13 @@ public class InvertedIndexWorkerThread implements Runnable{
 		String[] termList = dataFile.split(",");
 		logger.debug("Term size:"+termList.length);
 		for (int i = 0; i < termList.length; i++) {
+			//Si el termino es vacio o si no son caracteres o letras no se tiene en cuenta
+			if(termList[i].length()==0){
+				continue;
+			}
+			if(!Character.isLetterOrDigit(termList[i].charAt(0))){
+				continue;
+			}
 			index.addIndex(termList[i],fileName);
 		}
 		
