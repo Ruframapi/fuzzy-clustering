@@ -11,7 +11,7 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
 /**
  * Ejecuta el proceso de limpieza de los archivos
- * @author Ricardo
+ * @author Ricardo Carvajal Salamanca
  *
  */
 public class Main {
