@@ -64,4 +64,28 @@ public class CMeansTest {
 			System.out.println();
 		}
 	}
+	
+	
+	
+	@Test
+	
+	public void ordenar(){
+		int[] arreglo = {10,3,5,6,8,9,7,2};
+		
+		for (int i = 1; i < arreglo.length; i++) {
+			for (int j = 0; j < arreglo.length-1; j++) {
+			int aux = 0;
+			if(arreglo[j]>arreglo[j+1]){
+				aux=arreglo[j+1];
+				arreglo[j+1]=arreglo[j];
+				arreglo[j]=aux;
+			}
+			}
+		}
+		
+		for (int i = 0; i < arreglo.length; i++) {
+			System.out.print(arreglo[i]);
+		}
+		
+	}
 }

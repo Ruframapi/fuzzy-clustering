@@ -13,8 +13,10 @@ import org.apache.log4j.BasicConfigurator;
 import org.junit.Assert;
 import org.junit.Test;
 
+import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexReutersThreadPool;
 import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
 import co.edu.sanmartin.fuzzyclustering.ir.facade.IRFacade;
+import co.edu.sanmartin.fuzzyclustering.ir.index.DimensionallyReduced;
 import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
 import co.edu.sanmartin.fuzzyclustering.ir.index.MutualInformation;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.Cleaner;
@@ -40,6 +42,14 @@ public class IRTest {
 	@Test
 	public void invertedIndexTest() {
 		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(2);
+		threadPool.run();
+		//Thread thread = new Thread(threadPool);
+		//thread.start();
+	}
+	
+	@Test
+	public void invertedIndexReutersTest() {
+		InvertedIndexReutersThreadPool threadPool = new InvertedIndexReutersThreadPool(0);
 		threadPool.run();
 		//Thread thread = new Thread(threadPool);
 		//thread.start();
@@ -196,34 +206,8 @@ public class IRTest {
 
 	@Test
 	public void buildReducedMatrixPpmi() throws Exception{
-		int dimensionNueva =20;
-		BigDoubleMatrixFileManager largeMatrix = 
-				new BigDoubleMatrixFileManager();
-		largeMatrix.loadReadOnly(EDataFolder.MATRIX,"ppmi.txt");
-		double[][] matrixReduced = new double[largeMatrix.height()][dimensionNueva];
-		double[][] newMatrix = new double[largeMatrix.height()][matrixReduced[0].length];
-		Random random = new Random();
-		for (int i = 0; i < matrixReduced.length; i++) {
-			random.setSeed(System.nanoTime());
-			for (int j = 0; j < matrixReduced[i].length; j++) {
-				int multiplier = 1;
-				//if (random.nextBoolean()==false)multiplier = -1;
-				matrixReduced[i][j]=random.nextInt(2)*multiplier;
-			}
-		}
-		
-	        //se necesitan tres instrucciones for para multiplicar cada
-	        //fila de la una matriz por las columnas de la otra
-		for(int i = 0; i < largeMatrix.height(); i++){
-            for (int j = 0; j < matrixReduced.length; j++){
-                for (int k = 0; k < matrixReduced[0].length; k++){
-                    newMatrix [i][k] += largeMatrix.get(i,j)*matrixReduced[j][k];
-                }
-            }
-        }
-		
-		this.saveMatrixDouble(newMatrix, "reducida.txt", 0);
-		largeMatrix.close();
+		IRFacade irFacade = IRFacade.getInstance();
+		irFacade.reducedDimensionPPMIMatrix(2, true,0);
 	}
 	
 	@Test

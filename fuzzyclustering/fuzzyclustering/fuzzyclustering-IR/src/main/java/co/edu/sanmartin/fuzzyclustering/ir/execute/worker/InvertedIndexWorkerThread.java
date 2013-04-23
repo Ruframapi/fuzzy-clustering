@@ -27,7 +27,7 @@ public class InvertedIndexWorkerThread implements Runnable{
 
 	public void run() {
 		logger.debug("Init run Inverted Index Worker Thread DataFile:" + fileName);
-		String[] termList = dataFile.split(",");
+		String[] termList = dataFile.split(" ");
 		logger.debug("Term size:"+termList.length);
 		for (int i = 0; i < termList.length; i++) {
 			//Si el termino es vacio o si no son caracteres o letras no se tiene en cuenta
