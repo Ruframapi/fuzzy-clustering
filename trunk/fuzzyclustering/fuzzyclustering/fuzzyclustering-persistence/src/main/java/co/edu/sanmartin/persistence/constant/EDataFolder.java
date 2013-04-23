@@ -14,7 +14,8 @@ public  enum EDataFolder {
 	MATRIX("matrix",System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"matrix"),
 	MACHINE_LEARNING("machine learning", System.getProperty("file.separator")+"data"+System.getProperty("file.separator")+"machinelearning"),
 	BACKUP("BACKUP",System.getProperty("file.separator")+"backup"),
-	LEXICON("LEXICON",System.getProperty("file.separator")+"lexicon");
+	LEXICON("LEXICON",System.getProperty("file.separator")+"lexicon"),
+	TRAIN("TRAIN",System.getProperty("file.separator")+"train");
 	
 	private String name;
 	private String path;

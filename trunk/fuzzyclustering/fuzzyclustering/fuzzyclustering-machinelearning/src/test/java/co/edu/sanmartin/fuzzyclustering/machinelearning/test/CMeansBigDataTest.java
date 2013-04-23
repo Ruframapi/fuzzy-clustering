@@ -5,6 +5,7 @@ import java.util.Random;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Test;
 
+import co.edu.sanmartin.fuzzyclustering.ir.index.DimensionallyReduced;
 import co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans.FuzzyCMeans;
 import co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans.FuzzyCMeansBigData;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
@@ -18,6 +19,8 @@ public class CMeansBigDataTest {
 	public CMeansBigDataTest() {
 		BasicConfigurator.configure();
 	}
+	
+	
 	@Test
 	public void testGenerateCMeansBigData() throws Exception{
 		double[][] data ={{0.58,0.33},{0.90,0.11},{0.68,0.17},{0.11,0.44},{0.47,0.81},{0.24,0.83},
@@ -94,10 +97,13 @@ public class CMeansBigDataTest {
 	@Test
 	public void testGenerateCMeansReducedNio() throws Exception{
 		
-		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData("reducidaNio.txt",3, 200, 2, false);
-		fuzzyCmeans.init();
-		fuzzyCmeans.calculateFuzzyCmeans();
+		FuzzyCMeansBigData cmeans = new FuzzyCMeansBigData(DimensionallyReduced.REDUCED_FILE_NAME, 
+				8, 20000, 1.5, true);
+		cmeans.init();
+		cmeans.calculateFuzzyCmeans();
 	};
+	
+	
 	@Test
 	public void testGenerateCMeansReducedSample() throws Exception{
 		String dataFile = PersistenceFacade.getInstance().readFile(EDataFolder.MATRIX,"reducida.txt");
