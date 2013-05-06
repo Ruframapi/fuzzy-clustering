@@ -13,7 +13,9 @@ import co.edu.sanmartin.persistence.constant.EModule;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.facade.QueueFacade;
 import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
 
 /**
@@ -34,6 +36,7 @@ public class FuzzyCMeansBigData {
 	private int centroidsAmount;
 	private int iterationAmount;
 	private double mValue;
+	private WorkspaceDTO workspace;
 	
 	private double[][] previousCentroids;
 	private double[][] centroids;
@@ -49,8 +52,8 @@ public class FuzzyCMeansBigData {
 	 * @param iterationsAmount cantidad de iteraciones
 	 * @param mValue valor de m generalmente se utiliza 2
 	 */
-	public FuzzyCMeansBigData(BigDoubleMatrixFileManager data, int centroidsAmount, int iterationsAmount, double mValue){
-		
+	public FuzzyCMeansBigData(WorkspaceDTO workspace, BigDoubleMatrixFileManager data, int centroidsAmount, int iterationsAmount, double mValue){
+		this.workspace = workspace;
 		this.data = data;
 		this.centroidsAmount = centroidsAmount;
 		this.centroidsDistances = new double[centroidsAmount];
@@ -66,11 +69,12 @@ public class FuzzyCMeansBigData {
 	 * @param mValue valor de m generalmente se utiliza 2
 	 * @param buildMatrix indica si realiza la construccion de las matrices de terminos previa
 	 */
-	public FuzzyCMeansBigData(String fileName, int centroidsAmount, int iterationsAmount, 
+	public FuzzyCMeansBigData(WorkspaceDTO workspace,String fileName, int centroidsAmount, int iterationsAmount, 
 								double mValue, boolean buildMatrix){	
 		logger.info("Init FuzzyCMeansBigData Method");
+		this.workspace = workspace;
 		try {			
-			this.data  = new BigDoubleMatrixFileManager();
+			this.data  = new BigDoubleMatrixFileManager(this.workspace);
 			data.loadReadOnly(EDataFolder.MATRIX, fileName);
 			this.centroidsAmount = centroidsAmount;
 			this.iterationAmount = iterationsAmount;
@@ -134,8 +138,8 @@ public class FuzzyCMeansBigData {
 			
 			
 		}
-		PersistenceFacade.getInstance().saveMatrixDouble(this.centroids, EDataFolder.MACHINE_LEARNING, "centroids.txt", 0, 4);
-		PersistenceFacade.getInstance().saveMatrixDouble(this.initMembershipMatrix, EDataFolder.MACHINE_LEARNING, "relationship.txt", 0, 4);
+		this.workspace.getPersistence().saveMatrixDouble(this.centroids,EDataFolder.MACHINE_LEARNING, "centroids.txt", 0, 4);
+		this.workspace.getPersistence().saveMatrixDouble(this.initMembershipMatrix,EDataFolder.MACHINE_LEARNING, "membership.txt", 0, 4);
 		time_end = System.currentTimeMillis();
 		
 		String result = "El proceso de clusterizacion Tomo "+ 
@@ -328,14 +332,14 @@ public class FuzzyCMeansBigData {
 	/**
 	 * Almacena la matriz en disco
 	 **/
-	public void saveDoubleMatrix(double[][] matrix, String fileName){
+	public void saveDoubleMatrix(double[][] matrix, String dataRoot,String fileName){
 		
-		PersistenceFacade.getInstance().saveMatrixDouble(matrix, EDataFolder.MACHINE_LEARNING, fileName, 0, 2);
+		this.workspace.getPersistence().saveMatrixDouble(matrix,EDataFolder.MACHINE_LEARNING, fileName, 0, 2);
 	}
 	
 	public void sendMessageAsynch(String message){
 		QueueDTO queue = new QueueDTO();
-		queue.setInitDate(PersistenceFacade.getInstance().getServerDate().getTime());
+		queue.setInitDate(QueueFacade.getInstance().getServerDate().getTime());
 		queue.setEvent(EQueueEvent.SEND_MESSAGE);
 		queue.setModule(EModule.QUERYASYNCH);
 		queue.setParams(message);

@@ -5,6 +5,7 @@ import java.util.Random;
 import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
 import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
@@ -13,6 +14,11 @@ public class DimensionallyReduced {
 
 	private static Logger logger = Logger.getLogger("DimensionallyReduced");
 	public static final String REDUCED_FILE_NAME = "reduced.dat"; 
+	private WorkspaceDTO workspace;
+	
+	public DimensionallyReduced(WorkspaceDTO workspace){
+		this.workspace = workspace;
+	}
 	/**
 	 * Metodo encargado de realiza la reduccion de dimensionalidad de la matrix ppmi
 	 * @param fileName nombre del archivo
@@ -22,11 +28,10 @@ public class DimensionallyReduced {
 	 */
 	public void reducedDimensionDoubleMatrix(String fileName, int newDimension, 
 												boolean saveReadable, int reableRowsAmount){
-		SendMessageAsynch.sendMessage("Iniciando Proceso de Reduccion de Dimensionalidad para " + 
+		SendMessageAsynch.sendMessage(this.workspace, "Iniciando Proceso de Reduccion de Dimensionalidad para " + 
 									newDimension+ " Dimensiones." );
 		try{
-			BigDoubleMatrixFileManager ppmiMatrix = 
-					new BigDoubleMatrixFileManager();
+			BigDoubleMatrixFileManager ppmiMatrix = new BigDoubleMatrixFileManager(this.workspace);
 			ppmiMatrix.loadReadOnly(EDataFolder.MATRIX,MutualInformation.PPMI_FILE_NAME);
 			double[][] matrixReduced = new double[ppmiMatrix.height()][newDimension];
 			double[][] newMatrix = new double[ppmiMatrix.height()][matrixReduced[0].length];
@@ -50,9 +55,9 @@ public class DimensionallyReduced {
 				}
 			}
 
-			PersistenceFacade.getInstance().saveDoubleMatrixNio(newMatrix, REDUCED_FILE_NAME);
+			this.workspace.getPersistence().saveDoubleMatrixNio(newMatrix,REDUCED_FILE_NAME);
 			if(saveReadable){
-				PersistenceFacade.getInstance().saveMatrixDouble(newMatrix, EDataFolder.MATRIX, 
+				this.workspace.getPersistence().saveMatrixDouble(newMatrix, EDataFolder.MATRIX, 
 																"reduced.txt",reableRowsAmount,2);
 			}
 			ppmiMatrix.close();
@@ -61,7 +66,7 @@ public class DimensionallyReduced {
 			logger.error("Error in reducedDimension",e);
 		}
 		
-		SendMessageAsynch.sendMessage("Proceso de Reduccion de Dimensionalidad finalizado.");
+		SendMessageAsynch.sendMessage(this.workspace,"Proceso de Reduccion de Dimensionalidad finalizado.");
 	}
 
 

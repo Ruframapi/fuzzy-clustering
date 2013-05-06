@@ -10,6 +10,7 @@ import javax.faces.context.FacesContext;
 
 import org.apache.log4j.Logger;
 import org.primefaces.component.outputlabel.OutputLabel;
+import org.primefaces.context.RequestContext;
 import org.primefaces.push.PushContext;
 import org.primefaces.push.PushContextFactory;
 
@@ -27,10 +28,11 @@ public class AsynchManagedBean implements Serializable{
 	private String documentName;
 	private OutputLabel originalDataLabel;
 	private OutputLabel cleanDataLabel;
-
+	private final PushContext pushContext = PushContextFactory.getDefault().getPushContext();
+	
 	@PostConstruct
 	public void init(){
-
+		 
 	}
 	public String getDownloadStatus() {
 		return downloadStatus;
@@ -45,23 +47,23 @@ public class AsynchManagedBean implements Serializable{
 	
 	public void setDocument(DocumentDTO document) {
 		try{
+			RequestContext requestContext = RequestContext.getCurrentInstance();  
 			this.documentData = document.getLazyData();
 			this.cleanData = document.getLazyCleanData();
 			this.documentName= document.getName();
 			
-			//getOriginalDataLabel().setValue(this.documentData);
+			this.originalDataLabel.setValue(document.getLazyData());
 			//getCleanDataLabel().setValue(this.cleanData);
 			//isValid = calculate isValid
 			
 			//RequestContext requestContext = RequestContext.getCurrentInstance();
 			//requestContext.update("originalDataLabel");
 			//requestContext.update("cleanDataLabel");
-	
-			
-			PushContext pushContext = PushContextFactory.getDefault().getPushContext();  
+			requestContext.update(":form2:documents");   
 	        pushContext.push("/document", document); 
+	        pushContext.notifyAll();
 	        
-		}catch(Exception e){
+		}catch(Throwable e){
 			logger.error("Error in AsynchManagedBean setDocument",e);
 		}
         
@@ -93,6 +95,7 @@ public class AsynchManagedBean implements Serializable{
 		logger.info("Sending Message Asynch" + message);
 		PushContext pushContext = PushContextFactory.getDefault().getPushContext(); 
 		pushContext.push("/notifications", new FacesMessage("Mensaje del Servidor Remoto", message));
+		
 	}
 	
 	

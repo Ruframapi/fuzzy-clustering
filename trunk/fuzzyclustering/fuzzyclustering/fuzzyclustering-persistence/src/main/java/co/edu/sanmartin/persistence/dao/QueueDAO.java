@@ -1,23 +1,36 @@
 package co.edu.sanmartin.persistence.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
+import co.edu.sanmartin.persistence.constant.EDatabase;
 import co.edu.sanmartin.persistence.constant.EModule;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
+import co.edu.sanmartin.persistence.factory.ConnectionDataSourcePoolMySQL;
+import co.edu.sanmartin.persistence.factory.DAOFactory;
 
-public class QueueDAO extends AbstractDAO<QueueDTO>{
+public class QueueDAO {
 
-	@Override
+	protected Connection connection = null;
+	protected PreparedStatement statement;
+	protected ResultSet rs;
+	protected String sQLQuery;
+	
+
 	public void insert(QueueDTO queue) throws SQLException {
 		try {
-			connection = getConnectionPool().getConnection();
-			sQLQuery = "INSERT INTO queue (module, event,initDate,processDate,status, params) VALUES (?,?,?,?,?,?)";
+			connection = getConnectionPool().getMainConnection();
+			sQLQuery = "INSERT INTO queue (module, event,initDate,processDate,status, params, workspace) " +
+					"VALUES (?,?,?,?,?,?,?)";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, queue.getModule().name());
 			statement.setString(2, queue.getEvent().name());
@@ -30,6 +43,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 			}
 			statement.setString(5, queue.getStatus().name());
 			statement.setString(6, queue.getParams());
+			statement.setString(7, queue.getWorkspace());
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -46,7 +60,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 	 */
 	public void truncate() throws SQLException {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getMainConnection();
 			sQLQuery = "TRUNCATE TABLE queue";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.executeUpdate();
@@ -66,7 +80,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 		
 		Collection<QueueDTO> queueColl = new ArrayList<QueueDTO>();
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getMainConnection();
 			sQLQuery = "SELECT * FROM queue status = ? AND initDate <= ?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, status.name());
@@ -103,7 +117,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 		
 		Collection<QueueDTO> queueColl = new ArrayList<QueueDTO>();
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getMainConnection();
 			sQLQuery = "SELECT * FROM queue WHERE module=? AND status = ? AND initDate <= ?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, module.name());
@@ -119,6 +133,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 				queue.setInitDate(rs.getTimestamp("initDate"));
 				queue.setProcessDate(rs.getTimestamp("processDate"));
 				queue.setParams(rs.getString("params"));
+				queue.setWorkspace(rs.getString("workspace"));
 				queue.setStatus(status);
 				queueColl.add(queue);
 			}
@@ -142,7 +157,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 		
 		Collection<QueueDTO> queueColl = new ArrayList<QueueDTO>();
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getMainConnection();
 			sQLQuery = "SELECT * FROM queue WHERE status = ? AND initDate <= ?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, status.name());
@@ -180,7 +195,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 		
 		Collection<QueueDTO> queueColl = new ArrayList<QueueDTO>();
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getMainConnection();
 			sQLQuery = "SELECT * FROM queue WHERE event = ?  AND status = ?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, event.name());
@@ -216,7 +231,7 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 	 */
 	public void createTable(boolean dropTable) throws SQLException {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getMainConnection();
 			sQLQuery = null;
 			if (dropTable == true) {
 				sQLQuery = "DROP TABLE IF EXISTS queue";
@@ -242,10 +257,9 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 	}
 	
 
-	@Override
 	public void update(QueueDTO queue) throws SQLException {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getMainConnection();
 			sQLQuery = "UPDATE queue SET module=?, event=?,initDate=?,processDate=?,status=?,params =? WHERE id=?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1,queue.getModule().name());
@@ -269,10 +283,9 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 		}
 	}
 
-	@Override
 	public void delete(QueueDTO queue) throws SQLException {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getMainConnection();
 			sQLQuery = "DELETE FROM queue WHERE id = ?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setInt(1, queue.getId());
@@ -286,28 +299,17 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 		
 	}
 
-	@Override
 	public <T> void select() throws SQLException {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
 	public Collection<QueueDTO> selectAll() throws SQLException {
 		// TODO Auto-generated method stub
 		
 		return null;
 	}
 	
-	
-	
-	public void backupTable(){
-		super.backupTable("queue");
-	}
-	
-	public void restoreTable(){
-		super.restoreTable("queue", "id,event,initDate,processDate,status");
-	}
 
 	/**
 	 * Retorna la fecha y hora del servidor de base de datos
@@ -316,7 +318,8 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 	public Calendar getServerDate(){
 		Calendar serverDate = Calendar.getInstance();
 		try {
-			connection = getConnectionPool().getConnection();
+			
+			connection = getConnectionPool().getMainConnection();
 			sQLQuery = "SELECT NOW() AS SERVER_DATE";
 			statement = connection.prepareStatement(sQLQuery);
 			rs = statement.executeQuery();
@@ -335,4 +338,8 @@ public class QueueDAO extends AbstractDAO<QueueDTO>{
 		
 	}
 
+	protected ConnectionDataSourcePoolMySQL getConnectionPool(){
+		ConnectionDataSourcePoolMySQL connectionPool = DAOFactory.getInstance().getConnectionPool(EDatabase.MYSQL);
+		return connectionPool;
+	}
 }

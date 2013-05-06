@@ -1,12 +1,15 @@
 package co.edu.sanmartin.fuzzyclustering.cleaner.execute;
 
 import java.sql.SQLException;
+import java.util.Collection;
 
 import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.fuzzyclustering.cleaner.execute.thread.CleanerThreadPool;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.facade.WorkspaceFacade;
 
 /**
  * Clase que arranca el sistema de descarga de Noticias
@@ -24,7 +27,6 @@ public class Dequeue implements Runnable{
 	 * @param restart define si reinicia el proceso o continua con un proceso anterior
 	 */
 	public Dequeue(){
-		persistenceFacade = PersistenceFacade.getInstance();
 	}
 	
 	public void run() {
@@ -56,9 +58,13 @@ public class Dequeue implements Runnable{
 	 */
 	public void executeQueue() throws SQLException, PropertyValueNotFoundException{
 		logger.trace("Init executeQueue");
-		CleanerThreadPool threadPool = CleanerThreadPool.getInstance();
-		if(threadPool.getExecutor()!=null && threadPool.getExecutor().getQueue().size()==0){
-			threadPool.executeThreadPool();
+		Collection<WorkspaceDTO> workspaceColl = WorkspaceFacade.getInstance().getAllWorkspace();
+		
+		for (WorkspaceDTO workspaceDTO : workspaceColl) {
+			CleanerThreadPool threadPool = new CleanerThreadPool(workspaceDTO);
+			if(threadPool.getExecutor()!=null && threadPool.getExecutor().getQueue().size()==0){
+				threadPool.executeThreadPool();
+			}
 		}
 		
 	}

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import sun.misc.Cleaner;
 import sun.nio.ch.DirectBuffer;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
 /**
@@ -28,6 +29,11 @@ public class BigIntegerMatrixFileManager implements Closeable{
     private int height;
     private String fileName;
     private MappedByteBuffer out;
+    private WorkspaceDTO workspace;
+    
+    public BigIntegerMatrixFileManager(WorkspaceDTO workspace){
+    	this.workspace = workspace;
+    }
 
     
     public void loadReadWrite(EDataFolder dataFolder, String fileName, 
@@ -35,17 +41,16 @@ public class BigIntegerMatrixFileManager implements Closeable{
     	this.width = width;
         this.height = height;
     	this.fileName = fileName;
-    	String folderPath = PersistenceFacade.getInstance().getFolderPath(dataFolder);
-    	PersistenceFacade.getInstance().createFolder(folderPath);
+    	String folderPath = this.workspace.getPersistence().getFolderPath(dataFolder);
+    	this.workspace.getPersistence().createFolder(folderPath);
     	memoryMappedFile = new RandomAccessFile(folderPath + System.getProperty("file.separator") + fileName, "rw");
     	out = memoryMappedFile.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, 4*height*width);
     	
     }
     
     public void loadReadOnly(EDataFolder dataFolder, String fileName ) throws IOException{
-    	
     	this.fileName = fileName;
-    	String folderPath = PersistenceFacade.getInstance().getFolderPath(dataFolder);
+    	String folderPath = this.workspace.getPersistence().getFolderPath(dataFolder);
     	this.memoryMappedFile = new RandomAccessFile(folderPath + System.getProperty("file.separator") + fileName, "r");
     	this.loadMetadata();
     	this.fileName = fileName;
@@ -91,7 +96,7 @@ public class BigIntegerMatrixFileManager implements Closeable{
     	data.append(",");
     	data.append(this.width);
     	
-    	PersistenceFacade.getInstance().writeFile(EDataFolder.MATRIX, 
+    	this.workspace.getPersistence().writeFile(EDataFolder.MATRIX, 
     							getMetadataName(), data.toString());
     }
     
@@ -99,7 +104,7 @@ public class BigIntegerMatrixFileManager implements Closeable{
      * Carga los metadatos para la construccion de la matrix
      */
     private void loadMetadata(){
-    	String metadata = PersistenceFacade.getInstance().readFile(EDataFolder.MATRIX, getMetadataName());
+    	String metadata = this.workspace.getPersistence().readFile(EDataFolder.MATRIX, getMetadataName());
     	metadata = metadata.replaceAll(System.getProperty("line.separator"), "");
     	String[] metadataColl = metadata.split(";");
     	
@@ -121,8 +126,7 @@ public class BigIntegerMatrixFileManager implements Closeable{
      * @return
      */
     private String getMetadataName(){
-    	PersistenceFacade persistence = PersistenceFacade.getInstance();
-    	String fileName = persistence.getFileNameWithOutExtension(this.fileName);
+    	String fileName = this.workspace.getPersistence().getFileNameWithOutExtension(this.fileName);
     	StringBuilder stringBuilder = new StringBuilder();
     	stringBuilder.append(fileName);
     	stringBuilder.append("_");

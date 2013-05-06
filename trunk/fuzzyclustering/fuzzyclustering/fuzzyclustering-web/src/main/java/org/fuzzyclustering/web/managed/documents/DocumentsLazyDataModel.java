@@ -5,10 +5,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import javax.faces.bean.ManagedProperty;
+
+import org.fuzzyclustering.web.managed.WorkspaceManagedBean;
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortOrder;
 
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
 public class DocumentsLazyDataModel extends LazyDataModel<DocumentDTO> implements Serializable{
@@ -18,9 +22,16 @@ public class DocumentsLazyDataModel extends LazyDataModel<DocumentDTO> implement
 	private static final long serialVersionUID = 6975474989059428682L;
 	private static final int PAGE_SIZE = 10;
 
-	 private List<DocumentDTO> datasource;  
+	private List<DocumentDTO> datasource;  
+	
+	
+	private WorkspaceDTO workspace;
 
-    @Override  
+	public DocumentsLazyDataModel(WorkspaceDTO workspace){
+		this.workspace = workspace;
+	}
+	
+	@Override  
     public DocumentDTO getRowData(String rowKey) {  
         for(DocumentDTO document : datasource) {  
             if(document.getId()==Integer.parseInt(rowKey))  
@@ -42,14 +53,14 @@ public class DocumentsLazyDataModel extends LazyDataModel<DocumentDTO> implement
 		// TODO Auto-generated method stub
 		
 		List<DocumentDTO> listDocuments = 
-				(List<DocumentDTO>) PersistenceFacade.getInstance().getPaginateDocumentsColl(first, pageSize);
+				(List<DocumentDTO>) this.workspace.getPersistence().getPaginateDocumentsColl(first, pageSize);
 		return listDocuments;
 	}
 	
 	@Override
 	public int getRowCount() {
 		// TODO Auto-generated method stub
-		return PersistenceFacade.getInstance().getDownloadDocumentAmount();
+		return this.workspace.getPersistence().getDownloadDocumentAmount();
 	}
 	
 	@Override

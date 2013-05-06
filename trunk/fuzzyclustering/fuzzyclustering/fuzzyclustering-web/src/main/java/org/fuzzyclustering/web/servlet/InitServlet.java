@@ -29,12 +29,12 @@ public class InitServlet extends HttpServlet {
 	private Logger logger = org.apache.log4j.Logger.getRootLogger();
 	@Override
 	public void init(ServletConfig config) throws ServletException {
-		PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
+		//PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
 		try {
 			StringBuilder logPath = new StringBuilder();
-			logPath.append(persistenceFacade.getProperty(ESystemProperty.MAIN_PATH).getValue());
+			//logPath.append(persistenceFacade.getProperty(ESystemProperty.MAIN_PATH).getValue());
 			logPath.append("\\log");
-			persistenceFacade.createFolder(logPath.toString());
+			//persistenceFacade.createFolder(logPath.toString());
 			logPath.append("\\fuzzyclustering.log");
 			System.setProperty("logfile.name",logPath.toString());
 			System.out.println("Initialising log4j");
@@ -63,7 +63,7 @@ public class InitServlet extends HttpServlet {
 			
 			super.init(config);
 			
-		} catch (PropertyValueNotFoundException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 

@@ -7,6 +7,7 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 import co.edu.sanmartin.persistence.constant.EProperty;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
@@ -14,13 +15,13 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
 public class TwitterConnection {
 	
-	private PersistenceFacade persistence;
 	private static TwitterConnection instance;
 	private Twitter twitter;
 	private static Logger logger = Logger.getLogger(TwitterConnection.class);
+	private WorkspaceDTO workspace;
 	
-	private TwitterConnection(){
-		this.persistence = PersistenceFacade.getInstance();
+	private TwitterConnection(WorkspaceDTO workspace){
+		this.workspace = workspace;
 		try {
 			if(this.twitter ==null || this.twitter.getId()==0){
 				loginTwitter();
@@ -32,9 +33,9 @@ public class TwitterConnection {
 	}
 	
 	
-	public static TwitterConnection getInstance(){
+	public static TwitterConnection getInstance(WorkspaceDTO workspace){
 		if(instance ==  null){
-			instance = new TwitterConnection();
+			instance = new TwitterConnection(workspace);
 		}
 		return instance;
 	}
@@ -43,10 +44,10 @@ public class TwitterConnection {
 	private void loginTwitter() throws TwitterException{
 		String consumerKey;
 		try {
-			consumerKey = this.persistence.getProperty(EProperty.TWITTER_CONSUMER_KEY).getValue();
-			String consumerSecret = this.persistence.getProperty(EProperty.TWITTER_CONSUMER_SECRET).getValue();
-			String accessToken = this.persistence.getProperty(EProperty.TWITTER_ACCESS_TOKEN).getValue();
-			String accessTokenSecret = this.persistence.getProperty(EProperty.TWITTER_ACCESS_TOKEN_SECRET).getValue();
+			consumerKey = this.workspace.getPersistence().getProperty(EProperty.TWITTER_CONSUMER_KEY).getValue();
+			String consumerSecret = this.workspace.getPersistence().getProperty(EProperty.TWITTER_CONSUMER_SECRET).getValue();
+			String accessToken = this.workspace.getPersistence().getProperty(EProperty.TWITTER_ACCESS_TOKEN).getValue();
+			String accessTokenSecret = this.workspace.getPersistence().getProperty(EProperty.TWITTER_ACCESS_TOKEN_SECRET).getValue();
 			ConfigurationBuilder cb = new ConfigurationBuilder();
 			cb.setDebugEnabled(true)
 			  .setOAuthConsumerKey(consumerKey)

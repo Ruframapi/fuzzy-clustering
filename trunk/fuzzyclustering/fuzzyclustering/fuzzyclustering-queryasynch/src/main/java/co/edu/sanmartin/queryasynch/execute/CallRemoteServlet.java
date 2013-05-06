@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.constant.ESystemProperty;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
@@ -19,12 +20,14 @@ public class CallRemoteServlet {
 	private static String httpProtocol;
 	private static String webServerURL;
 	private static Logger logger = Logger.getLogger("CallRemoteServlet");
+	private WorkspaceDTO workspace;
 	
-	public CallRemoteServlet(){
-		PersistenceFacade persistence = PersistenceFacade.getInstance();
+	public CallRemoteServlet(WorkspaceDTO workspace){
+		this.workspace = workspace;
+		
 		try{
-			webServerURL = persistence.getProperty(ESystemProperty.WEB_SERVER_CONTEXT).getValue();
-			httpProtocol = persistence.getProperty(ESystemProperty.WEB_SERVER_PROTOCOL).getValue();
+			webServerURL = this.workspace.getPersistence().getProperty(ESystemProperty.WEB_SERVER_CONTEXT).getValue();
+			httpProtocol = this.workspace.getPersistence().getProperty(ESystemProperty.WEB_SERVER_PROTOCOL).getValue();
 		} catch (PropertyValueNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

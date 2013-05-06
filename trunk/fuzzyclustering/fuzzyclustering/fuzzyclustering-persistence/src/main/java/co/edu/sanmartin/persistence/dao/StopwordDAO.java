@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import co.edu.sanmartin.persistence.dto.StopwordDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 
 /**
  * DAO que gestiona la persistencia de las reglas de Stopwords
@@ -14,15 +15,17 @@ import co.edu.sanmartin.persistence.dto.StopwordDTO;
  */
 public class StopwordDAO extends AbstractDAO<StopwordDTO> {
 
+	public StopwordDAO(WorkspaceDTO workspace) {
+		super(workspace);
+	}
+
 	private Collection<StopwordDTO> stopwordColl;
 	
-	public StopwordDAO(){
-	}
-	
+
 	@Override
 	public void insert(StopwordDTO object) {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = "insert into stopword (name,regex,regexreplace,stopwordorder,enabled) VALUES (?,?,?,?,?)";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, object.getName());
@@ -43,7 +46,7 @@ public class StopwordDAO extends AbstractDAO<StopwordDTO> {
 	@Override
 	public void update(StopwordDTO object) {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = "update stopword set name = ?,regex =?, regexreplace = ?, stopwordorder = ?, enabled = ? where name =?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, object.getName());
@@ -65,7 +68,7 @@ public class StopwordDAO extends AbstractDAO<StopwordDTO> {
 	@Override
 	public void delete(StopwordDTO object) {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = "delete from stopword where name = ?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, object.getName());
@@ -92,7 +95,7 @@ public class StopwordDAO extends AbstractDAO<StopwordDTO> {
 		if(refresh){
 			try {
 				this.stopwordColl = new ArrayList();
-				connection = getConnectionPool().getConnection();
+				connection = getConnectionPool().getConnection(this.workspace);
 				sQLQuery = "select * from stopword order by stopwordorder";
 				statement = connection.prepareStatement(sQLQuery);
 				rs = statement.executeQuery();
@@ -123,7 +126,7 @@ public class StopwordDAO extends AbstractDAO<StopwordDTO> {
 	 */
 	public void createTable(boolean dropTable) {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = null;
 			if (dropTable == true) {
 				sQLQuery = "DROP TABLE IF EXISTS stopword";

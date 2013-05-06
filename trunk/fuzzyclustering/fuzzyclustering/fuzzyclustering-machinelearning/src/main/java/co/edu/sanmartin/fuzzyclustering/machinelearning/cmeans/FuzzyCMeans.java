@@ -3,6 +3,7 @@ package co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans;
 import java.util.Random;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
 /**
@@ -26,6 +27,7 @@ public class FuzzyCMeans {
 	private double[][] centroids;
 	private double[][] initMembershipMatrix;
 	private double[][] membershipMatrix;
+	private WorkspaceDTO workspace;
 	
 	
 	/**
@@ -34,8 +36,8 @@ public class FuzzyCMeans {
 	 * @param iterationsAmount cantidad de iteraciones
 	 * @param mValue valor de m generalmente se utiliza 2
 	 */
-	public FuzzyCMeans(double[][] data, int centroidsAmount, int iterationsAmount, int mValue){
-		
+	public FuzzyCMeans(WorkspaceDTO workspace, double[][] data, int centroidsAmount, int iterationsAmount, int mValue){
+		this.workspace = workspace;
 		this.data = data;
 		this.centroidsAmount = centroidsAmount;
 		this.iterationAmount = iterationsAmount;
@@ -102,7 +104,7 @@ public class FuzzyCMeans {
 				stringBuilder.append(centroids[j][j2]+",");
 			}
 		}
-		PersistenceFacade.getInstance().writeFile(EDataFolder.MACHINE_LEARNING, 
+		this.workspace.getPersistence().writeFile(EDataFolder.MACHINE_LEARNING, 
 				stringBuilder.toString(), data.toString());
 		
 	}

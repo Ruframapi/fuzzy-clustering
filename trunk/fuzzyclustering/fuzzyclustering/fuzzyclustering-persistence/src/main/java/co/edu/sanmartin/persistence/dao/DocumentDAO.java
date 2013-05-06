@@ -7,13 +7,18 @@ import java.util.Collection;
 
 import co.edu.sanmartin.persistence.constant.ESourceType;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 
 public class DocumentDAO extends AbstractDAO<DocumentDTO>{
+
+	public DocumentDAO(WorkspaceDTO workspace) {
+		super(workspace);
+	}
 
 	@Override
 	public synchronized void insert(DocumentDTO document) throws SQLException {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = "INSERT INTO document (sourcetype, name,source,published_date, download_date) VALUES (?,?,?,?,?)";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, document.getSourceType().name());
@@ -37,7 +42,7 @@ public class DocumentDAO extends AbstractDAO<DocumentDTO>{
 	 */
 	public void truncate() throws SQLException {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = "TRUNCATE TABLE document";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.executeUpdate();
@@ -53,7 +58,7 @@ public class DocumentDAO extends AbstractDAO<DocumentDTO>{
 	@Override
 	public synchronized void update(DocumentDTO document) throws SQLException {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = "UPDATE document SET clean_date = ? WHERE id = ?";
 			statement = connection.prepareStatement(sQLQuery);
 			if(document.getCleanDate()==null){
@@ -88,8 +93,8 @@ public class DocumentDAO extends AbstractDAO<DocumentDTO>{
 	public DocumentDTO selectDocumentById(int idDocument){
 		DocumentDTO document= null;
 		try {
-			connection = getConnectionPool().getConnection();
-			sQLQuery = "SELECT * FROM fuzzyclustering.document WHERE id = ?";
+			connection = getConnectionPool().getConnection(this.workspace);
+			sQLQuery = "SELECT * FROM document WHERE id = ?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setLong(1, idDocument);
 			rs = statement.executeQuery();
@@ -126,21 +131,23 @@ public class DocumentDAO extends AbstractDAO<DocumentDTO>{
 	 */
 	public void createTable(boolean dropTable) throws SQLException {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = null;
 			if (dropTable == true) {
 				sQLQuery = "DROP TABLE IF EXISTS document";
 				statement = connection.prepareStatement(sQLQuery);
 				statement.executeUpdate();
 			}
-			sQLQuery = "CREATE TABLE fuzzyclustering.document ( "+
-					"id INT NULL AUTO_INCREMENT , " +
-					"sourcetype VARCHAR(255) NOT NULL ," +
-					"name VARCHAR(255) NOT NULL ," +
-					"source VARCHAR(255) NOT NULL," +
-					"published_date DATETIME NOT NULL," +
-					"download_date DATETIME NOT NULL," +
-					"clean_date DATETIME NOT NULL)";
+			sQLQuery = "CREATE TABLE document (" +
+					"  id int(11) NOT NULL AUTO_INCREMENT," +
+					"  sourcetype varchar(255) NOT NULL," +
+					"  name varchar(255) NOT NULL," +
+					"  source varchar(255) NOT NULL," +
+					"  published_date datetime NOT NULL," +
+					"  download_date datetime NOT NULL," +
+					"  clean_date datetime DEFAULT NULL," +
+					"  PRIMARY KEY (id))";
+			
 			statement = connection.prepareStatement(sQLQuery);
 			statement.executeUpdate();
 		} catch (SQLException e) {
@@ -158,8 +165,8 @@ public class DocumentDAO extends AbstractDAO<DocumentDTO>{
 	public int getDownloadDocumentAmount(){
 		int amount = 0;
 		try {
-			connection = getConnectionPool().getConnection();
-			sQLQuery = "SELECT COUNT(1) AS amount FROM fuzzyclustering.document;";
+			connection = getConnectionPool().getConnection(this.workspace);
+			sQLQuery = "SELECT COUNT(1) AS amount FROM document;";
 			statement = connection.prepareStatement(sQLQuery);
 			rs = statement.executeQuery();
 			if(rs.next()){
@@ -184,8 +191,8 @@ public class DocumentDAO extends AbstractDAO<DocumentDTO>{
 	public Collection<DocumentDTO> getPaginateDocumentsColl(long startId, int limit){
 		Collection<DocumentDTO> documentColl = new ArrayList<DocumentDTO>();
 		try {
-			connection = getConnectionPool().getConnection();
-			sQLQuery = "SELECT * FROM fuzzyclustering.document WHERE id > ? ORDER BY id LIMIT ?";
+			connection = getConnectionPool().getConnection(this.workspace);
+			sQLQuery = "SELECT * FROM document WHERE id > ? ORDER BY id LIMIT ?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setLong(1, startId);
 			statement.setInt(2, limit);
@@ -219,8 +226,8 @@ public class DocumentDAO extends AbstractDAO<DocumentDTO>{
 	public Collection<DocumentDTO> getDocumentsForClean(){
 		Collection<DocumentDTO> documentColl = new ArrayList<DocumentDTO>();
 		try {
-			connection = getConnectionPool().getConnection();
-			sQLQuery = "SELECT * FROM fuzzyclustering.document WHERE clean_date IS NULL LIMIT 100";
+			connection = getConnectionPool().getConnection(this.workspace);
+			sQLQuery = "SELECT * FROM document WHERE clean_date IS NULL LIMIT 100";
 			statement = connection.prepareStatement(sQLQuery);
 			rs = statement.executeQuery();
 			while(rs.next()){

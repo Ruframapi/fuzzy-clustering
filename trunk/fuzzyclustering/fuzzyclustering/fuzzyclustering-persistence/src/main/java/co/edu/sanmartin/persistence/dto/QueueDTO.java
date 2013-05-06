@@ -24,6 +24,7 @@ public class QueueDTO implements Serializable{
 	private EQueueEvent event;
 	private EQueueStatus status;
 	private String params;
+	private String workspace;
 	
 	
 	public int getId() {
@@ -69,8 +70,11 @@ public class QueueDTO implements Serializable{
 	public void setParams(String params) {
 		this.params = params;
 	}
-	
-	
-	
+	public String getWorkspace() {
+		return workspace;
+	}
+	public void setWorkspace(String workspace) {
+		this.workspace = workspace;
+	}
 	
 }

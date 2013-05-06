@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 
 import javax.sql.DataSource;
 
@@ -13,38 +14,27 @@ import org.apache.log4j.Logger;
 import co.edu.sanmartin.persistence.constant.EDatabase;
 import co.edu.sanmartin.persistence.constant.ESystemProperty;
 import co.edu.sanmartin.persistence.constant.properties.PropertiesLoader;
-import co.edu.sanmartin.persistence.dao.PropertyDAO;
-import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
-import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 /**
  * Pool de conexiones a la base de datos
  * @author Ricardo
  *
  */
 public class ConnectionDataSourcePoolMySQL {
-
+	private final String MAIN_DATABASE_NAME ="fuzzyclustering";
 	Logger logger = Logger.getLogger(ConnectionDataSourcePoolMySQL.class);
 	/** Pool de conexiones */
-	private DataSource dataSource;
+	private HashMap<String,DataSource> dataSourceCol = new HashMap<String,DataSource>();
 
-	/**
-	 * Inicializa el pool de conexiones BasicDataSource y realiza una insercion
-	 * y una consulta
-	 */
-	public ConnectionDataSourcePoolMySQL() {
-		inicializaDataSource(EDatabase.MYSQL);
-	}
 
 	/**
 	 * Inicializacion de BasicDataSource
 	 */
-	private void inicializaDataSource(EDatabase database) {
+	private DataSource inicializaDataSource(EDatabase database, String databaseName, String server) {
 		BasicDataSource basicDataSource = new BasicDataSource();
 		PropertiesLoader propertiesLoader = PropertiesLoader.getInstance();
 		String userName = propertiesLoader.getProperty(ESystemProperty.MYSQL_USER.getPropertyName());
 		String password = propertiesLoader.getProperty(ESystemProperty.MYSQL_PASSWORD.getPropertyName());
-		String databaseName = propertiesLoader.getProperty(ESystemProperty.MYSQL_DATABASE.getPropertyName());
-		String server = propertiesLoader.getProperty(ESystemProperty.MYSQL_SERVER.getPropertyName());
 		basicDataSource.setDriverClassName(database.getDriverName());
 		basicDataSource.setUsername(userName);
 		basicDataSource.setPassword(password);
@@ -53,12 +43,47 @@ public class ConnectionDataSourcePoolMySQL {
 		// para comprobar que la conexion es correcta.
 		logger.info("Init DataSource Server:"+ server);
 		basicDataSource.setValidationQuery("select 1");
-		dataSource = basicDataSource;
+		return basicDataSource;
+	}
+	
+	public DataSource getDataSource(String databaseName, String server){
+		DataSource dataSource = dataSourceCol.get(databaseName);
+		if(dataSource == null){
+			dataSource = inicializaDataSource(EDatabase.MYSQL, databaseName, server);
+			dataSourceCol.put(databaseName, dataSource);
+		}
+		return dataSource;
 	}
 
-	public Connection getConnection(){
+	/**
+	 * Retorna la conexion a la base de datos principal
+	 * @return
+	 */
+	public Connection getMainConnection(){
+		
 		Connection connection = null;
 		try {
+			PropertiesLoader propertiesLoader = PropertiesLoader.getInstance();
+			String server = propertiesLoader.getProperty(ESystemProperty.MYSQL_SERVER.getPropertyName());
+			DataSource dataSource = this.getDataSource(MAIN_DATABASE_NAME, server);
+			connection = dataSource.getConnection();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return connection;
+	}
+
+	/**
+	 * Retorna la conexion a la base de datos del workspace
+	 * @param workspace
+	 * @return
+	 */
+	public Connection getConnection(WorkspaceDTO workspace){
+		
+		Connection connection = null;
+		try {
+			DataSource dataSource = this.getDataSource(workspace.getName(), workspace.getDatabaseHost());
 			connection = dataSource.getConnection();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -71,7 +96,7 @@ public class ConnectionDataSourcePoolMySQL {
 	 * Realiza una insercion, pidiendo una conexion al dataSource y cerrandola
 	 * inmediatamente despues, para liberarla.
 	 */
-	private void inserta() {
+	private void inserta(DataSource dataSource) {
 		Connection conexion = null;
 		try {
 			// BasicDataSource nos reserva una conexion y nos la devuelve.
@@ -88,6 +113,7 @@ public class ConnectionDataSourcePoolMySQL {
 			freeConnection(conexion);
 		}
 	}
+
 
 	/**
 	 * Cierra la conexion. Al provenir de BasicDataSource, en realidad no se
@@ -112,7 +138,7 @@ public class ConnectionDataSourcePoolMySQL {
 	 * Realiza una consulta a la base de datos y muestra los resultados en
 	 * pantalla.
 	 */
-	private void realizaConsulta() {
+	private void realizaConsulta(DataSource dataSource) {
 		Connection conexion = null;
 		try {
 			conexion = dataSource.getConnection();

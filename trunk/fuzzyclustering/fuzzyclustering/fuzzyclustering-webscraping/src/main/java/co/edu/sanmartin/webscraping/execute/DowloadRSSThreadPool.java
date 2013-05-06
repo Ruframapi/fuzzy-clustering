@@ -16,6 +16,7 @@ import co.edu.sanmartin.persistence.constant.ESourceType;
 import co.edu.sanmartin.persistence.dto.PropertyDTO;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
@@ -33,8 +34,10 @@ public class DowloadRSSThreadPool {
 	private static Logger logger = Logger.getRootLogger();
 	private AtomicInteger rssSequence;
 	private QueueDTO queue;
+	private WorkspaceDTO workspace;
 	
-	public DowloadRSSThreadPool(QueueDTO queue, AtomicInteger sequence){
+	public DowloadRSSThreadPool(WorkspaceDTO workspace, QueueDTO queue, AtomicInteger sequence){
+		this.workspace = workspace;
 		this.queue = queue;
 		this.rssSequence = sequence;
 	}
@@ -45,10 +48,9 @@ public class DowloadRSSThreadPool {
 		logger.info("Init DownloadTread RSS Execute Method for" + sourceType);
 		//Se cargan las fuentes rss disponibles
 		try {
-			PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
-			rssSourceCol = persistenceFacade.getAllSources();
+			rssSourceCol = this.workspace.getPersistence().getAllSources();
 			PropertyDTO threadPoolNumberProperty = 
-					persistenceFacade.getProperty(EProperty.WEB_SCRAPPING_THREAD_NUMBER);
+					this.workspace.getPersistence().getProperty(EProperty.WEB_SCRAPPING_THREAD_NUMBER);
 			threadPoolNumber = threadPoolNumberProperty.intValue();
 			this.queue.setProcessDate(new Date());
 			
@@ -67,12 +69,12 @@ public class DowloadRSSThreadPool {
 		for (SourceDTO sourceDTO : rssSourceCol) {
 			logger.info("Init download:" + sourceDTO.getUrl());
 			if(sourceDTO.getType().equals(ESourceType.RSS)){
-				rssWorkerThread = new RssDownloadWorkerThread(sourceDTO, rssSequence);
+				rssWorkerThread = new RssDownloadWorkerThread(this.workspace,sourceDTO, rssSequence);
 				executor.submit(rssWorkerThread);
 			}
 		}
 		this.queue.setStatus(EQueueStatus.SUCESS);
 		executor.shutdown();
-		SendMessageAsynch.sendMessage("Nuevas Noticias Rss Descargadas. Total" + rssSequence.get());
+		SendMessageAsynch.sendMessage(this.workspace,"Nuevas Noticias Rss Descargadas. Total" + rssSequence.get());
 	}
 }

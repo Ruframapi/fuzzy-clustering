@@ -8,15 +8,19 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
+import co.edu.sanmartin.persistence.facade.WorkspaceFacade;
 import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
 
 public class LargeDoubleMatrixTest {
+	
+	private WorkspaceDTO workspace = WorkspaceFacade.getInstance().getWorkspace("noticias");
 	
 	@Test
     public void getSetMatrixSmall() throws IOException {
         long start = System.nanoTime();
         final long used0 = usedMemory();
-        BigDoubleMatrixFileManager matrix = new BigDoubleMatrixFileManager();
+        BigDoubleMatrixFileManager matrix = new BigDoubleMatrixFileManager(workspace);
         matrix.loadReadWrite(EDataFolder.MATRIX,"ldm.test", 1000 * 1000, 1000 * 1000);
         for (int i = 0; i < matrix.width(); i++)
             matrix.set(i, i, i);
@@ -35,7 +39,7 @@ public class LargeDoubleMatrixTest {
     public void getSetMatrix() throws IOException {
         long start = System.nanoTime();
         final long used0 = usedMemory();
-        BigDoubleMatrixFileManager matrix = new BigDoubleMatrixFileManager();
+        BigDoubleMatrixFileManager matrix = new BigDoubleMatrixFileManager(this.workspace);
         matrix.loadReadWrite(EDataFolder.MATRIX,"ldm.test", 100 * 100, 100 * 100);
         for (int i = 0; i < matrix.width(); i++)
             matrix.set(i, i, i);

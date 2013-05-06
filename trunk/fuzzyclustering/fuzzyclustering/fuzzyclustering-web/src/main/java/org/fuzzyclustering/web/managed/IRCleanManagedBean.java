@@ -27,14 +27,6 @@ public class IRCleanManagedBean implements Serializable {
 	@ManagedProperty(value = "#{documents}") 
 	private DocumentsManagedBean documents;
 	
-	/*@PostConstruct
-	public void load(){
-		documents.loadDocuments(EDataFolder.ORIGINAL_RSS);
-	}*/
-	
-	public void load(){
-		documents.loadDocuments(EDataFolder.CLEAN);
-	}
 
 	public void setDocuments(DocumentsManagedBean documents) {
 		this.documents = documents;
@@ -56,6 +48,5 @@ public class IRCleanManagedBean implements Serializable {
 					"Error al realizar el proceso", e.getDescription());
 			FacesContext.getCurrentInstance().addMessage(null, msg);
 		}
-		this.load();
 	}
 }

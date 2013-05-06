@@ -8,20 +8,21 @@ import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.constant.ESystemProperty;
 import co.edu.sanmartin.persistence.constant.properties.PropertiesLoader;
 import co.edu.sanmartin.persistence.dto.PropertyDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 
 public class PropertyDAO extends AbstractDAO<PropertyDTO> {
 	
 	
-	public PropertyDAO (){
-		this.selectAll(true);
+	public PropertyDAO(WorkspaceDTO workspace) {
+		super(workspace);
 	}
 
 	ArrayList<PropertyDTO> propertyCol = new ArrayList<PropertyDTO>();
 	@Override
 	public void insert(PropertyDTO object) {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = "insert into property (name,value) VALUES (?,?)";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, object.getName());
@@ -40,7 +41,7 @@ public class PropertyDAO extends AbstractDAO<PropertyDTO> {
 	@Override
 	public void update(PropertyDTO object){
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = "UPDATE property SET value = ? WHERE name =?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, object.getValue());
@@ -78,11 +79,14 @@ public class PropertyDAO extends AbstractDAO<PropertyDTO> {
 	 * @throws SQLException
 	 * @throws PropertyValueNotFoundException 
 	 */
-	public <T> PropertyDTO  getProperty(Enum<?> property) 
+	public <T> PropertyDTO  getProperty(Enum<?> property, WorkspaceDTO workspace) 
 			throws PropertyValueNotFoundException {
 		
 		PropertyDTO searchProperty = new PropertyDTO();
 		searchProperty.setName(property.name());
+		if(this.propertyCol==null || this.propertyCol.isEmpty()){
+			this.selectAll(true);
+		}
 		int propertyIndex = this.propertyCol.indexOf(searchProperty);
 		if(propertyIndex==-1){
 			throw new PropertyValueNotFoundException();
@@ -100,7 +104,7 @@ public class PropertyDAO extends AbstractDAO<PropertyDTO> {
 	 */
 	public void dropTable(){
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = "DROP TABLE IF EXISTS property";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.executeUpdate();
@@ -115,7 +119,7 @@ public class PropertyDAO extends AbstractDAO<PropertyDTO> {
 	 */
 	public void truncateTable(){
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = "TRUNCATE TABLE property";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.executeUpdate();
@@ -135,8 +139,9 @@ public class PropertyDAO extends AbstractDAO<PropertyDTO> {
 				this.dropTable();
 			}
 			sQLQuery = 	"CREATE TABLE property (" +
-							"name varchar(40) NOT NULL," +
-							"value varchar(254))";
+					"  name varchar(40) NOT NULL," +
+					"  value varchar(254) DEFAULT NULL)";
+
 			statement = connection.prepareStatement(sQLQuery);
 			statement.executeUpdate();
 			this.insertDefautValues();
@@ -169,7 +174,7 @@ public class PropertyDAO extends AbstractDAO<PropertyDTO> {
 		if(refresh){
 			this.propertyCol = new ArrayList<PropertyDTO>();
 			try {
-				connection = getConnectionPool().getConnection();
+				connection = getConnectionPool().getConnection(this.workspace);
 				sQLQuery = "select * from property order by name";
 				statement = connection.prepareStatement(sQLQuery);
 				rs = statement.executeQuery();

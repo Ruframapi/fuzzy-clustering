@@ -6,11 +6,12 @@ import java.util.Collection;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
 import org.apache.log4j.Logger;
+import org.fuzzyclustering.web.managed.WorkspaceManagedBean;
 import org.primefaces.event.SelectEvent;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
@@ -19,8 +20,7 @@ import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
-import co.edu.sanmartin.persistence.dto.StopwordDTO;
-import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.facade.QueueFacade;
 
 /**
  * Managed bean que gestiona la vista de las carpetas de contienen 
@@ -29,7 +29,7 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
  *
  */
 @ManagedBean(name = "documents")
-@SessionScoped
+@ViewScoped
 public class DocumentsManagedBean implements Serializable {
 	/**
 	 * 
@@ -40,6 +40,10 @@ public class DocumentsManagedBean implements Serializable {
 	private DocumentDTO document;
 	private String originalDataDocument;
 	private String cleanDataDocument;
+	
+	@ManagedProperty(value = "#{workspace}") 
+	private WorkspaceManagedBean workspace;
+	
 	
 	public Collection<DocumentDTO> getDocumentsColl() {
 		return documentsColl;
@@ -56,10 +60,16 @@ public class DocumentsManagedBean implements Serializable {
 	public void setDocument(DocumentDTO document) {
 		this.document = document;
 	}
+	
+	
 
-	public void loadDocuments(EDataFolder dataFolder){
-		PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
-		Collection<DocumentDTO> fileList = persistenceFacade.getFileList(dataFolder);
+	public void setWorkspace(WorkspaceManagedBean workspace) {
+		this.workspace = workspace;
+	}
+
+	public void loadDocuments(String dataRoot, EDataFolder dataFolder){
+		Collection<DocumentDTO> fileList = 
+				this.workspace.getWorkspace().getPersistence().getFileList(dataFolder);
 		this.documentsColl = fileList;
 	}
 	
@@ -81,15 +91,15 @@ public class DocumentsManagedBean implements Serializable {
 	 */
 	private void sendQueryDocument(int documentId){
 		logger.info("Sending Query document document Id:" + documentId );
-		PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
 		QueueDTO queue = new QueueDTO();
 		queue.setEvent(EQueueEvent.QUERY_DOCUMENT);
 		queue.setModule(EModule.QUERYASYNCH);
-		queue.setInitDate(persistenceFacade.getServerDate().getTime());
+		queue.setInitDate(QueueFacade.getInstance().getServerDate().getTime());
 		queue.setParams(String.valueOf(documentId));
 		queue.setStatus(EQueueStatus.ENQUEUE);
+		queue.setWorkspace(this.workspace.getWorkspace().getName());
 		try {
-			persistenceFacade.insertQueue(queue);
+			QueueFacade.getInstance().insertQueue(queue);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.error(e);
@@ -130,7 +140,7 @@ public class DocumentsManagedBean implements Serializable {
 	
 	public DocumentsLazyDataModel getDocuments(){
 		if(documentsModel == null){
-			documentsModel = new DocumentsLazyDataModel();
+			documentsModel = new DocumentsLazyDataModel(this.workspace.getWorkspace());;
 		}
 		return documentsModel;
 	}
@@ -142,7 +152,7 @@ public class DocumentsManagedBean implements Serializable {
 		FacesContext.getCurrentInstance().addMessage(null, msg); 
 		this.document.setCleanDate(null);
 		try {
-			PersistenceFacade.getInstance().updateDocument(this.document);
+			this.workspace.getWorkspace().getPersistence().updateDocument(this.document);
 			try {
 				Thread.sleep (1000);
 			} catch (InterruptedException e) {

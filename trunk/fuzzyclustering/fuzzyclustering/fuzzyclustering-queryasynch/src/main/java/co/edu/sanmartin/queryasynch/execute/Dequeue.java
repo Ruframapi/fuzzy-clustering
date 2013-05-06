@@ -14,8 +14,11 @@ import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.facade.QueueFacade;
+import co.edu.sanmartin.persistence.facade.WorkspaceFacade;
 
 /**
  * Clase que arranca el sistema de descarga de Noticias
@@ -26,13 +29,11 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 public class Dequeue implements Runnable{
 
 	private static Logger logger = Logger.getLogger(Dequeue.class);
-	PersistenceFacade persistenceFacade;
 	/**
 	 * Constructor de la clase
 	 * @param restart define si reinicia el proceso o continua con un proceso anterior
 	 */
 	public Dequeue(){
-		persistenceFacade = PersistenceFacade.getInstance();
 		try {
 			this.cancelActiveQueue(EQueueEvent.QUERY_DOCUMENT);
 		} catch (SQLException e) {
@@ -73,35 +74,40 @@ public class Dequeue implements Runnable{
 	 * @throws PropertyValueNotFoundException 
 	 */
 	public void executeQueue() throws SQLException, PropertyValueNotFoundException{
-		
+
 		Collection<QueueDTO> queueCol = 
-				this.persistenceFacade.getQueueByStatusDate(EModule.QUERYASYNCH, 
+				QueueFacade.getInstance().getQueueByStatusDate(EModule.QUERYASYNCH, 
 						EQueueStatus.ENQUEUE, new Date());
 		for (QueueDTO queueDTO : queueCol) {
-			switch( queueDTO.getEvent() ){
-			case QUERY_DOCUMENT:
-				this.queryDocumentAsynch(queueDTO);
-				break;
-			case GENERATE_INVERTED_INDEX:
-				this.generateInvertedIndex(queueDTO);
-				break;
-			case GENERATE_TERM_TERM_MATRIX:
-				this.generateTermTermMatrix(queueDTO);
-				break;
-			case GENERATE_PPMI_MATRIX:
-				this.generatePPMIMatrix(queueDTO);
-				break;
-			case GENERATE_ALL_MATRIX:
-				this.generateCmeansMatrix(queueDTO);
-				break;
-			case GENERATE_REDUCED_PPMI_MATRIX:
-				this.generateReducedPPMIMatrix(queueDTO);
-				break;
-			case SEND_MESSAGE:
-				this.sendMessage(queueDTO);
-				break;
+			try{
+				switch( queueDTO.getEvent() ){
+				case QUERY_DOCUMENT:
+					this.queryDocumentAsynch(queueDTO);
+					break;
+				case GENERATE_INVERTED_INDEX:
+					this.generateInvertedIndex(queueDTO);
+					break;
+				case GENERATE_TERM_TERM_MATRIX:
+					this.generateTermTermMatrix(queueDTO);
+					break;
+				case GENERATE_PPMI_MATRIX:
+					this.generatePPMIMatrix(queueDTO);
+					break;
+				case GENERATE_ALL_MATRIX:
+					this.generateCmeansMatrix(queueDTO);
+					break;
+				case GENERATE_REDUCED_PPMI_MATRIX:
+					this.generateReducedPPMIMatrix(queueDTO);
+					break;
+				case SEND_MESSAGE:
+					this.sendMessage(queueDTO);
+					break;
+				}
+			}catch(RuntimeException e){
+				logger.error("Error en procesar la cola " + queueDTO.getEvent().toString(), e);
 			}
 		}
+
 
 	}
 
@@ -113,17 +119,18 @@ public class Dequeue implements Runnable{
 		logger.info("Init generateReducedPPMIMatrix");
 		try {
 			String[] params = queueDTO.getParams().split(",");
+			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
 			int newDimension = Integer.parseInt(params[0]);
 			Boolean saveReadable  = Boolean.parseBoolean(params[1]);
 			int readableRowsAmount = Integer.parseInt(params[2]);
 			IRFacade irFacade = IRFacade.getInstance();
-			irFacade.reducedDimensionPPMIMatrix(newDimension, saveReadable, readableRowsAmount);
+			irFacade.reducedDimensionPPMIMatrix(workspace, newDimension, saveReadable, readableRowsAmount);
 		} catch (Exception e) {
 			logger.error("Error in generateReducedPPMIMatrix",e);
 		}
 		finally{
 			try {
-				PersistenceFacade.getInstance().deleteQueue(queueDTO);
+				QueueFacade.getInstance().deleteQueue(queueDTO);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -137,15 +144,18 @@ public class Dequeue implements Runnable{
 	 */
 	private void sendMessage(QueueDTO queueDTO) {
 		// TODO Auto-generated method stub
+		String[] params = queueDTO.getParams().split(",");
+
 		try {
-			CallRemoteServlet callRemoteServlet = new CallRemoteServlet();
+			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
+			CallRemoteServlet callRemoteServlet = new CallRemoteServlet(workspace);
 			callRemoteServlet.sendMessage(queueDTO.getParams());
 		} catch (Exception e) {
 			logger.error("Error in generateInvertedIndex",e);
 		}
 		finally{
 			try {
-				PersistenceFacade.getInstance().deleteQueue(queueDTO);
+				QueueFacade.getInstance().deleteQueue(queueDTO);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -159,18 +169,19 @@ public class Dequeue implements Runnable{
 	 */
 	private void generateInvertedIndex(QueueDTO queueDTO) {
 		// TODO Auto-generated method stub
-		
+
 		try {
+			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
 			int minTermsOcurrences = Integer.parseInt(queueDTO.getParams());
 			IRFacade irFacade = IRFacade.getInstance();
-			irFacade.createInvertedIndex(minTermsOcurrences);	
-			PersistenceFacade.getInstance().deleteQueue(queueDTO);
+			irFacade.createInvertedIndex(workspace, minTermsOcurrences);	
+			QueueFacade.getInstance().deleteQueue(queueDTO);
 		} catch (Exception e) {
 			logger.error("Error in generateInvertedIndex",e);
 		}
 		finally{
 			try {
-				PersistenceFacade.getInstance().deleteQueue(queueDTO);
+				QueueFacade.getInstance().deleteQueue(queueDTO);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -185,14 +196,15 @@ public class Dequeue implements Runnable{
 	private void generateTermTermMatrix(QueueDTO queueDTO) {
 		logger.trace("Init generateTermTermMatrix Method");
 		try {
+			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
 			IRFacade irFacade = IRFacade.getInstance();
-			irFacade.createTermTermBigMatrix(true);	
+			irFacade.createTermTermBigMatrix(workspace, true);	
 		} catch (Exception e) {
 			logger.error("Error in generateTermTermMatrix",e);
 		}
 		finally{
 			try {
-				PersistenceFacade.getInstance().deleteQueue(queueDTO);
+				QueueFacade.getInstance().deleteQueue(queueDTO);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -206,18 +218,20 @@ public class Dequeue implements Runnable{
 	 */
 	private void generatePPMIMatrix(QueueDTO queueDTO) {
 		// TODO Auto-generated method stub
-		
+
 		try {
+			String[] params = queueDTO.getParams().split(",");
+			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
 			IRFacade irFacade = IRFacade.getInstance();
-			irFacade.createPPMIBigMatrix(true);
-			
+			irFacade.createPPMIBigMatrix(workspace, true);
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			logger.error("Error in generatePPMIMatrix",e);
 		}
 		finally{
 			try {
-				PersistenceFacade.getInstance().deleteQueue(queueDTO);
+				QueueFacade.getInstance().deleteQueue(queueDTO);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -232,25 +246,25 @@ public class Dequeue implements Runnable{
 	private void generateCmeansMatrix(QueueDTO queueDTO) {
 		// TODO Auto-generated method stub
 		try {
-			int minTermsOcurrences = Integer.parseInt(queueDTO.getParams());
+			String[] params = queueDTO.getParams().split(",");
+			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
+			int minTermsOcurrences = Integer.parseInt(params[1]);
 			IRFacade irFacade = IRFacade.getInstance();
-			irFacade.buildCmeanMatrix(minTermsOcurrences);
-			PersistenceFacade.getInstance().deleteQueue(queueDTO);
+			irFacade.buildCmeanMatrix(workspace,minTermsOcurrences);
+			QueueFacade.getInstance().deleteQueue(queueDTO);
 		} catch (Exception e) {
 			logger.error("Error in generateCmeansMatrix",e);
 		}
 		finally{
 			try {
-				PersistenceFacade.getInstance().deleteQueue(queueDTO);
+				QueueFacade.getInstance().deleteQueue(queueDTO);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
-
-
 
 	/**
 	 * Realiza la consulta de documentos de forma asincronica
@@ -258,16 +272,16 @@ public class Dequeue implements Runnable{
 	 * @throws SQLException 
 	 */
 	private void queryDocumentAsynch(QueueDTO queueDTO) throws SQLException{
-		PersistenceFacade persistence = PersistenceFacade.getInstance();
+		String[] params = queueDTO.getParams().split(",");
 		try {
 			//persistence.truncateQueryDocument();
 			if(queueDTO.getParams()!=null){
 				int idDocument = Integer.parseInt(queueDTO.getParams());
-
-				DocumentDTO document = persistence.selectDocumentById(idDocument);
+				WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
+				DocumentDTO document = workspace.getPersistence().selectDocumentById(idDocument);
 				logger.info("QueryDocumentAsynch: id:" + idDocument + " Name:" + document.getName());
-				String lazyData = persistence.readFile(EDataFolder.DOWNLOAD, document.getName());
-				String lazyCleanData = persistence.readFile(EDataFolder.CLEAN, document.getName());
+				String lazyData = workspace.getPersistence().readFile(EDataFolder.DOWNLOAD, document.getName());
+				String lazyCleanData = workspace.getPersistence().readFile(EDataFolder.CLEAN, document.getName());
 
 				if(lazyData.length()>1000) lazyData=lazyData.substring(0, 1000);
 				if(lazyCleanData.length()>1000) lazyCleanData=lazyCleanData.substring(0, 1000);
@@ -276,7 +290,7 @@ public class Dequeue implements Runnable{
 				logger.debug("Document query"+document.getId());
 				if(document!=null){
 					logger.debug("Calling Remote Servlet");
-					CallRemoteServlet callRemoteServlet = new CallRemoteServlet();
+					CallRemoteServlet callRemoteServlet = new CallRemoteServlet(workspace);
 					try {
 						callRemoteServlet.sendDocument(document);
 					} catch (URISyntaxException e) {
@@ -292,7 +306,7 @@ public class Dequeue implements Runnable{
 		}
 		finally{
 			try {
-				PersistenceFacade.getInstance().deleteQueue(queueDTO);
+				QueueFacade.getInstance().deleteQueue(queueDTO);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -305,9 +319,9 @@ public class Dequeue implements Runnable{
 	 */
 	private void cancelActiveQueue(EQueueEvent queueEvent) throws SQLException{
 		Collection<QueueDTO> queueActive = 
-				this.persistenceFacade.getQueueByStatus(queueEvent, EQueueStatus.ENQUEUE);
+				QueueFacade.getInstance().getQueueByStatus(queueEvent, EQueueStatus.ENQUEUE);
 		for (QueueDTO queueDTO2 : queueActive) {
-			persistenceFacade.deleteQueue(queueDTO2);
+			QueueFacade.getInstance().deleteQueue(queueDTO2);
 		}
 	}
 }

@@ -18,7 +18,7 @@ import javax.faces.bean.ViewScoped;
  */
 @ManagedBean(name = "chartController")
 @ViewScoped
-public class ChartTermController implements Serializable {
+public class ChartTermControllerTest implements Serializable {
     private String chartData;
     private String categories;
     private List<String> categoryList = new ArrayList<String>();
@@ -29,7 +29,7 @@ public class ChartTermController implements Serializable {
     int index = 0;
     private Long[] longs;
      
-    public ChartTermController(){
+    public ChartTermControllerTest(){
     	this.loadChartData();
     }
     /**
@@ -49,8 +49,8 @@ public class ChartTermController implements Serializable {
         heapSizeList.add(heapSize/MB);
         usedHeapSizeList.add((heapSize - Runtime.getRuntime().freeMemory())/MB);
          
-        series.add(new Series("Heap Size", heapSizeList));
-        series.add(new Series("Used Heap", usedHeapSizeList));
+     //   series.add(new Series("Heap Size", heapSizeList));
+     //   series.add(new Series("Used Heap", usedHeapSizeList));
  
         setChartData(new Gson().toJson(series));
          

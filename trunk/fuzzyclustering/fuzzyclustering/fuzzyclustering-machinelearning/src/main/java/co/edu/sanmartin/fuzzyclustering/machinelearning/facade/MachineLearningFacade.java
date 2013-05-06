@@ -1,6 +1,7 @@
 package co.edu.sanmartin.fuzzyclustering.machinelearning.facade;
 
 import co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans.FuzzyCMeans;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 
 public class MachineLearningFacade {
 	
@@ -11,8 +12,8 @@ public class MachineLearningFacade {
 	 * @param iterationsAmount cantidad de iteraciones
 	 * @param mValue valor de fuzzyficacion
 	 */
-	public void calculateCMeans(double[][] data, int centroidsAmount, int iterationsAmount, int mValue){
-		FuzzyCMeans cmeans = new FuzzyCMeans(data, centroidsAmount, iterationsAmount, mValue);
+	public void calculateCMeans(WorkspaceDTO workspace, double[][] data, int centroidsAmount, int iterationsAmount, int mValue){
+		FuzzyCMeans cmeans = new FuzzyCMeans(workspace, data, centroidsAmount, iterationsAmount, mValue);
 		cmeans.calculateFuzzyCmeans();
 	}
 

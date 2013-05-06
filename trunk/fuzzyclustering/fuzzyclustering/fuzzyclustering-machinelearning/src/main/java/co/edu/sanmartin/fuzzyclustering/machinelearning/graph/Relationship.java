@@ -5,14 +5,21 @@ import java.util.ArrayList;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
 
 public class Relationship {
+	
+	WorkspaceDTO workspace;
+	
+	public Relationship(WorkspaceDTO workspace){
+		this.workspace = workspace;
+	}
 
 	public void buildJson(){
 		String titulo = "Matriz de Relacion";
-		String dataFile = PersistenceFacade.getInstance().readFile("relationship.txt");
+		String dataFile = this.workspace.getPersistence().readFile("relationship.txt");
 		String json = null;
 		
 

@@ -18,6 +18,7 @@ import co.edu.sanmartin.persistence.constant.ESourceType;
 import co.edu.sanmartin.persistence.dto.PropertyDTO;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
@@ -35,8 +36,13 @@ public class DowloadTwitterThreadPool {
 	private static Logger logger = Logger.getRootLogger();
 	private AtomicInteger sequence;
 	private QueueDTO queue;
+	private String dataRoot;
+	private WorkspaceDTO workspace;
 
-	public DowloadTwitterThreadPool(QueueDTO queue, AtomicInteger sequence){
+	public DowloadTwitterThreadPool(WorkspaceDTO workspace, QueueDTO queue, AtomicInteger sequence){
+		this.workspace = workspace;
+		String[] parameter = queue.getParams().split(",");
+		this.dataRoot = parameter[0];
 		this.queue = queue;
 		this.sequence = sequence;
 	}
@@ -47,10 +53,10 @@ public class DowloadTwitterThreadPool {
 		logger.info("Init DownloadTread Twitter Execute Method for" + sourceType);
 		//Se cargan las fuentes rss disponibles
 		try {
-			PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
-			twitterSourceColl = persistenceFacade.getAllSources();
+			
+			twitterSourceColl = this.workspace.getPersistence().getAllSources();
 			PropertyDTO threadPoolNumberProperty = 
-					persistenceFacade.getProperty(EProperty.WEB_SCRAPPING_THREAD_NUMBER);
+					this.workspace.getPersistence().getProperty(EProperty.WEB_SCRAPPING_THREAD_NUMBER);
 			threadPoolNumber = threadPoolNumberProperty.intValue();
 			this.queue.setProcessDate(new Date());
 
@@ -69,7 +75,7 @@ public class DowloadTwitterThreadPool {
 		try{
 			for (SourceDTO sourceDTO : twitterSourceColl) {
 				if(sourceDTO.getType().equals(ESourceType.TWITTER)){
-					twitterWorkerThread = new TwitterDownloadWorkerThread(sourceDTO, sequence);
+					twitterWorkerThread = new TwitterDownloadWorkerThread(this.workspace,sourceDTO, this.sequence);
 					executor.submit(twitterWorkerThread);
 				}
 			}
@@ -78,6 +84,6 @@ public class DowloadTwitterThreadPool {
 		}
 		this.queue.setStatus(EQueueStatus.SUCESS);
 		executor.shutdown();
-		SendMessageAsynch.sendMessage("Nuevas Noticias Twitter Descargadas. Total" + sequence);
+		SendMessageAsynch.sendMessage(this.workspace,"Nuevas Noticias Twitter Descargadas. Total" + sequence);
 	}
 }

@@ -11,6 +11,7 @@ import java.util.Collection;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EDatabase;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 import co.edu.sanmartin.persistence.factory.ConnectionDataSourcePoolMySQL;
 import co.edu.sanmartin.persistence.factory.DAOFactory;
@@ -27,6 +28,11 @@ public abstract class AbstractDAO<T> {
 	protected PreparedStatement statement;
 	protected ResultSet rs;
 	protected String sQLQuery;
+	protected WorkspaceDTO workspace;
+	
+	public AbstractDAO (WorkspaceDTO workspace){
+		this.workspace = workspace;
+	}
 	
 	protected ConnectionDataSourcePoolMySQL getConnectionPool(){
 		ConnectionDataSourcePoolMySQL connectionPool = DAOFactory.getInstance().getConnectionPool(EDatabase.MYSQL);
@@ -46,8 +52,8 @@ public abstract class AbstractDAO<T> {
 	public void backupTable(String tableName){
 		try {
 			//Crea la carpeta de backups si no existe
-			FileManager fileManager = new FileManager();
-			String folderPath = PersistenceFacade.getInstance().getFolderPath(EDataFolder.BACKUP);
+			FileManager fileManager = new FileManager(workspace);
+			String folderPath = this.workspace.getPersistence().getFolderPath(EDataFolder.BACKUP);
 			fileManager.createFolder(folderPath);
 			
 			StringBuilder destinationPath = new StringBuilder();
@@ -59,7 +65,7 @@ public abstract class AbstractDAO<T> {
 			//SimpleDateFormat date_format = new SimpleDateFormat("dd-MMM-yyyy-HH_mm");
 			//destinationPath.append(date_format.format(Calendar.getInstance().getTime()));
 			destinationPath.append(".sql'");
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			
 			StringBuilder queryBuilder = new StringBuilder();
 			queryBuilder.append("SELECT * INTO OUTFILE ");
@@ -96,8 +102,8 @@ public abstract class AbstractDAO<T> {
 	public void restoreTable(String tableName, String columns){
 		try {
 			//Crea la carpeta de backups si no existe
-			FileManager fileManager = new FileManager();
-			String folderPath = PersistenceFacade.getInstance().getFolderPath(EDataFolder.BACKUP);
+			FileManager fileManager = new FileManager(workspace);
+			String folderPath = this.workspace.getPersistence().getFolderPath(EDataFolder.BACKUP);
 			fileManager.createFolder(folderPath);
 			
 			StringBuilder destinationPath = new StringBuilder();
@@ -109,7 +115,7 @@ public abstract class AbstractDAO<T> {
 			//SimpleDateFormat date_format = new SimpleDateFormat("dd-MMM-yyyy-HH_mm");
 			//destinationPath.append(date_format.format(Calendar.getInstance().getTime()));
 			destinationPath.append(".sql'");
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			
 			StringBuilder queryBuilder = new StringBuilder();
 			queryBuilder.append("LOAD DATA LOCAL INFILE ");

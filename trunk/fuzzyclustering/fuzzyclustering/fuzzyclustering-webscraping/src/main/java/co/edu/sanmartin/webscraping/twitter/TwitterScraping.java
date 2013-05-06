@@ -24,6 +24,7 @@ import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.constant.ESourceType;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
@@ -83,12 +84,14 @@ public class TwitterScraping {
 	
 	private static Logger logger = Logger.getRootLogger();
 	private AtomicInteger atomicSequence;
+	private String dataRoot;
+	private WorkspaceDTO workspace;
 	
-	private PersistenceFacade persistence = PersistenceFacade.getInstance();
 	private Twitter twitter;
 	
-	public TwitterScraping(AtomicInteger atomicSequence) throws TwitterException{
+	public TwitterScraping(WorkspaceDTO workspace,AtomicInteger atomicSequence) throws TwitterException{
 		try {
+			this.workspace = workspace;
 			this.atomicSequence = atomicSequence;
 			this.init();
 		} catch (PropertyValueNotFoundException e) {
@@ -98,7 +101,7 @@ public class TwitterScraping {
 	}
 	
 	private void init() throws PropertyValueNotFoundException, TwitterException{
-		this.twitter = TwitterConnection.getInstance().getTwitter();
+		this.twitter = TwitterConnection.getInstance(this.workspace).getTwitter();
 		//this.twitter = TwitterConnection.
 	}
 
@@ -109,7 +112,7 @@ public class TwitterScraping {
 	public Collection<String> getTwitterDocuments(){
 		Collection<String> documentCol = new ArrayList<String>();
 		try {
-			int timeLinePages = persistence.getProperty(EProperty.TWITTER_HOME_TIMELINE_PAGES).intValue();
+			int timeLinePages = this.workspace.getPersistence().getProperty(EProperty.TWITTER_HOME_TIMELINE_PAGES).intValue();
 			List<Status> statuses =  this.twitter.getHomeTimeline();			
 			for (Status status : statuses) {
 				System.out.println(status.getId() + "-" +status.getUser().getName() + ":" + status.getText());
@@ -140,17 +143,16 @@ public class TwitterScraping {
 	 * @throws TwitterException 
 	 * @throws IllegalStateException 
 	 */
-	public void saveTwitterDocument(SourceDTO source) throws SQLException, IllegalStateException, TwitterException{
+	public void saveTwitterDocument(String dataRoot, SourceDTO source) throws SQLException, IllegalStateException, TwitterException{
 		logger.debug("Init saveTwitterDocument Source:" + source.getUrl());
     	if(this.twitter !=null && this.twitter.getId()!=0){
 	    	Collection<DocumentDTO> documentContent = this.getTwitterDocuments(source);
 	    	logger.info("Documents to save Twitter Source:" + source.getUrl() + 
 					" Amount:" + documentContent.size());
-	    	PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
 	    	for (DocumentDTO documentDTO : documentContent) {	
 	    		logger.debug("Creating new twitter file:"+ documentDTO.getName());
-	    		persistenceFacade.writeFile(EDataFolder.DOWNLOAD, documentDTO.getName(), documentDTO.getLazyData());
-	    		persistenceFacade.insertDocument(documentDTO);
+	    		this.workspace.getPersistence().writeFile(EDataFolder.DOWNLOAD, documentDTO.getName(), documentDTO.getLazyData());
+	    		this.workspace.getPersistence().insertDocument(documentDTO);
 			}
     	}
     }
@@ -164,7 +166,7 @@ public class TwitterScraping {
 	public Collection<DocumentDTO> getTwitterDocuments(SourceDTO source) throws SQLException{
 		Collection<DocumentDTO> documentCol = new ArrayList<DocumentDTO>();
 		try {
-			int timeLinePages = persistence.getProperty(EProperty.TWITTER_HOME_TIMELINE_PAGES).intValue();
+			int timeLinePages = this.workspace.getPersistence().getProperty(EProperty.TWITTER_HOME_TIMELINE_PAGES).intValue();
 			Paging paging = new Paging();
 			
 			if(source.getSinceId()>0){
@@ -195,7 +197,7 @@ public class TwitterScraping {
 			if(responseList.size()>0){
 				source.setSinceId(responseList.get(0).getId());
 				source.setLastQuery(responseList.get(0).getCreatedAt());
-				PersistenceFacade.getInstance().updateSource(source);
+				this.workspace.getPersistence().updateSource(source);
 			}
 			
 		} catch (TwitterException e) {

@@ -5,8 +5,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
@@ -14,12 +16,20 @@ import org.primefaces.event.SelectEvent;
 
 import co.edu.sanmartin.persistence.constant.ESourceType;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
-import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
 @ManagedBean(name = "source")
 @ViewScoped
 public class SourceManagedBean implements Serializable {
 
+	@ManagedProperty(value = "#{workspace}") 
+	private WorkspaceManagedBean workspace;
+	
+	 @PostConstruct
+	 public void init(){
+		 this.newSource();
+		 this.loadSources();
+	 }
+	
 	private static final long serialVersionUID = -2663754899417381620L;
 	private SourceDTO sourceDTO;
 	private SourceDTO sourceRSSSelected;
@@ -30,15 +40,19 @@ public class SourceManagedBean implements Serializable {
 	private Collection<SourceDTO> twitterSourceCol;
 
 	public SourceManagedBean(){
-		this.newSource();
-		this.loadSources();
+		
 	}
+	
 	public SourceDTO getSourceDTO() {
 		return sourceDTO;
 	}
 
 	public void setSourceDTO(SourceDTO sourceDTO) {
 		this.sourceDTO = sourceDTO;
+	}
+	
+	public void setWorkspaceBean(WorkspaceManagedBean workspace) {
+		this.workspace = workspace;
 	}
 
 	public Collection<SourceDTO> getRssSourceCol() {
@@ -79,7 +93,7 @@ public class SourceManagedBean implements Serializable {
 		}
 		if(sourceDTO.getType()!=null){
 			try {
-				PersistenceFacade.getInstance().createSource(sourceDTO);
+				this.workspace.getWorkspace().getPersistence().createSource(sourceDTO);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -110,7 +124,7 @@ public class SourceManagedBean implements Serializable {
 	 */
 	public void deleteRssSource(){
 		try {
-			PersistenceFacade.getInstance().deleteSource(sourceRSSSelected);
+			this.workspace.getWorkspace().getPersistence().deleteSource(sourceRSSSelected);
 			this.loadSources();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -135,7 +149,7 @@ public class SourceManagedBean implements Serializable {
 		try {
 			//WebscrapingFacade webscrapingFacade = WebscrapingFacade.getInstance();
 			//webscrapingFacade.removeFriendship(this.sourceDTO.getUrl());
-			PersistenceFacade.getInstance().deleteSource(sourceTwitterSelected);
+			this.workspace.getWorkspace().getPersistence().deleteSource(sourceTwitterSelected);
 			this.loadSources();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -155,7 +169,7 @@ public class SourceManagedBean implements Serializable {
 	 */
 	public void loadSources(){
 			try {
-				this.sourceColl = PersistenceFacade.getInstance().getAllSources(true);
+				this.sourceColl = this.workspace.getWorkspace().getPersistence().getAllSources(true);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -172,4 +186,16 @@ public class SourceManagedBean implements Serializable {
         FacesMessage msg = new FacesMessage("Registro Seleccionado", ((SourceDTO) event.getObject()).getName());  
         FacesContext.getCurrentInstance().addMessage(null, msg);  
     }
+
+	public void setWorkspace(WorkspaceManagedBean workspace) {
+		this.workspace = workspace;
+	}
+
+	public WorkspaceManagedBean getWorkspace() {
+		return workspace;
+	}
+	
+	
+   
+   
 }

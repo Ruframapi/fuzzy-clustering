@@ -18,12 +18,12 @@
 				<p:menuitem value="Restaurar Configuracion"
 					actionListener="#{setup.restoreSystem}" />
 				<p:separator />
-				<p:menuitem value="Salir" url="index.xhtml" />
+				<p:menuitem value="Salir" action="#{workspace.systemOut}" />
 			</p:submenu>
 			<p:submenu label="Recuperacion de Informacion"
 				icon="ui-icon-document">
 				<p:menuitem value="Descarga de archivos" url="irdownload.xhtml" />
-				<p:menuitem value="Generacion de Indices" url="irinvertedindex.xhtml" />
+				<p:menuitem value="Generar C-Means" url="processmanager.xhtml" />
 			</p:submenu>
 			<p:submenu label="Clustering" icon="ui-icon-document">
 				<p:menuitem value="Generar Conjuntos Difusos C-Means"

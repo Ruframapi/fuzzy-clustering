@@ -20,6 +20,7 @@ import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.constant.ESourceType;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
@@ -38,12 +39,14 @@ import com.sun.syndication.io.XmlReader;
 public class RssScraping{
 
 	private static Logger logger = Logger.getRootLogger();
-
+	
 	Set urlSet = new HashSet();
 	private AtomicInteger atomicSequence;
-
-	public RssScraping(AtomicInteger atomicSequence){
+	private WorkspaceDTO workspace;
+	
+	public RssScraping(WorkspaceDTO workspace,AtomicInteger atomicSequence){
 		logger.debug("Init RssScraping Class");
+		this.workspace = workspace;
 		this.atomicSequence = atomicSequence;
 	}
 	/**
@@ -103,7 +106,7 @@ public class RssScraping{
 			}
 
 			source.setLastQuery(lastPublishedDate);
-			PersistenceFacade.getInstance().updateSource(source);
+			this.workspace.getPersistence().updateSource(source);
 
 		} catch (Exception ex) {
 			logger.info("ERROR: " + ex.getMessage() + " Source:" + source) ;
@@ -117,12 +120,12 @@ public class RssScraping{
 		Collection<DocumentDTO> documentContent = this.getRssDocuments(source);
 		logger.info("Documents to save Rss Source:" + source.getUrl() + 
 				" Amount:" + documentContent.size());
-		PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
 		
 		for (DocumentDTO documentDTO : documentContent) {
 			logger.debug("Creating new file:"+ documentDTO.getName());
-			persistenceFacade.writeFile(EDataFolder.DOWNLOAD, documentDTO.getName(), documentDTO.getLazyData());
-			persistenceFacade.insertDocument(documentDTO);
+			this.workspace.getPersistence().writeFile(EDataFolder.DOWNLOAD, documentDTO.getName(), 
+											documentDTO.getLazyData());
+			this.workspace.getPersistence().insertDocument(documentDTO);
 		}
 
 	}

@@ -6,6 +6,8 @@ import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
 import co.edu.sanmartin.fuzzyclustering.ir.index.DimensionallyReduced;
 import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
 import co.edu.sanmartin.fuzzyclustering.ir.index.MutualInformation;
+import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
 
 /**
@@ -16,7 +18,7 @@ import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
 public class IRFacade {
 
 	private static IRFacade instance;
-	private InvertedIndex invertedIndex = new InvertedIndex();
+	
 	
 	private IRFacade(){
 		
@@ -29,16 +31,27 @@ public class IRFacade {
 		return instance;
 	}
 
-	public void createInvertedIndex(int minTermsOcurrences){
+	public InvertedIndex getInvertedIndex(WorkspaceDTO workspace){
+		InvertedIndex invertedIndex = new InvertedIndex(workspace);
+		invertedIndex.loadInvertedIndexData();
+		return invertedIndex;
+	}
+	public void createInvertedIndex(WorkspaceDTO workspace, int minTermsOcurrences){
+		workspace.getPersistence().deleteFolder(EDataFolder.MATRIX);
+		workspace.getPersistence().deleteFolder(EDataFolder.MACHINE_LEARNING);
+		InvertedIndex invertedIndex = new InvertedIndex(workspace);	
+		//invertedIndex.loadInvertedIndexData();
 		invertedIndex.createInvertedIndex(minTermsOcurrences);
 	}
 	
-	public void createTermTermBigMatrix(boolean persist) throws IOException{
-		this.invertedIndex.createTermTermBigMatrix(persist);
+	public void createTermTermBigMatrix(WorkspaceDTO workspace, boolean persist) throws IOException{
+		InvertedIndex invertedIndex = new InvertedIndex(workspace);	
+		invertedIndex.loadInvertedIndexData();
+		invertedIndex.createTermTermBigMatrix(persist);
 	}
-	
-	public void createPPMIBigMatrix(boolean persist){
-		MutualInformation mutualInformation = new MutualInformation();
+
+	public void createPPMIBigMatrix(WorkspaceDTO workspace, boolean persist){
+		MutualInformation mutualInformation = new MutualInformation(workspace);
 		try {
 			mutualInformation.buildMutualInformationBigMatrix(true);
 		} catch (IOException e) {
@@ -54,9 +67,9 @@ public class IRFacade {
 	 * @param saveReadable
 	 * @param reableRowsAmount
 	 */
-	public void reducedDimensionPPMIMatrix(int newDimension, 
+	public void reducedDimensionPPMIMatrix(WorkspaceDTO workspace, int newDimension, 
 			boolean saveReadable, int reableRowsAmount){
-		DimensionallyReduced dimensionally = new DimensionallyReduced();
+		DimensionallyReduced dimensionally = new DimensionallyReduced(workspace);
 		dimensionally.reducedDimensionDoubleMatrix(MutualInformation.PPMI_FILE_NAME, 
 				newDimension, saveReadable, reableRowsAmount);
 	}
@@ -64,20 +77,20 @@ public class IRFacade {
 	/**
 	 * Construye todas las matrices necesarias para la construcion de los conjuntos difusos
 	 */
-	public void buildCmeanMatrix(int minQuantiryTerms) throws Exception{
+	public void buildCmeanMatrix(WorkspaceDTO workspace, int minQuantiryTerms) throws Exception{
 		try {
-			InvertedIndex invertedIndex = new InvertedIndex();
-			InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(minQuantiryTerms);
+			InvertedIndex invertedIndex = new InvertedIndex(workspace);
+			InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(workspace,minQuantiryTerms);
 			threadPool.run();
 			invertedIndex.createTermTermBigMatrix(true);
-			MutualInformation mutualInformation = new MutualInformation();
+			MutualInformation mutualInformation = new MutualInformation(workspace);
 			mutualInformation.buildMutualInformationBigMatrix(true);
-			SendMessageAsynch.sendMessage("PPMI Matriz Creada");
+			SendMessageAsynch.sendMessage(workspace, "PPMI Matriz Creada");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		SendMessageAsynch.sendMessage("Proceso Finalizado");
+		SendMessageAsynch.sendMessage(workspace, "Proceso Finalizado");
 	}
 	
 	

@@ -1,55 +1,43 @@
 package co.edu.sanmartin.fuzzyclustering.ir.test;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.Random;
 
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Assert;
 import org.junit.Test;
 
-import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexReutersThreadPool;
 import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
 import co.edu.sanmartin.fuzzyclustering.ir.facade.IRFacade;
-import co.edu.sanmartin.fuzzyclustering.ir.index.DimensionallyReduced;
 import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
 import co.edu.sanmartin.fuzzyclustering.ir.index.MutualInformation;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.Cleaner;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.stemmer.Stemmer;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
-import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
+import co.edu.sanmartin.persistence.facade.WorkspaceFacade;
 import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
 import co.edu.sanmartin.persistence.file.BigIntegerMatrixFileManager;
 
 public class IRTest {
 
+	private WorkspaceDTO workspace = WorkspaceFacade.getWorkspace("noticias");
 	public IRTest() {
 		BasicConfigurator.configure();
 	}
 
 	@Test
 	public void cleanTextLexicon(){
-		Cleaner cleaner = new Cleaner();
+		Cleaner cleaner = new Cleaner(this.workspace);
 		cleaner.deleteLexiconStopWords("a ante bajo co contra Ricardo Carvajal Estuvo en un lugar muy importante", "miArchivo.txt", false);
 	}
 	
 	
 	@Test
 	public void invertedIndexTest() {
-		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(2);
-		threadPool.run();
-		//Thread thread = new Thread(threadPool);
-		//thread.start();
-	}
-	
-	@Test
-	public void invertedIndexReutersTest() {
-		InvertedIndexReutersThreadPool threadPool = new InvertedIndexReutersThreadPool(0);
+		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(workspace,2);
 		threadPool.run();
 		//Thread thread = new Thread(threadPool);
 		//thread.start();
@@ -58,7 +46,7 @@ public class IRTest {
 	
 	@Test
 	public void termDocumentBigMatrixTest(){
-		InvertedIndex invertedIndex = new InvertedIndex();
+		InvertedIndex invertedIndex = new InvertedIndex(workspace);
 		try {
 			invertedIndex.createTermDocumentBigMatrix(true);
 		} catch (Exception e) {
@@ -69,17 +57,17 @@ public class IRTest {
 	
 	@Test
 	public void termTermMatrixTest(){
-		InvertedIndex indexManager = new InvertedIndex();
+		InvertedIndex indexManager = new InvertedIndex(workspace);
 		indexManager.getTermTermMatrix();
 	}
 	@Test
 	public void buildTermTermMatrixTest(){
-		InvertedIndex indexManager = new InvertedIndex();
+		InvertedIndex indexManager = new InvertedIndex(workspace);
 		indexManager.buildTermTermMatrix(true);
 	}
 	@Test
 	public void buildTermTermBigMatrixTest(){
-		InvertedIndex invertedIndex = new InvertedIndex();
+		InvertedIndex invertedIndex = new InvertedIndex(workspace);
 		try {
 			invertedIndex.createTermTermBigMatrix(true);
 		} catch (IOException e) {
@@ -89,13 +77,13 @@ public class IRTest {
 	}
 	@Test
 	public void mutualInformationTest(){
-		MutualInformation mutualInformation = new MutualInformation();
+		MutualInformation mutualInformation = new MutualInformation(workspace);
 		mutualInformation.buildMutualInformationMatrix();
 	}
 	
 	@Test
 	public void buildMutualInformationBigMatrixTest(){
-		MutualInformation mutualInformation = new MutualInformation();
+		MutualInformation mutualInformation = new MutualInformation(workspace);
 		try {
 			mutualInformation.buildMutualInformationBigMatrix(true);
 		} catch (IOException e) {
@@ -110,7 +98,7 @@ public class IRTest {
 		
 		try {
 			BigIntegerMatrixFileManager largeMatrix = 
-					new BigIntegerMatrixFileManager();
+					new BigIntegerMatrixFileManager(workspace);
 			largeMatrix.loadReadOnly(EDataFolder.MATRIX,"termterm.txt");
 			int[][] termtermMatrix = new int[largeMatrix.height()][largeMatrix.width()];
 			for (int i = 0; i < largeMatrix.height(); i++) {
@@ -137,7 +125,7 @@ public class IRTest {
 		
 		try {
 			BigIntegerMatrixFileManager largeMatrix = 
-					new BigIntegerMatrixFileManager();
+					new BigIntegerMatrixFileManager(workspace);
 			largeMatrix.loadReadOnly(EDataFolder.MATRIX,"termdocument.txt");
 			int[][] termDocument = new int[largeMatrix.height()][largeMatrix.width()];
 			for (int i = 0; i < largeMatrix.height(); i++) {
@@ -163,7 +151,8 @@ public class IRTest {
 	 * Almacena la matriz en disco
 	 **/
 	public void saveMatrix(double[][] matrix, String fileName) throws Exception{
-		BigDoubleMatrixFileManager bigMatrixFileManager = new BigDoubleMatrixFileManager();
+		BigDoubleMatrixFileManager bigMatrixFileManager = new BigDoubleMatrixFileManager(this.workspace);
+		WorkspaceDTO workspace = WorkspaceFacade.getWorkspace("noticias");
 		bigMatrixFileManager.loadReadWrite(EDataFolder.MATRIX, fileName,matrix.length,matrix[0].length);
 		System.out.println("Init savematrix");
 		for (int i = 0; i < matrix.length; i++) {;
@@ -180,7 +169,7 @@ public class IRTest {
 		int limit = 0;
 		try {
 			BigDoubleMatrixFileManager largeMatrix = 
-					new BigDoubleMatrixFileManager();
+					new BigDoubleMatrixFileManager(this.workspace);
 			largeMatrix.loadReadOnly(EDataFolder.MATRIX,"ppmi.txt");
 			if(limit==0){
 				limit = largeMatrix.height();
@@ -207,7 +196,7 @@ public class IRTest {
 	@Test
 	public void buildReducedMatrixPpmi() throws Exception{
 		IRFacade irFacade = IRFacade.getInstance();
-		irFacade.reducedDimensionPPMIMatrix(2, true,0);
+		irFacade.reducedDimensionPPMIMatrix(this.workspace, 2, true,0);
 	}
 	
 	@Test
@@ -216,7 +205,7 @@ public class IRTest {
 		double[][] data ={{1.0,2.0,3.0,4.0,5.0},{6.0,7.0,8.0,9.0,10}};
 		this.saveMatrix(data, "testdimensiones.txt");
 		BigDoubleMatrixFileManager largeMatrix = 
-				new BigDoubleMatrixFileManager();
+				new BigDoubleMatrixFileManager(this.workspace);
 		largeMatrix.loadReadOnly(EDataFolder.MATRIX,"testdimensiones.txt");
 		
 		
@@ -242,7 +231,7 @@ public class IRTest {
 		double[][] data ={{1.00,1.00},{0.00,1.00}};
 		this.saveMatrix(data, "testdimensiones.txt");
 		BigDoubleMatrixFileManager largeMatrix = 
-				new BigDoubleMatrixFileManager();
+				new BigDoubleMatrixFileManager(this.workspace);
 		largeMatrix.loadReadOnly(EDataFolder.MATRIX,"testdimensiones.txt");
 		double[][] matrixReduced = new double[largeMatrix.height()][dimensionNueva];
 		double[][] newMatrix = new double[matrixReduced.length][matrixReduced[0].length];
@@ -279,7 +268,7 @@ public class IRTest {
 */
 	@Test
 	public void stemmerTest() {
-		Stemmer stemmer = new Stemmer();
+		Stemmer stemmer = new Stemmer(this.workspace);
 		String result = stemmer.stem("compró", "", false);
 		System.out.print(result);
 	}
@@ -289,7 +278,7 @@ public class IRTest {
 	 */
 	@Test
 	public void ppmiTest(){
-		MutualInformation mutualInformation = new MutualInformation();
+		MutualInformation mutualInformation = new MutualInformation(this.workspace);
 		double ppmi = mutualInformation.ppmi(6, 11, 7, 19);
 		Assert.assertEquals(0.58, ppmi, 0.1);
 	}
@@ -319,7 +308,7 @@ public class IRTest {
 			}
 			data.append("\t");
 		}
-		PersistenceFacade.getInstance().writeFile(EDataFolder.MATRIX, 
+		this.workspace.getPersistence().writeFile(EDataFolder.MATRIX, 
 													fileName, data.toString());
 	}
 	
@@ -344,7 +333,7 @@ public class IRTest {
 			}
 			data.append(System.getProperty("line.separator"));
 		}
-		PersistenceFacade.getInstance().writeFile(EDataFolder.MATRIX, 
+		this.workspace.getPersistence().writeFile(EDataFolder.MATRIX, 
 												  fileName, data.toString());
 	}
 	
@@ -352,7 +341,7 @@ public class IRTest {
 	public void buildAllMatrixTest(){
 		IRFacade irFacade = IRFacade.getInstance();
 		try {
-			irFacade.buildCmeanMatrix(0);
+			irFacade.buildCmeanMatrix(this.workspace,0);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

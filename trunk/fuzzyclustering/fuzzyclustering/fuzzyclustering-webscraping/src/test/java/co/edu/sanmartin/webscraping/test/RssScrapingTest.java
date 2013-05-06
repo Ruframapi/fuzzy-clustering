@@ -6,6 +6,8 @@ import org.apache.log4j.BasicConfigurator;
 import org.junit.Test;
 
 import co.edu.sanmartin.persistence.dto.SourceDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
+import co.edu.sanmartin.persistence.facade.WorkspaceFacade;
 import co.edu.sanmartin.webscraping.rss.RssScraping;
 
 /**
@@ -14,6 +16,10 @@ import co.edu.sanmartin.webscraping.rss.RssScraping;
  *
  */
 public class RssScrapingTest {
+	
+
+private WorkspaceDTO workspace = WorkspaceFacade.getWorkspace("noticias");
+	
 	public RssScrapingTest(){
 		BasicConfigurator.configure();
 	}
@@ -22,7 +28,7 @@ public class RssScrapingTest {
 	//@Ignore
 	public void rssDowloadTest(){
 		AtomicInteger ai = new AtomicInteger();
-		RssScraping rssScraping = new RssScraping(ai);
+		RssScraping rssScraping = new RssScraping(this.workspace,ai);
 		SourceDTO sourceDTO = new SourceDTO();
 		//sourceDTO.setUrl("http://www.eltiempo.com/economia/rss.xml");
 		sourceDTO.setUrl("http://es.noticias.yahoo.com/rss/economia");
