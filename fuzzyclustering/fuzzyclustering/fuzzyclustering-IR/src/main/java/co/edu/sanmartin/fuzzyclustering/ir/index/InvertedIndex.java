@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import co.edu.sanmartin.fuzzyclustering.ir.execute.InvertedIndexThreadPool;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
 import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
@@ -38,9 +39,12 @@ public class InvertedIndex {
 	private int totalDocumentsCount;
 	//Matrix Termino Termino en Memoria
 	private int[][] termTermMatrix;
+	
+	private ArrayList<String> wordList;
+	private WorkspaceDTO workspace;
 
-	public InvertedIndex(){
-		//this.loadData();
+	public InvertedIndex(WorkspaceDTO workspace){
+		this.workspace = workspace;
 	}
 
 	public String getInvertedIndexData() {
@@ -91,6 +95,12 @@ public class InvertedIndex {
 	public void setTotalDocumentsCount(int totalDocumentsCount) {
 		this.totalDocumentsCount = totalDocumentsCount;
 	}
+	
+	
+
+	public ArrayList<String> getWordList() {
+		return wordList;
+	}
 
 	/*
 	 * Crea el indice invertido utilizando Thread Pool 
@@ -98,7 +108,7 @@ public class InvertedIndex {
 	 * en el indice invertido
 	 */
 	public void createInvertedIndex(int minTermsOcurrences){
-		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(minTermsOcurrences);
+		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(workspace,minTermsOcurrences);
 		Thread thread=new Thread(threadPool);
 		thread.start();
 	}
@@ -110,20 +120,26 @@ public class InvertedIndex {
 	public void loadInvertedIndexData(){
 
 		StringBuilder data = new StringBuilder();
-		PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
-		Collection<DocumentDTO> fileList = persistenceFacade.getFileList(EDataFolder.INVERTED_INDEX);
+		Collection<DocumentDTO> fileList = workspace.getPersistence().getFileList(EDataFolder.INVERTED_INDEX);
 		for (DocumentDTO fileName : fileList) {
-			data.append(persistenceFacade.readFile(EDataFolder.INVERTED_INDEX,fileName.getName())); 
+			data.append(workspace.getPersistence().readFile(EDataFolder.INVERTED_INDEX,fileName.getName())); 
 		}
 		if(data.length()>0){
 			this.invertedIndexData = data.toString();
 			this.termList =this.invertedIndexData.split(System.getProperty("line.separator"));
 			this.termCount = this.termList.length;
+			this.loadWordList();
 			this.countTotalInvertedIndexTerms();
 			this.countTermsDocument();
 			this.countDocuments();
 		}
-
+	}
+	
+	private void loadWordList(){
+		this.wordList = new ArrayList<String>();
+		for (int i = 0; i < termList.length; i++) {
+			this.wordList.add(this.termList[i].split("\t")[0]);
+		}
 	}
 	
 	/**
@@ -134,7 +150,7 @@ public class InvertedIndex {
 	 */
 	public void createTermTermBigMatrix(boolean persist) throws IOException{
 		logger.info("Inicializando construccion de Matrix Termino Termino");
-		SendMessageAsynch.sendMessage("Creando Matriz de Terminos");
+		SendMessageAsynch.sendMessage(this.workspace,"Creando Matriz de Terminos");
 		long time_start = 0, time_end=0;
 		time_start = System.currentTimeMillis();
 		//Se almacena en memoria los punteros de los documentos para no volver a recorrer la lista
@@ -142,7 +158,7 @@ public class InvertedIndex {
 		try{	
 			this.loadInvertedIndexData();
 			BigIntegerMatrixFileManager largeMatrix = 
-					new BigIntegerMatrixFileManager();
+					new BigIntegerMatrixFileManager(this.workspace);
 			largeMatrix.loadReadWrite(EDataFolder.MATRIX,TERM_TERM_FILENAME, termCount, termCount);
 			for (int i = 0; i < termCount; ++i) {
 				String termData = termList[i];
@@ -178,7 +194,7 @@ public class InvertedIndex {
 				( time_end - time_start )/1000 +" segundos" + 
 				(( time_end - time_start )/1000)/60 +" minutos";
 		logger.info(finalMessage);
-		SendMessageAsynch.sendMessage(finalMessage);
+		SendMessageAsynch.sendMessage(this.workspace,finalMessage);
 		
 	}
 
@@ -190,7 +206,7 @@ public class InvertedIndex {
 
 		try {
 			BigDoubleMatrixFileManager largeMatrix = 
-					new BigDoubleMatrixFileManager();
+					new BigDoubleMatrixFileManager(this.workspace);
 			largeMatrix.loadReadOnly(EDataFolder.MATRIX,TERM_TERM_FILENAME);
 			for (int i = 0; i < 10; i++) {
 				for (int j = 0; j < largeMatrix.width(); j++) {
@@ -265,7 +281,7 @@ public class InvertedIndex {
 	public void createTermDocumentBigMatrix(boolean persist) throws Exception{
 		this.loadInvertedIndexData();
 		BigIntegerMatrixFileManager largeMatrix = 
-				new BigIntegerMatrixFileManager();
+				new BigIntegerMatrixFileManager(this.workspace);
 		largeMatrix.loadReadWrite(EDataFolder.MATRIX,TERM_DOCUMENT_FILENAME, termCount,this.totalDocumentsCount+1);
 		for (int i = 0; i < termCount; ++i) {
 			String termData = termList[i];
@@ -301,7 +317,7 @@ public class InvertedIndex {
 				termArray[documentId][i]=termArray[documentId][i]+1;
 			}
 		}
-		this.saveMatrix(termArray,"termdocument.txt");
+		this.saveMatrix(termArray, "termdocument.txt");
 	}
 
 	
@@ -394,7 +410,7 @@ public class InvertedIndex {
 		}
 		data.append(System.getProperty("line.separator"));
 		}
-		PersistenceFacade.getInstance().writeFile(EDataFolder.MATRIX, 
+		this.workspace.getPersistence().writeFile(EDataFolder.MATRIX, 
 				fileName, data.toString());
 	}
 
@@ -411,7 +427,7 @@ public class InvertedIndex {
 		}
 		data.append(System.getProperty("line.separator"));
 		}
-		PersistenceFacade.getInstance().writeFile(EDataFolder.MATRIX, 
+		this.workspace.getPersistence().writeFile( EDataFolder.MATRIX, 
 				fileName, data.toString());
 	}
 
@@ -426,7 +442,7 @@ public class InvertedIndex {
 
 		try {
 			BigDoubleMatrixFileManager largeMatrix = 
-					new BigDoubleMatrixFileManager();
+					new BigDoubleMatrixFileManager(this.workspace);
 			largeMatrix.loadReadWrite(EDataFolder.MATRIX,fileName, matrix.length, matrix[0].length);
 			for (int i = 0; i < matrix.length; i++) {
 				for (int j = 0; j < matrix[i].length; j++) {

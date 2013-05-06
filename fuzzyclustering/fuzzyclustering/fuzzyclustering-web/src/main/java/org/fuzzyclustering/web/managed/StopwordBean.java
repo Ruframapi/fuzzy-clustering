@@ -5,8 +5,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
@@ -14,9 +16,7 @@ import org.apache.log4j.Logger;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 
-import co.edu.sanmartin.persistence.dto.PropertyDTO;
 import co.edu.sanmartin.persistence.dto.StopwordDTO;
-import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
 @ManagedBean( name = "stopword")
 @ViewScoped
@@ -24,12 +24,16 @@ public class StopwordBean implements Serializable{
 	private static Logger logger  = Logger.getRootLogger();
 	private static final long serialVersionUID = -8166935663965015152L;
 	
+	@ManagedProperty(value = "#{workspace}") 
+	private WorkspaceManagedBean workspaceBean;
+	
 	private StopwordDTO stopwordDTO;
 	private StopwordDTO stopwordSelected;
 	private Collection<StopwordDTO> stopwordCol;
 	private boolean isSelected;
 	
-	public StopwordBean(){
+	@PostConstruct
+	public void init(){
 		this.newStopword();
 		this.loadStopwordCol();
 	}
@@ -39,6 +43,9 @@ public class StopwordBean implements Serializable{
 		return stopwordDTO;
 	}
 
+	public void setWorkspaceBean(WorkspaceManagedBean workspaceBean) {
+		this.workspaceBean = workspaceBean;
+	}
 
 	public void setStopwordDTO(StopwordDTO stopwordDTO) {
 		this.stopwordDTO = stopwordDTO;
@@ -81,8 +88,8 @@ public class StopwordBean implements Serializable{
 		logger.debug("Init Create Stop Word Method");
 		try {
 			stopwordDTO.setStopwordOrder(this.stopwordCol.size());
-			PersistenceFacade.getInstance().createStopword(stopwordDTO);
-			PersistenceFacade.getInstance().refreshMemoryData();
+			this.workspaceBean.getWorkspace().getPersistence().createStopword(stopwordDTO);
+			this.workspaceBean.getWorkspace().getPersistence().refreshMemoryData();
 			this.loadStopwordCol();
 			this.stopwordDTO = new StopwordDTO();
 		} catch (SQLException e) {
@@ -96,8 +103,8 @@ public class StopwordBean implements Serializable{
 	 */
 	public void deleteStopword(){
 		try {
-			PersistenceFacade.getInstance().deleteStopword(stopwordDTO);
-			PersistenceFacade.getInstance().refreshMemoryData();
+			this.workspaceBean.getWorkspace().getPersistence().deleteStopword(stopwordDTO);
+			this.workspaceBean.getWorkspace().getPersistence().refreshMemoryData();
 			this.loadStopwordCol();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -117,7 +124,7 @@ public class StopwordBean implements Serializable{
 	 */
 	public void loadStopwordCol(){
 		try {
-			this.stopwordCol = PersistenceFacade.getInstance().getAllStopword();
+			this.stopwordCol = this.workspaceBean.getWorkspace().getPersistence().getAllStopword();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -139,8 +146,8 @@ public class StopwordBean implements Serializable{
 
 		FacesContext.getCurrentInstance().addMessage(null, msg);
 		try {
-			PersistenceFacade.getInstance().updateStopword((StopwordDTO) event.getObject());
-			PersistenceFacade.getInstance().refreshMemoryData();
+			this.workspaceBean.getWorkspace().getPersistence().updateStopword((StopwordDTO) event.getObject());
+			this.workspaceBean.getWorkspace().getPersistence().refreshMemoryData();
 			this.loadStopwordCol();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -155,11 +162,11 @@ public class StopwordBean implements Serializable{
 			  ArrayList<StopwordDTO> stopwordList = (ArrayList<StopwordDTO>) this.stopwordCol;
 			  int position = stopwordList.indexOf(this.stopwordDTO);
 		      this.stopwordDTO.setStopwordOrder(position-1);
-		      PersistenceFacade.getInstance().updateStopword(this.stopwordDTO);
+		      this.workspaceBean.getWorkspace().getPersistence().updateStopword(this.stopwordDTO);
 		      StopwordDTO stopwordBefore = stopwordList.get(position-1);
 		      stopwordBefore.setStopwordOrder(position);
-		      PersistenceFacade.getInstance().updateStopword(stopwordBefore);
-		      PersistenceFacade.getInstance().refreshMemoryData();
+		      this.workspaceBean.getWorkspace().getPersistence().updateStopword(stopwordBefore);
+		      this.workspaceBean.getWorkspace().getPersistence().refreshMemoryData();
 			  this.loadStopwordCol();  
 		   }
 			

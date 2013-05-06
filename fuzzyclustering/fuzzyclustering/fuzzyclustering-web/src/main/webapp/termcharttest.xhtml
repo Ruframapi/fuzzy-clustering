@@ -17,6 +17,7 @@
                 var options = createOption(divId, chartType, chartTitle, categories);
                 options.series = $.parseJSON(chartData);
                 //chart.xAxis[0].setCategories($.parseJSON(categories));
+                chart.xAxis[0].setCategories('a','e','i','o','u');
                 var chart = new Highcharts.Chart(options);
             }
             

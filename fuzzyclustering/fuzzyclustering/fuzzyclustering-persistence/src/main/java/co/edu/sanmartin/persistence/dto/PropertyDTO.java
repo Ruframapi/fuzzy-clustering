@@ -45,7 +45,6 @@ public class PropertyDTO implements Serializable{
 		this.value = value;
 	}
 	
-
 	/**
 	 * Retorna el valor entero de la propiedad
 	 * @return

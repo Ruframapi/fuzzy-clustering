@@ -11,7 +11,7 @@
 	</ui:define>
 	<ui:define name="content">
 		<h:form>
-			<p:panel header="Proceso de construccion de indices de terminos">
+			<p:panel header="Proceso de descarga de archivos desde fuentes RSS y Twitter">
 				<p:panelGrid columns="2">
 				<f:facet name="header"> Indice Invertido</f:facet>
 					<p:panelGrid columns="2">
@@ -62,6 +62,8 @@
 						<p:outputLabel>Tiempo de Generacion:</p:outputLabel>
 						<p:outputLabel>0</p:outputLabel>
 					</p:panelGrid>
+					<p:commandButton value="Descargar"
+				actionListener="#{irDownload.download}"></p:commandButton>
 					<p:commandButton value="Generar"
 						actionListener="#{irBean.buildReducedMatrix}">
 					</p:commandButton>

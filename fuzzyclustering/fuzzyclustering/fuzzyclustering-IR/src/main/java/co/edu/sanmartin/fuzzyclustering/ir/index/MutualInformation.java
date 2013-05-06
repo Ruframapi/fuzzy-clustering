@@ -7,6 +7,7 @@ import java.math.RoundingMode;
 import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
 import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
 import co.edu.sanmartin.persistence.file.BigIntegerMatrixFileManager;
@@ -22,6 +23,11 @@ public class MutualInformation {
 	private static Logger logger = Logger.getLogger("MutualInformation");
 	public static final String PPMI_FILE_NAME = "ppmi.dat"; 
 	
+	private WorkspaceDTO workspace;
+	
+	public MutualInformation(WorkspaceDTO workspace){
+		this.workspace = workspace;
+	}
 	
 	
 	/**
@@ -30,13 +36,13 @@ public class MutualInformation {
 	 */
 	public void buildMutualInformationBigMatrix(boolean persist) throws IOException{
 		logger.info("Inicializando construccion de Matrix PPMI");
-		SendMessageAsynch.sendMessage("Creando PPMI Matriz");
+		SendMessageAsynch.sendMessage(this.workspace,"Creando PPMI Matriz");
 		long time_start = 0, time_end=0;
 		time_start = System.currentTimeMillis();
-		InvertedIndex invertedIndex = new InvertedIndex();
+		InvertedIndex invertedIndex = new InvertedIndex(this.workspace);
 		invertedIndex.loadInvertedIndexData();
-		BigIntegerMatrixFileManager largeMatrixTermTerm = new BigIntegerMatrixFileManager();
-		BigDoubleMatrixFileManager largeMatrixPpmi = new BigDoubleMatrixFileManager();
+		BigIntegerMatrixFileManager largeMatrixTermTerm = new BigIntegerMatrixFileManager(this.workspace);
+		BigDoubleMatrixFileManager largeMatrixPpmi = new BigDoubleMatrixFileManager(this.workspace);
 	
 		double totalWordDocumentsCount = invertedIndex.getTotaldocumentWordsCount();
 		try {
@@ -69,7 +75,7 @@ public class MutualInformation {
 				( time_end - time_start )/1000 +" segundos" + 
 				(( time_end - time_start )/1000)/60 +" minutos";
 		logger.info(finalMessage);
-		SendMessageAsynch.sendMessage("Creando PPMI Matriz");
+		SendMessageAsynch.sendMessage(this.workspace,"Creando PPMI Matriz");
 	}
 	
 	
@@ -97,7 +103,7 @@ public class MutualInformation {
 	
 	@Deprecated
 	public void buildMutualInformationMatrix(){
-		InvertedIndex invertedIndex = new InvertedIndex();
+		InvertedIndex invertedIndex = new InvertedIndex(this.workspace);
 		int[][] invertedIndexData = invertedIndex.getTermTermMatrix();
 		double[][] ppmiData = new double[invertedIndex.getTermCount()][invertedIndex.getTermCount()]; 
 		double totalWordDocumentsCount = invertedIndex.getTotaldocumentWordsCount();

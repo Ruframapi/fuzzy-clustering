@@ -4,11 +4,11 @@ import java.io.ObjectInputStream.GetField;
 
 
 public enum ELexicon {
-	ADVERBS("adverbs-es.txt"),
-	CONJUNCTIONS("conjunctions-es.txt"),
-	DETERMINANTS("determinants-es.txt"),
-	PREPOSITIONS("prepositions-es.txt"),
-	PRONOUNS("pronouns-es.txt");
+	ADVERBS("adverbs"),
+	CONJUNCTIONS("conjunctions"),
+	DETERMINANTS("determinants"),
+	PREPOSITIONS("prepositions"),
+	PRONOUNS("pronouns");
 	
 	private String fileName;
 	

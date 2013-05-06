@@ -8,6 +8,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import co.edu.sanmartin.persistence.constant.EDatabase;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 
 public class DAOFactory {
 	public static final String USER = "fuzzyclustering";
@@ -31,22 +32,8 @@ public class DAOFactory {
 		return connectionFactory;
 	}
 	
-/*	public Connection getConnection(EDatabase database) throws SQLException {
-		if( this.conn !=null){
-			return this.conn;
-		}
-		try {
-			Class.forName(database.getDriverName());
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		Connection conn = null;
-		conn = DriverManager.getConnection(getDBUrl(database), USER, PASSWORD);
-		return conn;
-	}
-	*/
-	private Connection getConnection(EDatabase database) throws SQLException {
-		Connection conn = this.connectionDataSource.getConnection();
+	private Connection getConnection(WorkspaceDTO workspace) throws SQLException {
+		Connection conn = this.connectionDataSource.getConnection(workspace);
 		return conn;
 	}
 	
@@ -54,14 +41,14 @@ public class DAOFactory {
 		return this.connectionDataSource;
 	}
 	
-	public String getDBUrl(EDatabase database){
+	public String getDBUrl(EDatabase database, String databaseName){
 		String urlConnection = null;
 		switch(database){
 		case POSTGRES:
-			urlConnection = "jdbc:postgresql://localhost:5432/"+DATABASE_NAME;
+			urlConnection = "jdbc:postgresql://localhost:5432/"+databaseName;
 			break;
 		case MYSQL:
-			urlConnection = "jdbc:mysql://localhost:3306/"+DATABASE_NAME;
+			urlConnection = "jdbc:mysql://localhost:3306/"+databaseName;
 			break;	
 		}
 		return urlConnection;

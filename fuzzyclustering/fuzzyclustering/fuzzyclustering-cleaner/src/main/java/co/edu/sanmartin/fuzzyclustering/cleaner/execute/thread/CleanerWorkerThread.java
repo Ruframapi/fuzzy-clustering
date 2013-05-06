@@ -10,24 +10,28 @@ import co.edu.sanmartin.fuzzyclustering.ir.normalize.stemmer.Stemmer;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
 /**
  * Clase encargada de realizar el proceso de normalización de los archivos
- * @author Ricardo
+ * @author Ricardo Carvajal Salamanca
  *
  */
 public class CleanerWorkerThread implements Callable<String>{
-	private PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
-	private Cleaner cleaner = new Cleaner();
-	private Stemmer stemmer = new Stemmer();
+	private Cleaner cleaner;
+	private Stemmer stemmer;
 	private DocumentDTO document;
+	private WorkspaceDTO workspace;
 
 	private static Logger logger = Logger.getLogger(CleanerWorkerThread.class);
 	
 	
-	public CleanerWorkerThread(DocumentDTO document) {
+	public CleanerWorkerThread(WorkspaceDTO workspace,DocumentDTO document) {
 		this.document = document;
+		this.workspace = workspace;
+		this.cleaner = new Cleaner(workspace);
+		this.stemmer = new Stemmer(workspace);
 	}
 
 	public String call() throws Exception {
@@ -38,14 +42,14 @@ public class CleanerWorkerThread implements Callable<String>{
 		dataFile = new StringBuilder(cleaner.toLowerData(dataFile.toString(),document.getName(),false));
 		dataFile = new StringBuilder(cleaner.deleteLexiconStopWords(dataFile.toString(), document.getName(), false));
 		dataFile = new StringBuilder(cleaner.applyRegexExpression(dataFile.toString(),document.getName(),false));
-		String stemmerOn = PersistenceFacade.getInstance().getProperty(EProperty.TEXT_STEMMER_ON).getValue();
+		String stemmerOn = workspace.getPersistence().getProperty(EProperty.TEXT_STEMMER_ON).getValue();
 		if(stemmerOn.equals("true")){
 		   dataFile = new StringBuilder(stemmer.stem(dataFile.toString(), document.getName(), false));
 		}
 		
-		persistenceFacade.writeFile(EDataFolder.CLEAN, document.getName(), dataFile.toString());
+		workspace.getPersistence().writeFile(EDataFolder.CLEAN, document.getName(), dataFile.toString());
 		this.document.setCleanDate(new Date());
-		persistenceFacade.updateDocument(this.document);
+		workspace.getPersistence().updateDocument(this.document);
 	    logger.info("Write Clean File: " + this.document.getName());
 		return "Hecho";
 		

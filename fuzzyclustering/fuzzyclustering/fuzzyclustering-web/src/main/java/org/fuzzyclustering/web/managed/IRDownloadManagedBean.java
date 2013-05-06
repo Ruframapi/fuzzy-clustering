@@ -9,23 +9,20 @@ import java.util.Collection;
 import java.util.Date;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.RequestScoped;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
 import org.apache.log4j.Logger;
 import org.fuzzyclustering.web.managed.documents.DocumentsManagedBean;
 
-import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EModule;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
-import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.facade.QueueFacade;
 
 
 @ManagedBean(name = "irDownload")
@@ -40,26 +37,52 @@ public class IRDownloadManagedBean implements Serializable {
 	
 	@ManagedProperty(value = "#{documents}") 
 	private DocumentsManagedBean documents;
+	@ManagedProperty(value = "#{workspace}") 
+	private WorkspaceManagedBean workspaceBean;
 	
 	
-	public void load(){
-		documents.loadDocuments(EDataFolder.DOWNLOAD);
+	@PostConstruct
+	public void init(){
+		if(workspaceBean!= null && workspaceBean.getWorkspace()!=null){
+		this.downloadDocumentAmount = 
+				this.workspaceBean.getWorkspace().getPersistence().getDownloadDocumentAmount();
+		}
 	}
 
 	public void setDocuments(DocumentsManagedBean documents) {
 		this.documents = documents;
 	}
 	
+	
+	public void setWorkspaceBean(WorkspaceManagedBean workspaceBean) {
+		this.workspaceBean = workspaceBean;
+	}
+
 	public void download(){
 		logger.debug("Start download process");
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Inicializa Proceso de Descarga", "Consultando las fuentes de información...");
-		Calendar calendar = PersistenceFacade.getInstance().getServerDate();
+		Calendar calendar = QueueFacade.getInstance().getServerDate();
 		this.addQueueDownload(EQueueEvent.DOWNLOAD_RSS, calendar.getTime());
 		calendar.add(Calendar.SECOND, 30);
 		this.addQueueDownload(EQueueEvent.DOWNLOAD_TWITTER, calendar.getTime());
 		FacesContext.getCurrentInstance().addMessage(null, msg);
 		//WebscrapingFacade.getInstance().downloadSources();
+	}
+	
+	/**
+	 * Realiza la Descarga de la fuente Reuters
+	 */
+	public void downloadReuters(){
+		logger.debug("Start download process");
+		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+				"Inicializa Proceso de Descarga", "");
+		FacesContext.getCurrentInstance().addMessage(null, msg);
+		Calendar calendar = QueueFacade.getInstance().getServerDate();
+		this.addQueueDownload(EQueueEvent.DOWNLOAD_TRAIN, calendar.getTime());
+		msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+				"Proceso Finalizado", "");
+		FacesContext.getCurrentInstance().addMessage(null, msg);
 	}
 	
 	public void reloadSettings(){
@@ -79,9 +102,11 @@ public class IRDownloadManagedBean implements Serializable {
 		queue.setModule(EModule.WEBSCRAPPING);
 		queue.setEvent(queueEvent);
 		queue.setInitDate(date);
+		queue.setParams("data");
+		queue.setWorkspace(this.workspaceBean.getWorkspace().getName());
 		queue.setStatus(EQueueStatus.ENQUEUE);
 		try {
-			PersistenceFacade.getInstance().insertQueue(queue);
+			QueueFacade.getInstance().insertQueue(queue);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -95,10 +120,12 @@ public class IRDownloadManagedBean implements Serializable {
 		QueueDTO queue = new QueueDTO();
 		queue.setModule(EModule.WEBSCRAPPING);
 		queue.setEvent(EQueueEvent.CLEAN_DOWNLOAD);
-		queue.setInitDate(PersistenceFacade.getInstance().getServerDate().getTime());
+		queue.setInitDate(QueueFacade.getInstance().getServerDate().getTime());
+		queue.setWorkspace(this.workspaceBean.getWorkspace().getName());
 		queue.setStatus(EQueueStatus.ENQUEUE);
+		queue.setParams("data");
 		try {
-			PersistenceFacade.getInstance().insertQueue(queue);
+			QueueFacade.getInstance().insertQueue(queue);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -109,13 +136,12 @@ public class IRDownloadManagedBean implements Serializable {
 	 * Actualiza la información de las descargas
 	 */
 	public void poolListener(){
-		PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
 		Collection<QueueDTO> enqueueColl = new ArrayList<QueueDTO>();
-		this.downloadEnqueue = persistenceFacade.getQueueByStatusDate(EModule.WEBSCRAPPING, 
+		this.downloadEnqueue = QueueFacade.getInstance().getQueueByStatusDate(EModule.WEBSCRAPPING, 
 																			EQueueStatus.ENQUEUE, new Date());
-		this.downloadActive = persistenceFacade.getQueueByStatusDate(EModule.WEBSCRAPPING, 
+		this.downloadActive = QueueFacade.getInstance().getQueueByStatusDate(EModule.WEBSCRAPPING, 
 																			EQueueStatus.ACTIVE, new Date());
-		this.downloadDocumentAmount = persistenceFacade.getDownloadDocumentAmount();
+		this.downloadDocumentAmount = this.workspaceBean.getWorkspace().getPersistence().getDownloadDocumentAmount();
 	}
 
 	public Collection<QueueDTO> getDownloadEnqueue() {
@@ -131,11 +157,9 @@ public class IRDownloadManagedBean implements Serializable {
 	}
 	
 
-	
-	
-	
-	
-	
+	public void load(){
+		
+	}
 	
 
 }

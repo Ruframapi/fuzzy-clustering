@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.dto.SourceDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.webscraping.rss.RssScraping;
 
 /**
@@ -19,11 +20,13 @@ public class RssDownloadWorkerThread implements Callable<String>{
 	private static Logger logger = Logger.getRootLogger();
 	private SourceDTO sourceDTO;
 	RssScraping rssScraping;
+	private WorkspaceDTO workspace;
 	
-	public RssDownloadWorkerThread(SourceDTO sourceDTO, AtomicInteger sequence) {
+	public RssDownloadWorkerThread(WorkspaceDTO workspace, SourceDTO sourceDTO, AtomicInteger sequence) {
+		this.workspace = workspace;
 		logger.debug("Init RssDownloadWorkerThread source" + sourceDTO.getUrl());
 		this.sourceDTO = sourceDTO;
-		this.rssScraping = new RssScraping(sequence);
+		this.rssScraping = new RssScraping(this.workspace,sequence);
 	}
 
 	public String call() throws Exception {

@@ -9,8 +9,8 @@ import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EProperty;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
-import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
 /**
  * Clase que genera el indice invertido a partir de los documentos previamente
@@ -23,11 +23,12 @@ public class InvertedIndexBuilder {
 	Logger logger = Logger.getRootLogger();
 	private ConcurrentLinkedDeque<String> index;
 	private ArrayList<String> invertedIndex;
+	private WorkspaceDTO workspace;
 	
-	
-	public InvertedIndexBuilder(ConcurrentLinkedDeque<String> index){
+	public InvertedIndexBuilder(WorkspaceDTO workspace, ConcurrentLinkedDeque<String> index){
 		logger.debug("Init Inverted Index");
 		this.index = index;
+		this.workspace = workspace;
 	}
 	
 	public void addIndex(String term, String document){
@@ -43,6 +44,7 @@ public class InvertedIndexBuilder {
 	 */
 	private void buildIndex(int minQuantityTerms){
 		//Ordena Alfabeticamente el indice
+		
 		this.invertedIndex = new ArrayList<String>();
 		Collection<String> termCol =  index;
 		ArrayList<String> termList =new ArrayList<String>(termCol);
@@ -53,7 +55,7 @@ public class InvertedIndexBuilder {
 		for (String termItem : termList) {
 			String splitToken = null;
 			try {
-				splitToken = PersistenceFacade.getInstance().getProperty(EProperty.TEXT_SPLIT_TOKEN).getValue();
+				splitToken = this.workspace.getPersistence().getProperty(EProperty.TEXT_SPLIT_TOKEN).getValue();
 			} catch (PropertyValueNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -107,7 +109,7 @@ public class InvertedIndexBuilder {
 			stringBuilder.append(word);
 			stringBuilder.append(System.getProperty("line.separator"));
 		}
-		PersistenceFacade.getInstance().writeFile(EDataFolder.INVERTED_INDEX,
+		this.workspace.getPersistence().writeFile(EDataFolder.INVERTED_INDEX,
 													 "invertedIndex.txt", stringBuilder.toString());
 		
 	}

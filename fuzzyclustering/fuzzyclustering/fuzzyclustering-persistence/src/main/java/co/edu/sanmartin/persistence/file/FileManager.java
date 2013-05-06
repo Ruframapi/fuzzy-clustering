@@ -15,6 +15,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Scanner;
 
 import org.apache.log4j.Logger;
@@ -22,6 +23,7 @@ import org.apache.log4j.Logger;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.ESystemProperty;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
@@ -33,6 +35,12 @@ public class FileManager {
 
 	private static Logger logger = Logger.getRootLogger();
 
+	private WorkspaceDTO workspace;
+	
+	
+	public FileManager( WorkspaceDTO workspace ){
+		this.workspace = workspace;
+	}
 	/**
 	 * Escribe un archivo en disco en caso de existir lo elimina y crea uno nuevo
 	 * @param folderPath ubicacion del archivo
@@ -64,6 +72,7 @@ public class FileManager {
 
 	/**
 	 * Escribe un archivo en disco
+	 * @param dataRoot workspace de trabajo
 	 * @param destinationProperty propiedad con el path de destino
 	 * @param fileName nombre del archivo
 	 * @param data información del archivo
@@ -78,7 +87,7 @@ public class FileManager {
 	 * @param dataFolder
 	 */
 	public void deteleFolder(EDataFolder dataFolder){
-		String dataPath = PersistenceFacade.getInstance().getFolderPath(dataFolder);
+		String dataPath = this.workspace.getPersistence().getFolderPath(dataFolder);
 		File file = new File(dataPath);
 		file.delete();
 	}
@@ -110,6 +119,21 @@ public class FileManager {
 		stringBuider.append(fileName);
 		return this.readFileNio(stringBuider.toString());
 	}
+	
+	/**
+	 * Retorna el archivo de la carpeta especificada
+	 * @param dataFolder
+	 * @param fileName
+	 * @return
+	 */
+	public String readRootFile(EDataFolder dataFolder, String fileName){
+		StringBuilder stringBuider = new StringBuilder();
+		stringBuider.append(this.getRootFolderPath(dataFolder));
+		stringBuider.append(System.getProperty("file.separator"));
+		stringBuider.append(fileName);
+		return this.readFileNio(stringBuider.toString());
+	}
+	
 
 	/**
 	 * Retorna la información del archivo
@@ -196,6 +220,25 @@ public class FileManager {
 		String[] fileNameColl = fileName.split(System.getProperty("file.separator")+".");
 		return fileNameColl[0];
 	}
+	
+	/**
+	 * Retorna el path de las carpetas que gestiona el sistema
+	 * @param dataFolder enumeracion con las diferentes carpetas del sistema
+	 * @return
+	 */
+	public String getRootFolderPath(EDataFolder dataFolder){
+		StringBuilder folderPath = new StringBuilder();
+		try {
+			folderPath.append(this.workspace.getPersistence().getProperty(
+					ESystemProperty.MAIN_PATH).getValue() );
+			folderPath.append(System.getProperty("file.separator"));
+			folderPath.append(dataFolder.getPath());
+		} catch (PropertyValueNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return folderPath.toString();
+	}
 
 	/**
 	 * Retorna el path de las carpetas que gestiona el sistema
@@ -205,7 +248,13 @@ public class FileManager {
 	public String getFolderPath(EDataFolder dataFolder){
 		StringBuilder folderPath = new StringBuilder();
 		try {
-			folderPath.append(PersistenceFacade.getInstance().getProperty(ESystemProperty.MAIN_PATH).getValue());
+			folderPath.append(this.workspace.getPersistence().getProperty(
+					ESystemProperty.MAIN_PATH).getValue() );
+			folderPath.append(System.getProperty("file.separator"));
+			folderPath.append("workspace");
+			folderPath.append(System.getProperty("file.separator"));
+			folderPath.append(this.workspace.getName());
+			folderPath.append(System.getProperty("file.separator"));
 			folderPath.append(dataFolder.getPath());
 		} catch (PropertyValueNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -262,7 +311,7 @@ public class FileManager {
 			fc.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error en writeFileNio",e);
 		}
 	}
 	
@@ -271,7 +320,7 @@ public class FileManager {
 	 * Almacena la matriz double en disco utilizando MappedFiles
 	 **/
 	public void saveDoubleMatrixNio(double[][] matrix, String fileName) throws Exception{
-		BigDoubleMatrixFileManager bigMatrixFileManager = new BigDoubleMatrixFileManager();
+		BigDoubleMatrixFileManager bigMatrixFileManager = new BigDoubleMatrixFileManager(this.workspace);
 		bigMatrixFileManager.loadReadWrite(EDataFolder.MATRIX, fileName,matrix.length,matrix[0].length);
 		System.out.println("Init savematrix");
 		for (int i = 0; i < matrix.length; i++) {;
@@ -308,7 +357,29 @@ public class FileManager {
 			}
 			data.append(System.getProperty("line.separator"));
 		}
-		PersistenceFacade.getInstance().writeFile(dataFolder, 
+		this.workspace.getPersistence().writeFile(dataFolder, 
 												  fileName, data.toString());
+	}
+	
+	/**
+	 * Convierte un archivo de texto en una matrix en memoria en java.
+	 * @param dataFolder
+	 * @param fileName
+	 * @return
+	 */
+	public <T> List<T> readFileMatrix(EDataFolder dataFolder, String fileName){
+		List<T> vectorArray = new ArrayList<T>(); 
+		String dataFile = this.readFile(dataFolder, fileName);
+		String[] stringVector = dataFile.split(System.getProperty("line.separator"));
+		for (String row : stringVector) {
+			String[] rowVector = row.split("\t");
+			Double[] doubleVector = new Double[rowVector.length];
+			for (int i = 0; i < doubleVector.length; i++) {
+				doubleVector[i]=Double.parseDouble(rowVector[i]);
+			}
+			vectorArray.add((T) doubleVector);
+		}
+		
+		return vectorArray;
 	}
 }

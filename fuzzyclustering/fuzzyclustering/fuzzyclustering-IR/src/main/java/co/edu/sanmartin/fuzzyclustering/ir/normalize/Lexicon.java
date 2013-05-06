@@ -5,8 +5,11 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.persistence.constant.EDataFolder;
+import co.edu.sanmartin.persistence.constant.ELanguage;
 import co.edu.sanmartin.persistence.constant.ELexicon;
 import co.edu.sanmartin.persistence.constant.EProperty;
+import co.edu.sanmartin.persistence.dto.PropertyDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
@@ -18,19 +21,15 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
  */
 public class Lexicon {
 	private static Logger logger = Logger.getLogger(Lexicon.class);
-	private HashMap<ELexicon,String> lexiconMap;
+	private static HashMap<ELexicon,String> lexiconMap;
 	private static Lexicon instance;
+	private WorkspaceDTO workspace;
 	
-	private Lexicon(){
+	public Lexicon(WorkspaceDTO workspace){
+		this.workspace = workspace;
 		this.initLexiconinMemory();
 	}
 	
-	public static Lexicon getInstance(){
-		if (instance == null){
-			instance = new Lexicon();
-		}
-		return instance;
-	}
 	
 	/**
 	 * Vuelve a cargar los lexicones en memoria
@@ -42,24 +41,23 @@ public class Lexicon {
 	/**
 	 * Inicializa los lexicones en memoria para realizar el proceso de normalizacion de archivos
 	 */
-	private void initLexiconinMemory() {
+	private  void initLexiconinMemory() {
 		lexiconMap = new HashMap<ELexicon,String>();
-    	PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
     	try {
-			if (persistenceFacade.getProperty(EProperty.IR_DELETE_ADVERBS).getValue().equals("true")){
-        		this.lexiconMap.put(ELexicon.ADVERBS, this.getLexiconPattern(ELexicon.ADVERBS));
+			if (this.workspace.getPersistence().getProperty(EProperty.IR_DELETE_ADVERBS).getValue().equals("true")){
+        		Lexicon.lexiconMap.put(ELexicon.ADVERBS, this.getLexiconPattern(ELexicon.ADVERBS));
 			}
-			if (persistenceFacade.getProperty(EProperty.IR_DELETE_CONJUNCTIONS).getValue().equals("true")){
-				this.lexiconMap.put(ELexicon.CONJUNCTIONS, this.getLexiconPattern(ELexicon.CONJUNCTIONS));
+			if (this.workspace.getPersistence().getProperty(EProperty.IR_DELETE_CONJUNCTIONS).getValue().equals("true")){
+				Lexicon.lexiconMap.put(ELexicon.CONJUNCTIONS, this.getLexiconPattern(ELexicon.CONJUNCTIONS));
 			}
-			if (persistenceFacade.getProperty(EProperty.IR_DELETE_DETERMINANTS).getValue().equals("true")){
-				this.lexiconMap.put(ELexicon.DETERMINANTS, this.getLexiconPattern(ELexicon.DETERMINANTS));
+			if (this.workspace.getPersistence().getProperty(EProperty.IR_DELETE_DETERMINANTS).getValue().equals("true")){
+				Lexicon.lexiconMap.put(ELexicon.DETERMINANTS, this.getLexiconPattern(ELexicon.DETERMINANTS));
 			}
-			if (persistenceFacade.getProperty(EProperty.IR_DELETE_PREPOSITIONS).getValue().equals("true")){
-				this.lexiconMap.put(ELexicon.PREPOSITIONS, this.getLexiconPattern(ELexicon.PREPOSITIONS));
+			if (this.workspace.getPersistence().getProperty(EProperty.IR_DELETE_PREPOSITIONS).getValue().equals("true")){
+				Lexicon.lexiconMap.put(ELexicon.PREPOSITIONS, this.getLexiconPattern(ELexicon.PREPOSITIONS));
 			}
-			if (persistenceFacade.getProperty(EProperty.IR_DELETE_PRONOUNS).getValue().equals("true")){
-				this.lexiconMap.put(ELexicon.PRONOUNS, this.getLexiconPattern(ELexicon.PRONOUNS));
+			if (this.workspace.getPersistence().getProperty(EProperty.IR_DELETE_PRONOUNS).getValue().equals("true")){
+				Lexicon.lexiconMap.put(ELexicon.PRONOUNS, this.getLexiconPattern(ELexicon.PRONOUNS));
 			}
 		} catch (PropertyValueNotFoundException e) {
 			logger.error("No se encuentra la propiedad", e);
@@ -74,8 +72,19 @@ public class Lexicon {
      * @return La cadena con la construccion del lexicon como expresion regular
      */
     private String getLexiconPattern(ELexicon lexicon){
-    	PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
-    	String word = persistenceFacade.readFile(EDataFolder.LEXICON,lexicon.getFileName());
+
+    	
+    	ELanguage language = null;
+    	try {
+			PropertyDTO property = this.workspace.getPersistence().getProperty(EProperty.LANGUAGE);
+			language = ELanguage.valueOf(property.getValue());
+		} catch (PropertyValueNotFoundException e) {
+			// TODO Auto-generated catch block
+			logger.error(e);
+		}
+    	
+    	String word = this.workspace.getPersistence().readRootFile(EDataFolder.LEXICON,
+    													lexicon.getFileName()+"-"+language.getInitials()+".txt");
 		String[] adverbsList = word.split(",");
 		StringBuilder regexPattern = new StringBuilder();
 		

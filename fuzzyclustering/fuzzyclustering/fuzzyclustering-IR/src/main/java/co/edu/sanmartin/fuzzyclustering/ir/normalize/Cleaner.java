@@ -16,6 +16,7 @@ import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.ELexicon;
 import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.dto.StopwordDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 
@@ -27,18 +28,23 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 public class Cleaner {
 	
 	private static Logger logger = Logger.getRootLogger();
+	private WorkspaceDTO workspace;
 	
+	
+	public Cleaner(WorkspaceDTO workspace){
+		this.workspace = workspace;
+	}
 	/**
      * Metodo enargado de convertir los caracteres de escape de HTML que incluyen
      * acentos y caracteres especiales en caracteres UTF
      * @param data datos a convertir caracteres de escape
      * @return la cadena de caracteres convertida
      */
-    public String unescapeHtml( String data, String fileName, boolean persist ){
+    public String unescapeHtml(String data, String fileName, boolean persist ){
 	    StringBuilder unescape = new StringBuilder();
 	    unescape.append(StringEscapeUtils.unescapeHtml(data));
 	    if(persist){
-	    	PersistenceFacade.getInstance().writeFile(EDataFolder.CLEAN, fileName, unescape.toString());
+	    	workspace.getPersistence().writeFile(EDataFolder.CLEAN, fileName, unescape.toString());
 	    }
 	    return unescape.toString();
     }
@@ -48,11 +54,11 @@ public class Cleaner {
      * @param data textos a convertir
      * @return la cadena de texto convertido a minuscula
      */
-    public String toLowerData( String data, String fileName, boolean persist ){
+    public String toLowerData(String data, String fileName, boolean persist ){
         StringBuilder lower = new StringBuilder();
         lower.append(data.toLowerCase());
         if(persist){
-	    	PersistenceFacade.getInstance().writeFile(EDataFolder.CLEAN, fileName, lower.toString());
+	    	this.workspace.getPersistence().writeFile(EDataFolder.CLEAN, fileName, lower.toString());
 	    }
         return lower.toString();
     }
@@ -68,7 +74,7 @@ public class Cleaner {
         StringBuilder cleanString = new StringBuilder();
         Collection<StopwordDTO> stopwordRulesCol = null;
 		try {
-			stopwordRulesCol = PersistenceFacade.getInstance().getAllStopword();
+			stopwordRulesCol = this.workspace.getPersistence().getAllStopword();
 		} catch (SQLException ex) {
 			// TODO Auto-generated catch block
 			logger.error(ex);
@@ -89,7 +95,7 @@ public class Cleaner {
         }
         String result = cleanString.toString();
         if(persist){
-	    	PersistenceFacade.getInstance().writeFile(EDataFolder.CLEAN, fileName, result);
+	    	this.workspace.getPersistence().writeFile(EDataFolder.CLEAN, fileName, result);
 	    }
         return result;
     }
@@ -104,7 +110,7 @@ public class Cleaner {
     public String deleteLexiconStopWords(String data, String fileName, boolean persist){
     	StringBuilder cleanString = new StringBuilder();
     	cleanString.append(data);
-    	Lexicon lexicon = Lexicon.getInstance();
+    	Lexicon lexicon = new Lexicon(this.workspace);
     	HashMap<ELexicon,String> lexiconMap = lexicon.getLexiconMap();
     	Iterator it = lexiconMap.entrySet().iterator();
     	while (it.hasNext()) {

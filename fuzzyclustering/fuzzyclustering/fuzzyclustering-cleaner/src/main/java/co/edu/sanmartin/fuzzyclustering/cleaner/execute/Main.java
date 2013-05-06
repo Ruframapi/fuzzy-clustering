@@ -16,6 +16,8 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
  */
 public class Main {
 
+	private static final Logger logger = Logger.getLogger(Main.class);
+	
 	static{
 		final String LOG_FILE = "../config/log4j_cleaner.properties"; 
 		Properties logProperties = new Properties();      
@@ -29,10 +31,8 @@ public class Main {
 			System.out.println("Logging not enabled for Cleaner" + e);       
 		}  
 	}
-	private static final Logger logger = Logger.getLogger(Main.class);
 	
-	PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
-	
+
 	public static void main( String args[]){
 		logger.info("Init Clenaer App");
 		Dequeue dequeue = new Dequeue();

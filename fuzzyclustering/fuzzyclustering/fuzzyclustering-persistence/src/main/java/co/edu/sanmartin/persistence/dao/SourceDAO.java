@@ -7,17 +7,19 @@ import java.util.Collection;
 import co.edu.sanmartin.persistence.constant.ESourceType;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.dto.StopwordDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 
 public class SourceDAO extends AbstractDAO<SourceDTO> {
 
+	public SourceDAO(WorkspaceDTO workspace) {
+		super(workspace);
+	}
 	Collection<SourceDTO> sourceColl = new ArrayList<SourceDTO>();
 	
-	public SourceDAO() {
-	}
 
 	public void insert(SourceDTO sourceDTO) {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = "insert into source (name,url,type) VALUES (?,?,?)";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, sourceDTO.getName());
@@ -34,7 +36,7 @@ public class SourceDAO extends AbstractDAO<SourceDTO> {
 
 	public void update(SourceDTO sourceDTO) {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = "update source set name = ?,url =?, type=?, lastQuery = ?, sinceId = ? where name =?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, sourceDTO.getName());
@@ -60,7 +62,7 @@ public class SourceDAO extends AbstractDAO<SourceDTO> {
 
 	public void delete(SourceDTO sourceDTO) {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = "delete from source where name = ?";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, sourceDTO.getName());
@@ -86,7 +88,7 @@ public class SourceDAO extends AbstractDAO<SourceDTO> {
 		try {
 			if(refresh){
 				this.sourceColl = new ArrayList<SourceDTO>();
-				connection = getConnectionPool().getConnection();
+				connection = getConnectionPool().getConnection(this.workspace);
 				sQLQuery = "select * from source";
 				statement = connection.prepareStatement(sQLQuery);
 				rs = statement.executeQuery();
@@ -117,7 +119,7 @@ public class SourceDAO extends AbstractDAO<SourceDTO> {
 	 */
 	public void createTable(boolean dropTable) throws SQLException {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = null;
 			if (dropTable == true) {
 				sQLQuery = "DROP TABLE IF EXISTS source";

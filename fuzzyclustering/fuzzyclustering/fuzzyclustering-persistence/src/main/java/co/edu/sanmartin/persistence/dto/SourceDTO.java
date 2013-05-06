@@ -6,6 +6,8 @@ import java.util.Date;
 import co.edu.sanmartin.persistence.constant.ESourceType;
 
 public class SourceDTO implements Serializable{
+
+	private static final long serialVersionUID = 6744317037759698777L;
 	private String name;
 	private String url;
 	private Date lastQuery;

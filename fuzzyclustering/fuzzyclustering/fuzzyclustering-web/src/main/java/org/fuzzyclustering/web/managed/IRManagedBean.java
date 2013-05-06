@@ -15,11 +15,14 @@ import javax.faces.context.FacesContext;
 import org.apache.log4j.Logger;
 import org.fuzzyclustering.web.managed.documents.DocumentsManagedBean;
 
+import co.edu.sanmartin.fuzzyclustering.ir.facade.IRFacade;
+import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EModule;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.facade.QueueFacade;
 
 
 
@@ -30,6 +33,9 @@ public class IRManagedBean implements Serializable {
 	private static Logger logger = Logger.getRootLogger();
 	@ManagedProperty(value = "#{documents}") 
 	private DocumentsManagedBean documents;
+	
+	@ManagedProperty(value = "#{workspace}") 
+	private WorkspaceManagedBean workspaceBean;
 	
 	private Integer minTermsOcurrences;
 	private Integer newDimension = 2;
@@ -46,18 +52,23 @@ public class IRManagedBean implements Serializable {
 		this.documents = documents;
 	}
 	
+	public void setWorkspaceBean(WorkspaceManagedBean workspaceBean) {
+		this.workspaceBean = workspaceBean;
+	}
+	
 	public void buildInvertedIndex(){
-		logger.debug("Start download process");
+		logger.debug("Start buildInvertedIndex");
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 				"Inicializa Proceso de Creación de Indices", "Procesando los documentos descargados.");
 		FacesContext.getCurrentInstance().addMessage(null, msg);
 		try{
 			this.addQueueDownload(EQueueEvent.GENERATE_INVERTED_INDEX, 
-									PersistenceFacade.getInstance().getServerDate().getTime(),
+									QueueFacade.getInstance().getServerDate().getTime(),
 									this.minTermsOcurrences.toString());
 			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 					"Proceso En Curso", ".");
 			FacesContext.getCurrentInstance().addMessage(null, msg);
+			
 		}
 		catch(PatternSyntaxException e){
 			msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
@@ -66,6 +77,7 @@ public class IRManagedBean implements Serializable {
 		}
 		
 	}
+	
 	
 	/**
 	 * Envia la solicitud de creación de la matrix Termino Termino
@@ -77,7 +89,7 @@ public class IRManagedBean implements Serializable {
 		FacesContext.getCurrentInstance().addMessage(null, msg);
 		try{
 			this.addQueueDownload(EQueueEvent.GENERATE_TERM_TERM_MATRIX, 
-									PersistenceFacade.getInstance().getServerDate().getTime(),
+									QueueFacade.getInstance().getServerDate().getTime(),
 									null);
 			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 					"Proceso En Curso", ".");
@@ -100,7 +112,7 @@ public class IRManagedBean implements Serializable {
 		FacesContext.getCurrentInstance().addMessage(null, msg);
 		try{
 			this.addQueueDownload(EQueueEvent.GENERATE_PPMI_MATRIX, 
-									PersistenceFacade.getInstance().getServerDate().getTime(),
+									QueueFacade.getInstance().getServerDate().getTime(),
 									null);
 			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 					"Proceso En Curso", ".");
@@ -129,7 +141,7 @@ public class IRManagedBean implements Serializable {
 		FacesContext.getCurrentInstance().addMessage(null, msg);
 		try{
 			this.addQueueDownload(EQueueEvent.GENERATE_REDUCED_PPMI_MATRIX, 
-									PersistenceFacade.getInstance().getServerDate().getTime(),
+									QueueFacade.getInstance().getServerDate().getTime(),
 									params.toString());
 			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 					"Proceso En Curso", ".");
@@ -151,7 +163,7 @@ public class IRManagedBean implements Serializable {
 		FacesContext.getCurrentInstance().addMessage(null, msg);
 		try{
 			this.addQueueDownload(EQueueEvent.GENERATE_ALL_MATRIX, 
-									PersistenceFacade.getInstance().getServerDate().getTime(),
+									QueueFacade.getInstance().getServerDate().getTime(),
 									this.minTermsOcurrences.toString());
 			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 					"Proceso En Curso", ".");
@@ -175,9 +187,10 @@ public class IRManagedBean implements Serializable {
 		queue.setEvent(queueEvent);
 		queue.setInitDate(date);
 		queue.setParams(params);
+		queue.setWorkspace(this.workspaceBean.getWorkspace().getName());
 		queue.setStatus(EQueueStatus.ENQUEUE);
 		try {
-			PersistenceFacade.getInstance().insertQueue(queue);
+			QueueFacade.getInstance().insertQueue(queue);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

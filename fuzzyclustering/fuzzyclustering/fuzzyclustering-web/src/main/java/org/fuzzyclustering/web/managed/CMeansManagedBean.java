@@ -8,21 +8,27 @@ import java.util.regex.PatternSyntaxException;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 
 import org.apache.log4j.Logger;
+import org.fuzzyclustering.web.managed.documents.DocumentsManagedBean;
 
 import co.edu.sanmartin.persistence.constant.EModule;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.facade.QueueFacade;
 
 
 @ManagedBean(name = "cmean")
 @SessionScoped
 public class CMeansManagedBean implements Serializable {
+	
+	@ManagedProperty(value = "#{workspace}") 
+	private WorkspaceManagedBean workspaceBean;
 	/**
 	 * 
 	 */
@@ -35,6 +41,13 @@ public class CMeansManagedBean implements Serializable {
 	
 	
 	
+	
+	public void setWorkspaceBean(WorkspaceManagedBean workspaceBean) {
+		this.workspaceBean = workspaceBean;
+	}
+
+
+
 	public int getTermAmount() {
 		return termAmount;
 	}
@@ -88,7 +101,7 @@ public class CMeansManagedBean implements Serializable {
 				"Inicializa Proceso de Clusterizacion", "Procesando los documentos descargados.");
 		FacesContext.getCurrentInstance().addMessage(null, msg);
 		try{
-			this.addQueueCmeans(EQueueEvent.GENERATE_FUZZY_CMEANS, PersistenceFacade.getInstance().getServerDate().getTime());
+			this.addQueueCmeans(EQueueEvent.GENERATE_FUZZY_CMEANS, QueueFacade.getInstance().getServerDate().getTime());
 			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 					"Proceso En Curso", ".");
 			FacesContext.getCurrentInstance().addMessage(null, msg);
@@ -119,9 +132,10 @@ public class CMeansManagedBean implements Serializable {
 		params.append("true");
 		queue.setParams(params.toString());
 		queue.setInitDate(date);
+		queue.setWorkspace(this.workspaceBean.getWorkspace().getName());
 		queue.setStatus(EQueueStatus.ENQUEUE);
 		try {
-			PersistenceFacade.getInstance().insertQueue(queue);
+			QueueFacade.getInstance().insertQueue(queue);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

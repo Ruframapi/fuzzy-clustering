@@ -33,7 +33,7 @@
 				actionListener="#{irDownload.deleteDownloadSources}" disabled="true"></p:commandButton>
 			<p:commandButton value="Recargar Configuracion"
 				actionListener="#{irDownload.reloadSettings}"></p:commandButton>	
-			<p:poll interval="20" update="dataListEnqueue,dataListActive,resume" listener="#{irDownload.poolListener}" /> 
+			<p:poll interval="20" update="dataListEnqueue,dataListActive,resume" listener="#{irDownload.poolListener}" />
 		</h:form>
 	</ui:define>
 	<ui:define name="documents">

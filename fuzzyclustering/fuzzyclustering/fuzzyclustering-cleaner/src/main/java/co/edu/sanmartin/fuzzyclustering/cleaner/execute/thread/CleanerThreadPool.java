@@ -10,8 +10,10 @@ import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.PropertyDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.facade.WorkspaceFacade;
 
 /**
  * Thead pool con fin de crear un pool de 10 hilos para la descarga de los documentos
@@ -24,12 +26,14 @@ public class CleanerThreadPool {
 	private static CleanerThreadPool instance;
 	private ThreadPoolExecutor executor;
 	private int threadPoolNumber = 10;
+	private WorkspaceDTO workspace;
 	
-	private CleanerThreadPool(){	
+	
+	public CleanerThreadPool(WorkspaceDTO workspace){	
 		try {
-			PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
+			this.workspace = workspace;
 			PropertyDTO threadPoolNumberProperty = 
-					persistenceFacade.getProperty(EProperty.CLEAN_THREAD_NUMBER);
+					this.workspace.getPersistence().getProperty(EProperty.CLEAN_THREAD_NUMBER);
 			threadPoolNumber = threadPoolNumberProperty.intValue();
 			executor=(ThreadPoolExecutor)Executors.newFixedThreadPool(threadPoolNumber);
 			
@@ -39,29 +43,29 @@ public class CleanerThreadPool {
 		}
 	}
 	
-	public static CleanerThreadPool getInstance() {
-		if(instance == null){
-			instance = new CleanerThreadPool();
-		}
-		return instance;
-	}
-
+	/**
+	 * Ejecuta el pool de hilos para realizar la limpieza de los archivos
+	 */
 	public void executeThreadPool(){
 		executor=(ThreadPoolExecutor)Executors.newFixedThreadPool(threadPoolNumber);
-		Collection<DocumentDTO> fileCol = PersistenceFacade.getInstance().getDocumentsForClean();
+		Collection<DocumentDTO> fileCol = this.workspace.getPersistence().getDocumentsForClean();
 		logger.info("Files To Clean:" + fileCol.size());
 		CleanerWorkerThread cleanerWorkerThread;
 		//Se realiza la limipieza de los archivos
 		//Cargamos la informacion de los archivos en memoria
 		for (DocumentDTO file : fileCol) {
-			PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
-			file.setLazyData(persistenceFacade.readFile(EDataFolder.DOWNLOAD, file.getName()));
+			try{
+				file.setLazyData(this.workspace.getPersistence().readFile(EDataFolder.DOWNLOAD, file.getName()));
+			}
+			catch(Exception e){
+				logger.error("Error in executeThreadPool read File", e);
+			}
 		}
 		
 		for (DocumentDTO documentDTO : fileCol) {
 			logger.info("Cleaning File:" + documentDTO.getName());
 			try{
-				cleanerWorkerThread = new CleanerWorkerThread(documentDTO);
+				cleanerWorkerThread = new CleanerWorkerThread(this.workspace, documentDTO);
 				executor.submit(cleanerWorkerThread);
 			}
 			catch(Throwable e){
@@ -75,8 +79,6 @@ public class CleanerThreadPool {
 	public ThreadPoolExecutor getExecutor() {
 		return executor;
 	}
-	
-	
 	
 	
 }

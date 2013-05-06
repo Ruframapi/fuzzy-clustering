@@ -3,10 +3,64 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:p="http://primefaces.org/ui" template="templates/template.xhtml">
-
 	<ui:define name="context">
-	 <ui:include src="contextmenu.xhtml" />
 	</ui:define>
 	<ui:define name="content">
+		<h:form id="documentForm">
+			<p:panel id="panel" header="Espacio de Trabajo"
+				style="width: 450px; position: absolute; top:30%; left: 50%; margin-top: 30px; margin-left: -225px">
+
+				<p:selectOneMenu id="workspace_menu" value="#{workspace.workspace}"
+					effect="fade" converter="workspaceConverter">
+					<f:selectItem itemLabel="Seleccione un Espacio de Trabajo"
+						itemValue="" />
+					<f:selectItems value="#{workspace.workspaceColl}"
+						var="workspaceItem" itemLabel="#{workspaceItem.name}"
+						itemValue="#{workspaceItem}" />
+					<p:ajax update="panel" />
+				</p:selectOneMenu>
+				<f:facet name="footer">
+					<p:commandButton id="ingresarButton" value="Ingresar" action="#{workspace.loadWorkspace}" rendered="#{workspace.introAvailable}"></p:commandButton>
+					<p:commandButton value="Nuevo Espacio de Trabajo"
+						oncomplete="dlg1.show();" immediate="true"></p:commandButton>
+					<p:commandButton value="Eliminar" onclick="confirmation.show()"
+						update="workspace_menu" immediate="true"></p:commandButton>
+				</f:facet>
+			</p:panel>
+		</h:form>
+
+		<p:dialog id="modalDialog" header="Nuevo Espacio de Trabajo"
+			widgetVar="dlg1" resizable="false" showEffect="explode"
+			hideEffect="explode" modal="true" appendToBody="true">
+			<h:form>
+				<p:panelGrid id="panelForm1" columns="2">
+					<p:outputLabel value="Nombre" for="name"></p:outputLabel>
+					<p:inputText id="name" value="#{workspace.workspace.name}"
+						size="45" required="true" label="Nombre"></p:inputText>
+					<p:outputLabel value="Servidor" for="server"></p:outputLabel>
+					<p:inputText id="server"
+						value="#{workspace.workspace.databaseHost}" size="45"
+						required="true"></p:inputText>
+				</p:panelGrid>
+				<p:commandButton value="Crear"
+					actionListener="#{workspace.createWorkspace}"
+					update="panelForm1,:documentForm:panel"
+					oncomplete="dlg1.hide()"></p:commandButton>
+			</h:form>
+		</p:dialog>
+		
+			<p:confirmDialog id="confirmDialog"
+				message="Esta seguro de eliminar todos los datos y configuraciones del espacio de trabajo?"
+				header="Proceso de eliminacion de informacion" severity="alert"
+				widgetVar="confirmation" appendToBody="true">
+				<h:form id="confirmform">
+				<p:commandButton id="confirm" value="Si"
+					oncomplete="confirmation.hide();"
+					actionListener="#{workspace.deleteWorkspace}"
+					update=":documentForm:panel" />
+				<p:commandButton id="decline" value="No"
+					onclick="confirmation.hide()" type="button" />
+					</h:form>
+			</p:confirmDialog>
 	</ui:define>
 </ui:composition>

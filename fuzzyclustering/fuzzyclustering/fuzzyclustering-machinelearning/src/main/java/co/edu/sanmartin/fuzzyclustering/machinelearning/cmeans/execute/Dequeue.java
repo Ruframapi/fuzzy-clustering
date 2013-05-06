@@ -17,8 +17,11 @@ import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.facade.QueueFacade;
+import co.edu.sanmartin.persistence.facade.WorkspaceFacade;
 
 /**
  * Clase que arranca el sistema de descarga de Noticias
@@ -36,7 +39,6 @@ public class Dequeue implements Runnable{
 	 * @param restart define si reinicia el proceso o continua con un proceso anterior
 	 */
 	public Dequeue(){
-		persistenceFacade = PersistenceFacade.getInstance();
 		try {
 			this.cancelActiveQueue(EQueueEvent.GENERATE_INVERTED_INDEX);
 			this.cancelActiveQueue(EQueueEvent.GENERATE_FUZZY_CMEANS);
@@ -80,7 +82,7 @@ public class Dequeue implements Runnable{
 	public void executeQueue() throws SQLException, PropertyValueNotFoundException{
 
 		Collection<QueueDTO> queueCol = 
-				this.persistenceFacade.getQueueByStatusDate(EModule.MACHINE_LEARNING, 
+				QueueFacade.getInstance().getQueueByStatusDate(EModule.MACHINE_LEARNING, 
 						EQueueStatus.ENQUEUE, new Date());
 		for (QueueDTO queueDTO : queueCol) {
 			switch( queueDTO.getEvent() ){
@@ -103,12 +105,14 @@ public class Dequeue implements Runnable{
 		int iterationsAmount = Integer.parseInt(parameter[1]);
 		double mValue = Double.parseDouble(parameter[2]);
 		boolean buildMatrix = Boolean.parseBoolean(parameter[3]);
-		FuzzyCMeansBigData cmeans = new FuzzyCMeansBigData(DimensionallyReduced.REDUCED_FILE_NAME, 
+		
+		WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
+		FuzzyCMeansBigData cmeans = new FuzzyCMeansBigData(workspace,DimensionallyReduced.REDUCED_FILE_NAME, 
 														centroidsAmount, iterationsAmount, mValue, buildMatrix);
 		cmeans.init();
 		cmeans.calculateFuzzyCmeans();
 		try {
-			PersistenceFacade.getInstance().deleteQueue(queueDTO);
+			QueueFacade.getInstance().deleteQueue(queueDTO);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -123,9 +127,9 @@ public class Dequeue implements Runnable{
 	 */
 	private void cancelActiveQueue(EQueueEvent queueEvent) throws SQLException{
 		Collection<QueueDTO> queueActive = 
-				this.persistenceFacade.getQueueByStatus(queueEvent, EQueueStatus.ENQUEUE);
+				QueueFacade.getInstance().getQueueByStatus(queueEvent, EQueueStatus.ENQUEUE);
 		for (QueueDTO queueDTO2 : queueActive) {
-			persistenceFacade.deleteQueue(queueDTO2);
+			QueueFacade.getInstance().deleteQueue(queueDTO2);
 		}
 	}
 	

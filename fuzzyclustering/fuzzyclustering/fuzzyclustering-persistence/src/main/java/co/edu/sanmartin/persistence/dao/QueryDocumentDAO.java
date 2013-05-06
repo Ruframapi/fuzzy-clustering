@@ -5,13 +5,18 @@ import java.sql.Timestamp;
 import java.util.Collection;
 
 import co.edu.sanmartin.persistence.dto.QueryDocumentDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 
 public class QueryDocumentDAO extends AbstractDAO<QueryDocumentDTO>{
+
+	public QueryDocumentDAO(WorkspaceDTO workspace) {
+		super(workspace);
+	}
 
 	@Override
 	public void insert(QueryDocumentDTO queryDocument) throws SQLException {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = "INSERT INTO querydocument (originalData, cleanData) VALUES (?,?)";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.setString(1, queryDocument.getOriginalData());
@@ -57,7 +62,7 @@ public class QueryDocumentDAO extends AbstractDAO<QueryDocumentDTO>{
 	 */
 	public void createTable(boolean dropTable) throws SQLException {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = null;
 			if (dropTable == true) {
 				sQLQuery = "DROP TABLE IF EXISTS querydocument";
@@ -83,7 +88,7 @@ public class QueryDocumentDAO extends AbstractDAO<QueryDocumentDTO>{
 	 */
 	public void truncate() throws SQLException {
 		try {
-			connection = getConnectionPool().getConnection();
+			connection = getConnectionPool().getConnection(this.workspace);
 			sQLQuery = "TRUNCATE TABLE querydocument";
 			statement = connection.prepareStatement(sQLQuery);
 			statement.executeUpdate();

@@ -6,7 +6,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import co.edu.sanmartin.persistence.constant.properties.PropertiesLoader;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
+import co.edu.sanmartin.persistence.facade.QueueFacade;
+import co.edu.sanmartin.persistence.facade.WorkspaceFacade;
 
 /**
  * Pruebas de persitencia
@@ -15,11 +18,12 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
  */
 public class PersistenceTest {
 
+	private WorkspaceDTO workspace = WorkspaceFacade.getInstance().getWorkspace("noticias");
 	@Test
 	@Ignore
 	public void testInitialize(){
 		try {
-			PersistenceFacade.getInstance().initialize();
+			this.workspace.getPersistence().initialize();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -35,7 +39,7 @@ public class PersistenceTest {
 	
 	@Test
 	public void getServerDateTest(){
-		System.out.print(PersistenceFacade.getInstance().getServerDate().toString());
+		System.out.print(QueueFacade.getInstance().getServerDate().toString());
 	}
 	
 }

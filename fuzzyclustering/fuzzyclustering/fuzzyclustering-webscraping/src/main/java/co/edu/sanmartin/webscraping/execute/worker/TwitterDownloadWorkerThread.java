@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import twitter4j.TwitterException;
 
 import co.edu.sanmartin.persistence.dto.SourceDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.webscraping.rss.RssScraping;
 import co.edu.sanmartin.webscraping.twitter.TwitterScraping;
 
@@ -21,20 +22,23 @@ public class TwitterDownloadWorkerThread implements Callable<String>{
 
 	private static Logger logger = Logger.getRootLogger();
 	private SourceDTO sourceDTO;
-	TwitterScraping twitterScraping;
-	AtomicInteger sequence;
+	private TwitterScraping twitterScraping;
+	private AtomicInteger sequence;
+	private String dataRoot;
+	private WorkspaceDTO workspace;
 	
-	public TwitterDownloadWorkerThread(SourceDTO sourceDTO, AtomicInteger sequence) throws TwitterException {
+	public TwitterDownloadWorkerThread(WorkspaceDTO workspace, SourceDTO sourceDTO, AtomicInteger sequence) throws TwitterException {
 		logger.debug("Init TwitterDownloadWorkerThread");
+		this.workspace = workspace;
 		this.sequence = sequence;
 		this.sourceDTO = sourceDTO;
-		twitterScraping = new TwitterScraping(sequence);
+		twitterScraping = new TwitterScraping(workspace,sequence);
 	}
 
 	public String call() throws Exception {
 		logger.debug("Init TwitterDownloadWorkerThread Run Method");
 		logger.debug("sourceDTO.getUrl()");
-		twitterScraping.saveTwitterDocument(sourceDTO);
+		twitterScraping.saveTwitterDocument(this.dataRoot, this.sourceDTO);
 		return "true";
 	}
 

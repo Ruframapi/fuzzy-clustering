@@ -1,0 +1,62 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" template="templates/template.xhtml">
+	<f:metadata>
+		<f:event listener="#{irBean.load}" type="preRenderView" />
+	</f:metadata>
+	<ui:define name="context">
+		<ui:include src="contextmenu.xhtml" />
+	</ui:define>
+	<ui:define name="content">
+		<h:form>
+			<p:panel header="Proceso de agrupamiento difuso">
+				<p:panelGrid columns="6">
+					<p:panelGrid columns="1">
+						<f:facet name="header"> Indice Invertido</f:facet>
+						<p:panelGrid columns="2">
+							<p:outputLabel>Cantidad Minima de Ocurrencias:</p:outputLabel>
+							<p:inputText value="#{irBean.minTermsOcurrences}" size="3"></p:inputText>
+						</p:panelGrid>
+						<p:commandButton value="Generar"
+							actionListener="#{irBean.buildInvertedIndex}">
+						</p:commandButton>
+					</p:panelGrid>
+					<p:panelGrid columns="1">
+						<f:facet name="header"> Matrix Termino - Termino</f:facet>
+						<p:panelGrid columns="2">
+
+						</p:panelGrid>
+						<p:commandButton value="Generar"
+							actionListener="#{irBean.buildTermTermMatrix}">
+						</p:commandButton>
+					</p:panelGrid>
+					<p:panelGrid columns="1">
+						<f:facet name="header"> Matrix Mutual Information PPMI</f:facet>
+						<p:panelGrid columns="2">
+
+						</p:panelGrid>
+						<p:commandButton value="Generar"
+							actionListener="#{irBean.buildPPMIMatrix}">
+						</p:commandButton>
+					</p:panelGrid>
+					<p:panelGrid columns="1" style="width: 300px">
+						<f:facet name="header">Reduccion de Dimensionalidad</f:facet>
+						<p:panelGrid columns="2">
+							<p:outputLabel>Numero de Dimensiones:</p:outputLabel>
+							<p:inputText value="#{irBean.newDimension}" size="3"></p:inputText>
+							<p:outputLabel>Almacenar como Texto Plano:</p:outputLabel>
+							<p:selectBooleanCheckbox value="#{irBean.saveReadable}"></p:selectBooleanCheckbox>
+							<p:outputLabel>Cantidad de registros a guardar:</p:outputLabel>
+							<p:inputText value="#{irBean.readableRowsAmount}" size="3"></p:inputText>
+						</p:panelGrid>
+						<p:commandButton value="Generar"
+							actionListener="#{irBean.buildReducedMatrix}">
+						</p:commandButton>
+					</p:panelGrid>
+				</p:panelGrid>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>

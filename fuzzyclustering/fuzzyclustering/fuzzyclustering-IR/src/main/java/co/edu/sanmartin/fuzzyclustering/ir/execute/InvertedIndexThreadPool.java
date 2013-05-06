@@ -18,6 +18,7 @@ import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EProperty;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.PropertyDTO;
+import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
@@ -31,41 +32,41 @@ public class InvertedIndexThreadPool implements Runnable{
 	
 	//Cantidad minima que debe aparecer un termino para almacenarlo en el indice.
 	private int minTermsOcurrences = 0;
-	public InvertedIndexThreadPool(int minTermsOcurrences){
+	private WorkspaceDTO workspace;
+	public InvertedIndexThreadPool(WorkspaceDTO workspace, int minTermsOcurrences){
 		this.minTermsOcurrences = minTermsOcurrences;
+		this.workspace = workspace;
 	}
 	Logger logger = Logger.getLogger("InvertedIndexThreadPool");
 
 	public void run() {
 		logger.info("Inicializando construccion del indice invertido");
-		SendMessageAsynch.sendMessage("Creando Indice Invertido");
+		SendMessageAsynch.sendMessage(this.workspace,"Creando Indice Invertido");
 		long time_start, time_end;
 		time_start = System.currentTimeMillis();
 		int threadPoolNumber = 10;
 		//Se cargan las fuentes rss disponibles
 		try {
-			PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
 			PropertyDTO threadPoolNumberProperty = 
-					persistenceFacade.getProperty(EProperty.INVERTED_INDEX_THREAD_NUMBER);
+					this.workspace.getPersistence().getProperty(EProperty.INVERTED_INDEX_THREAD_NUMBER);
 			threadPoolNumber = threadPoolNumberProperty.intValue();
 		} catch (PropertyValueNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		Collection<DocumentDTO> fileCol = PersistenceFacade.getInstance().getFileList(EDataFolder.CLEAN);
+		Collection<DocumentDTO> fileCol = this.workspace.getPersistence().getFileList(EDataFolder.CLEAN);
 		
 		InvertedIndexWorkerThread invertedIndexWorkerThread;
 		
 		ThreadPoolExecutor executor=(ThreadPoolExecutor)Executors.newFixedThreadPool(threadPoolNumber);
 		HashMap<String, StringBuilder> dataMap = new HashMap<String,StringBuilder>();
-		InvertedIndexBuilder index = new InvertedIndexBuilder(new ConcurrentLinkedDeque<String>());
+		InvertedIndexBuilder index = new InvertedIndexBuilder(this.workspace,new ConcurrentLinkedDeque<String>());
 		//Almacenamos los archivos en memoria
 		for (DocumentDTO file : fileCol) {
-			PersistenceFacade persistenceFacade = PersistenceFacade.getInstance();
 			StringBuilder dataFile = new StringBuilder();
-			dataFile.append(persistenceFacade.readFile(EDataFolder.CLEAN,file.getName()));
-			invertedIndexWorkerThread = new InvertedIndexWorkerThread(dataFile, file.getNameWithoutExtension(), index);
+			dataFile.append(this.workspace.getPersistence().readFile(EDataFolder.CLEAN,file.getName()));
+			invertedIndexWorkerThread = new InvertedIndexWorkerThread(this.workspace, dataFile, file.getNameWithoutExtension(), index);
 			executor.execute(invertedIndexWorkerThread);
 		}
 
@@ -85,7 +86,7 @@ public class InvertedIndexThreadPool implements Runnable{
 				(( time_end - time_start )/1000)/60 +" minutos";
 		logger.info(finalMessage);
 		
-		SendMessageAsynch.sendMessage(finalMessage);
+		SendMessageAsynch.sendMessage(this.workspace,finalMessage);
 		
 	}
 }
