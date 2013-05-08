@@ -11,9 +11,10 @@
 	</ui:define>
 	<ui:define name="content">
 		<h:form>
-			<p:panel header="Proceso de agrupamiento difuso">
+			<p:panel header="Proceso de agrupamiento difuso"
+				styleClass="align_top">
 				<p:panelGrid columns="6">
-					<p:panelGrid columns="1">
+					<p:panelGrid columns="1" style="width: 200px; height:150px">
 						<f:facet name="header"> Indice Invertido</f:facet>
 						<p:panelGrid columns="2">
 							<p:outputLabel>Cantidad Minima de Ocurrencias:</p:outputLabel>
@@ -23,25 +24,27 @@
 							actionListener="#{irBean.buildInvertedIndex}">
 						</p:commandButton>
 					</p:panelGrid>
-					<p:panelGrid columns="1">
-						<f:facet name="header"> Matrix Termino - Termino</f:facet>
-						<p:panelGrid columns="2">
+					<p:panel header="Construccion de Matrices">
+						<p:panelGrid columns="1" style="width: 200px; height:75px">
+							<f:facet name="header"> Matrix Termino - Termino</f:facet>
+							<p:panelGrid columns="2">
 
+							</p:panelGrid>
+							<p:commandButton value="Generar"
+								actionListener="#{irBean.buildTermTermMatrix}">
+							</p:commandButton>
 						</p:panelGrid>
-						<p:commandButton value="Generar"
-							actionListener="#{irBean.buildTermTermMatrix}">
-						</p:commandButton>
-					</p:panelGrid>
-					<p:panelGrid columns="1">
-						<f:facet name="header"> Matrix Mutual Information PPMI</f:facet>
-						<p:panelGrid columns="2">
+						<p:panelGrid columns="1" style="width: 200px; height:75px">
+							<f:facet name="header"> Matrix Mutual Information PPMI</f:facet>
+							<p:panelGrid columns="2">
 
+							</p:panelGrid>
+							<p:commandButton value="Generar"
+								actionListener="#{irBean.buildPPMIMatrix}">
+							</p:commandButton>
 						</p:panelGrid>
-						<p:commandButton value="Generar"
-							actionListener="#{irBean.buildPPMIMatrix}">
-						</p:commandButton>
-					</p:panelGrid>
-					<p:panelGrid columns="1" style="width: 300px">
+					</p:panel>
+					<p:panelGrid columns="1" style="width: 200px; height:150px">
 						<f:facet name="header">Reduccion de Dimensionalidad</f:facet>
 						<p:panelGrid columns="2">
 							<p:outputLabel>Numero de Dimensiones:</p:outputLabel>
@@ -53,6 +56,28 @@
 						</p:panelGrid>
 						<p:commandButton value="Generar"
 							actionListener="#{irBean.buildReducedMatrix}">
+						</p:commandButton>
+
+					</p:panelGrid>
+					<p:panel>
+						<p:panelGrid columns="2" style="width: 200px; height:150px">
+							<f:facet name="header">Generacion de Conjuntos Difusos</f:facet>
+							<p:outputLabel value="Cantidad de Terminos"></p:outputLabel>
+							<p:inputText value="#{cmean.termAmount}"></p:inputText>
+							<p:outputLabel value="Cantidad de Centroides"></p:outputLabel>
+							<p:inputText value="#{cmean.centroidsAmount}"></p:inputText>
+							<p:outputLabel value="Iteraciones"></p:outputLabel>
+							<p:inputText value="#{cmean.iterationAmount}"></p:inputText>
+							<p:outputLabel value="Valor de Fuzzyficacion"></p:outputLabel>
+							<p:inputText value="#{cmean.fuzzyValue}"></p:inputText>
+						</p:panelGrid>
+						<p:commandButton value="Clusterizar"
+							actionListener="#{cmean.generate}"></p:commandButton>
+					</p:panel>
+					<p:panelGrid columns="1" style="width: 200px; height:150px">
+						<f:facet name="header">Indice de Pertenencia</f:facet>
+						<p:commandButton value="Generar"
+							actionListener="#{cmean.generateMembershipIndex}">
 						</p:commandButton>
 					</p:panelGrid>
 				</p:panelGrid>

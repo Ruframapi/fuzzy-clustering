@@ -1,5 +1,6 @@
 package co.edu.sanmartin.fuzzyclustering.machinelearning.facade;
 
+import co.edu.sanmartin.fuzzyclustering.machinelearning.classifier.DocumentCluster;
 import co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans.FuzzyCMeans;
 import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 
@@ -15,6 +16,15 @@ public class MachineLearningFacade {
 	public void calculateCMeans(WorkspaceDTO workspace, double[][] data, int centroidsAmount, int iterationsAmount, int mValue){
 		FuzzyCMeans cmeans = new FuzzyCMeans(workspace, data, centroidsAmount, iterationsAmount, mValue);
 		cmeans.calculateFuzzyCmeans();
+	}
+	
+	/**
+	 * Genera el indice de pertenencia de cada termino en los clusteres
+	 * @param workspace
+	 */
+	public void generatePertenenceIndex(WorkspaceDTO workspace){
+		DocumentCluster documentCluster = new DocumentCluster(workspace);
+		documentCluster.buildMembershipIndex();
 	}
 
 }

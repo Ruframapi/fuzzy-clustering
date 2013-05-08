@@ -23,17 +23,41 @@ public class ReutersTrainer {
 	}
 	public void classyfyReutersStemmed(){
 		DocumentCluster documentCluster = new DocumentCluster(this.workspace);
-		documentCluster.loadMembershipTermDocument("train");
+		documentCluster.loadMembershipTermDocument();
+		ArrayList<DocumentDTO> testReutersDocument = this.testReutersDocumentsCol();
+		for (DocumentDTO documentDTO : testReutersDocument) {
+			documentCluster.getDocumentTermMembership(documentDTO);
+		}
+	}
+	
+	public void classyfyReutersStemmed1(){
+		DocumentCluster documentCluster = new DocumentCluster(this.workspace);
+		documentCluster.loadMembershipTermDocument();
 		ArrayList<DocumentDTO> testReutersDocument = this.testReutersDocumentsCol();
 		for (DocumentDTO documentDTO : testReutersDocument) {
 			documentCluster.getDocumentMembership(documentDTO);
 		}
 	}
 	
+	public void classyfyReutersStemmed2(){
+		StringBuilder stringBuilder = new StringBuilder();
+		DocumentCluster documentCluster = new DocumentCluster(this.workspace);
+		documentCluster.loadMembershipTermDocument();
+		ArrayList<DocumentDTO> testReutersDocument = this.testReutersDocumentsCol();
+		for (DocumentDTO documentDTO : testReutersDocument) {
+			
+			ArrayList result = documentCluster.getDocumentMembership(documentDTO, "acq" );
+			stringBuilder.append(result.get(0));
+			stringBuilder.append("\t");
+			stringBuilder.append(result.get(1));
+			stringBuilder.append("\t");
+			stringBuilder.append(result.get(2));
+			stringBuilder.append(System.getProperty("line.separator"));
+		}
+		this.workspace.getPersistence().writeFile(EDataFolder.MACHINE_LEARNING, 
+				"clusterdocument.txt", stringBuilder.toString());
+	}
 	
-	
-	
-
 	
 	/**
 	 * Retorna los documentos de Test de Reuters

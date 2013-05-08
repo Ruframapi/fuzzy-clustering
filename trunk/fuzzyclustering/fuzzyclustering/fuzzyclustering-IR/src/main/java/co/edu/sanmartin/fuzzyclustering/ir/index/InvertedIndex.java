@@ -107,8 +107,8 @@ public class InvertedIndex {
 	 * @param minTermsOcurrences cantidad minima de ocurrencias que debe tener un termino para almacenarse 
 	 * en el indice invertido
 	 */
-	public void createInvertedIndex(int minTermsOcurrences){
-		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(workspace,minTermsOcurrences);
+	public void createInvertedIndex(int minTermsOcurrences, int documentsAmount){
+		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(workspace,minTermsOcurrences, documentsAmount);
 		Thread thread=new Thread(threadPool);
 		thread.start();
 	}

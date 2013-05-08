@@ -113,6 +113,38 @@ public class CMeansManagedBean implements Serializable {
 		}
 	}
 	
+	/**
+	 * Solicita la generacion de la matrix de pertenencia de terminos
+	 */
+	public void generateMembershipIndex(){
+		logger.debug("Start download process");
+		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+				"Generando Indice de Pertenencia", "");
+		FacesContext.getCurrentInstance().addMessage(null, msg);
+		try{
+			QueueDTO queue = new QueueDTO();
+			queue.setModule(EModule.MACHINE_LEARNING);
+			queue.setEvent(EQueueEvent.GENERATE_MEMBERSHIP_INDEX);
+			queue.setInitDate(QueueFacade.getInstance().getServerDate().getTime());
+			queue.setWorkspace(this.workspaceBean.getWorkspace().getName());
+			queue.setStatus(EQueueStatus.ENQUEUE);
+			try {
+				QueueFacade.getInstance().insertQueue(queue);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+					"Proceso En Curso", ".");
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+		catch(PatternSyntaxException e){
+			msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Error al realizar el proceso", e.getDescription());
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+	}
+	
 	
 	/**
 	 * Adiciona una cola en el webscrapping
@@ -141,5 +173,7 @@ public class CMeansManagedBean implements Serializable {
 			e.printStackTrace();
 		}
 	}
+	
+
 	
 }

@@ -1,21 +1,17 @@
 package co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans.execute;
 
-import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-import co.edu.sanmartin.fuzzyclustering.ir.facade.IRFacade;
 import co.edu.sanmartin.fuzzyclustering.ir.index.DimensionallyReduced;
-import co.edu.sanmartin.fuzzyclustering.ir.index.MutualInformation;
+import co.edu.sanmartin.fuzzyclustering.machinelearning.classifier.DocumentCluster;
 import co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans.FuzzyCMeansBigData;
-import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.constant.EModule;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
-import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.QueueDTO;
 import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
@@ -89,7 +85,11 @@ public class Dequeue implements Runnable{
 			case GENERATE_FUZZY_CMEANS:
 				this.generateCmeans(queueDTO);
 				break;
+			case GENERATE_MEMBERSHIP_INDEX:
+				this.generateMembershipIndex(queueDTO);
+				break;
 			}
+			
 		}
 		
 	}
@@ -120,6 +120,21 @@ public class Dequeue implements Runnable{
 		
 	}
 
+	/**
+	 * Genera la matriz de pertenencia de los terminos
+	 * @param queue
+	 */
+	public void generateMembershipIndex(QueueDTO queue){
+		WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queue.getWorkspace());
+		DocumentCluster documentCluster = new DocumentCluster(workspace);
+		documentCluster.buildMembershipIndex();
+		try {
+			QueueFacade.getInstance().deleteQueue(queue);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	
 	/**

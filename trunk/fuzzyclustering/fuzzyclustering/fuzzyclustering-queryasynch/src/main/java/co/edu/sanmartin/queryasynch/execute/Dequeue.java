@@ -172,9 +172,11 @@ public class Dequeue implements Runnable{
 
 		try {
 			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
-			int minTermsOcurrences = Integer.parseInt(queueDTO.getParams());
+			String[] params = queueDTO.getParams().split(",");
+			int minTermsOcurrences = Integer.parseInt(params[0]);
+			int documentsAmount = Integer.parseInt(params[1]);
 			IRFacade irFacade = IRFacade.getInstance();
-			irFacade.createInvertedIndex(workspace, minTermsOcurrences);	
+			irFacade.createInvertedIndex(workspace, minTermsOcurrences,documentsAmount);	
 			QueueFacade.getInstance().deleteQueue(queueDTO);
 		} catch (Exception e) {
 			logger.error("Error in generateInvertedIndex",e);
@@ -220,7 +222,6 @@ public class Dequeue implements Runnable{
 		// TODO Auto-generated method stub
 
 		try {
-			String[] params = queueDTO.getParams().split(",");
 			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
 			IRFacade irFacade = IRFacade.getInstance();
 			irFacade.createPPMIBigMatrix(workspace, true);
@@ -244,14 +245,16 @@ public class Dequeue implements Runnable{
 	 * @param queueDTO
 	 */
 	private void generateCmeansMatrix(QueueDTO queueDTO) {
-		// TODO Auto-generated method stub
 		try {
-			String[] params = queueDTO.getParams().split(",");
 			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
-			int minTermsOcurrences = Integer.parseInt(params[1]);
-			IRFacade irFacade = IRFacade.getInstance();
-			irFacade.buildCmeanMatrix(workspace,minTermsOcurrences);
-			QueueFacade.getInstance().deleteQueue(queueDTO);
+			if(queueDTO.getParams()!=null){
+				String[] params = queueDTO.getParams().split(",");
+				int minTermsOcurrences = Integer.parseInt(params[1]);
+				int documentsAmount = Integer.parseInt(params[1]);
+				IRFacade irFacade = IRFacade.getInstance();
+				irFacade.buildCmeanMatrix(workspace,minTermsOcurrences, documentsAmount);
+				QueueFacade.getInstance().deleteQueue(queueDTO);
+			}
 		} catch (Exception e) {
 			logger.error("Error in generateCmeansMatrix",e);
 		}
@@ -265,6 +268,8 @@ public class Dequeue implements Runnable{
 		}
 
 	}
+	
+
 
 	/**
 	 * Realiza la consulta de documentos de forma asincronica
@@ -272,10 +277,11 @@ public class Dequeue implements Runnable{
 	 * @throws SQLException 
 	 */
 	private void queryDocumentAsynch(QueueDTO queueDTO) throws SQLException{
-		String[] params = queueDTO.getParams().split(",");
+
 		try {
 			//persistence.truncateQueryDocument();
 			if(queueDTO.getParams()!=null){
+				String[] params = queueDTO.getParams().split(",");
 				int idDocument = Integer.parseInt(queueDTO.getParams());
 				WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
 				DocumentDTO document = workspace.getPersistence().selectDocumentById(idDocument);
