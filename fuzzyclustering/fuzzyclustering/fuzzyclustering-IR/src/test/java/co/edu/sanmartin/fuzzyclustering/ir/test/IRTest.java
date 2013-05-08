@@ -37,7 +37,7 @@ public class IRTest {
 	
 	@Test
 	public void invertedIndexTest() {
-		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(workspace,2);
+		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(workspace,2,0);
 		threadPool.run();
 		//Thread thread = new Thread(threadPool);
 		//thread.start();
@@ -341,7 +341,7 @@ public class IRTest {
 	public void buildAllMatrixTest(){
 		IRFacade irFacade = IRFacade.getInstance();
 		try {
-			irFacade.buildCmeanMatrix(this.workspace,0);
+			irFacade.buildCmeanMatrix(this.workspace,0,0);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

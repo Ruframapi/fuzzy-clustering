@@ -36,12 +36,12 @@ public class IRFacade {
 		invertedIndex.loadInvertedIndexData();
 		return invertedIndex;
 	}
-	public void createInvertedIndex(WorkspaceDTO workspace, int minTermsOcurrences){
+	public void createInvertedIndex(WorkspaceDTO workspace, int minTermsOcurrences, int documentsAmount){
 		workspace.getPersistence().deleteFolder(EDataFolder.MATRIX);
 		workspace.getPersistence().deleteFolder(EDataFolder.MACHINE_LEARNING);
 		InvertedIndex invertedIndex = new InvertedIndex(workspace);	
 		//invertedIndex.loadInvertedIndexData();
-		invertedIndex.createInvertedIndex(minTermsOcurrences);
+		invertedIndex.createInvertedIndex(minTermsOcurrences,documentsAmount);
 	}
 	
 	public void createTermTermBigMatrix(WorkspaceDTO workspace, boolean persist) throws IOException{
@@ -77,10 +77,10 @@ public class IRFacade {
 	/**
 	 * Construye todas las matrices necesarias para la construcion de los conjuntos difusos
 	 */
-	public void buildCmeanMatrix(WorkspaceDTO workspace, int minQuantiryTerms) throws Exception{
+	public void buildCmeanMatrix(WorkspaceDTO workspace, int minQuantiryTerms, int documentsAmount) throws Exception{
 		try {
 			InvertedIndex invertedIndex = new InvertedIndex(workspace);
-			InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(workspace,minQuantiryTerms);
+			InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(workspace,minQuantiryTerms,documentsAmount);
 			threadPool.run();
 			invertedIndex.createTermTermBigMatrix(true);
 			MutualInformation mutualInformation = new MutualInformation(workspace);

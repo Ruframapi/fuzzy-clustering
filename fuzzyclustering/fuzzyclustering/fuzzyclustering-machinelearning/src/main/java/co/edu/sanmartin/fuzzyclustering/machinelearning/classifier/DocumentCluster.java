@@ -1,6 +1,8 @@
 package co.edu.sanmartin.fuzzyclustering.machinelearning.classifier;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -31,7 +33,7 @@ public class DocumentCluster {
 	 * Metodo encargado de crear el indice de pertenencia de los terminos 
 	 * 
 	 */
-	public void buildMembershipIndex(String dataRoot){
+	public void buildMembershipIndex(){
 		List<Double[]> membershipMatrix = 
 				this.workspace.getPersistence().readFileMatrix(EDataFolder.MACHINE_LEARNING, 
 																"membership.txt");
@@ -57,10 +59,10 @@ public class DocumentCluster {
 	}
 	
 	/**
-	 * Retorna el valor de pertenencia del documento
+	 * Retorna el valor de pertenencia de cada termino del documento
 	 * @param document
 	 */
-	public HashMap<String, ArrayList> getDocumentMembership(DocumentDTO document){
+	public HashMap<String, ArrayList> getDocumentTermMembership(DocumentDTO document){
 		String cleanData = document.getLazyCleanData();
 		String[] documentTermArray = cleanData.split(" ");
 		HashMap<String, ArrayList> membeshipDocument = new HashMap<String,ArrayList>();
@@ -69,20 +71,104 @@ public class DocumentCluster {
 			membeshipDocument.put(term, array);
 		}
 		return membeshipDocument;
-
 	}
 	
-	/**public ArrayList getMembershipTerm(String term){
-		int termIndex = this.membershipTermDocument.indexOf(term);
-		if(termIndex>=0){
-			return this.membershipTermDocument;
+	/**
+	 * Retorna los valores de pertenencia del documento en los diferentes clusteres
+	 * @param document
+	 * @return
+	 */
+	public HashMap<String,Double> getDocumentMembership(DocumentDTO document){
+		HashMap<String, ArrayList> documentTermMembership = this.getDocumentTermMembership(document);
+		
+		ArrayList<ArrayList> clusterMembership = new ArrayList<ArrayList>();
+		Iterator iterator = documentTermMembership.entrySet().iterator();
+		//Construimos la pareja cluster grado de pertenencia de los terminos de los documentos
+		while (iterator.hasNext()) {
+			Map.Entry e = (Map.Entry)iterator.next();
+		    String key = (String) e.getKey();
+		    ArrayList dataArray =(ArrayList) e.getValue();
+		    if(dataArray!=null){
+		    	ArrayList arrayList = new ArrayList();
+		    	arrayList.add((String)dataArray.get(0));
+		    	arrayList.add(Double.parseDouble((String)dataArray.get(1)));
+		    	clusterMembership.add(arrayList);
+		    }
 		}
-	}*/
+		
+		  //ordenamos la lista o  
+        Collections.sort(clusterMembership, new Comparator() {  
+  
+            public int compare(Object o1, Object o2) {  
+            	ArrayList a1 = (ArrayList) o1;
+            	ArrayList a2 = (ArrayList) o2;
+                String cluster1 = (String) a1.get(0);  
+                String cluster2 = (String) a2.get(0);  
+                return cluster1.compareToIgnoreCase(cluster2);  
+            }  
+        });
+				
+		String tempKey = "-1";
+		Integer tempQuantity = 0;
+		Double tempSummatory = 0.0;
+		
+		HashMap<String,Double> clusterAverage = new HashMap<String,Double>();
+		
+		for(ArrayList list : clusterMembership){
+		
+		    String key = (String) list.get(0);
+		    Double value =(Double) list.get(1);
+		    
+		    if(!tempKey.equals(key)){
+		    	if(tempQuantity!=0){
+		    		clusterAverage.put(tempKey, tempSummatory/tempQuantity);
+		    	}
+		    	tempQuantity = 0;
+		    	tempSummatory = 0.0;
+		    }
+		    tempKey = key;
+		    tempQuantity++;
+		    tempSummatory+=value;		    
+		}
+	
+		System.out.println(clusterAverage.toString());
+		return clusterAverage;
+	}
+	
+	/**
+	 * Retorna el cluster al que pertenece el documento y si el termino buscado 
+	 * tambien pertenece al cluster
+	 * @param document
+	 * @param word
+	 * @return
+	 */
+	public ArrayList getDocumentMembership(DocumentDTO document, String word){
+		HashMap<String,Double> documentMembership = this.getDocumentMembership(document);
+		Iterator iterator = documentMembership.entrySet().iterator();
+		Double tmpMaxValue = 0.0;
+		String tmpCluster = null;
+		while (iterator.hasNext()) {
+			Map.Entry e = (Map.Entry)iterator.next();
+		    String key = (String) e.getKey();
+		    Double value =(Double) e.getValue();
+		    if(value>tmpMaxValue){
+		    	tmpMaxValue = value;
+		    	tmpCluster = key; 
+		    }
+		}
+		
+		ArrayList result = new ArrayList();
+		result.add(tmpCluster);
+		result.add(tmpMaxValue);
+		result.add(this.membershipTermDocument.get(word));
+		return result;
+	}
+	
 	
 	/**
 	 * Carga el Indice de Membresia de Terminos
 	 */
-	public void loadMembershipTermDocument(String dataRoot){
+	public void loadMembershipTermDocument(){
 		String membershipTerm = this.workspace.getPersistence().readFile(EDataFolder.MACHINE_LEARNING, 
 																			"membershipt_term.txt");
 		String[] membershipTermSplit = membershipTerm.split(System.getProperty("line.separator"));

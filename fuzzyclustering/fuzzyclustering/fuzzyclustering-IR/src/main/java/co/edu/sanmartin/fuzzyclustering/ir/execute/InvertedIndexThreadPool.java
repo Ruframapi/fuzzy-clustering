@@ -32,9 +32,11 @@ public class InvertedIndexThreadPool implements Runnable{
 	
 	//Cantidad minima que debe aparecer un termino para almacenarlo en el indice.
 	private int minTermsOcurrences = 0;
+	private int documentsAmount = 0;
 	private WorkspaceDTO workspace;
-	public InvertedIndexThreadPool(WorkspaceDTO workspace, int minTermsOcurrences){
+	public InvertedIndexThreadPool(WorkspaceDTO workspace, int minTermsOcurrences, int documentsAmount){
 		this.minTermsOcurrences = minTermsOcurrences;
+		this.documentsAmount = documentsAmount;
 		this.workspace = workspace;
 	}
 	Logger logger = Logger.getLogger("InvertedIndexThreadPool");
@@ -56,14 +58,16 @@ public class InvertedIndexThreadPool implements Runnable{
 		}
 
 		Collection<DocumentDTO> fileCol = this.workspace.getPersistence().getFileList(EDataFolder.CLEAN);
-		
 		InvertedIndexWorkerThread invertedIndexWorkerThread;
 		
 		ThreadPoolExecutor executor=(ThreadPoolExecutor)Executors.newFixedThreadPool(threadPoolNumber);
 		HashMap<String, StringBuilder> dataMap = new HashMap<String,StringBuilder>();
 		InvertedIndexBuilder index = new InvertedIndexBuilder(this.workspace,new ConcurrentLinkedDeque<String>());
 		//Almacenamos los archivos en memoria
+		int counter = 0;
 		for (DocumentDTO file : fileCol) {
+			//Limitamos la creacion del indice a una cantidad de documentos limitada
+			if(documentsAmount>0 && counter>this.documentsAmount) break;
 			StringBuilder dataFile = new StringBuilder();
 			dataFile.append(this.workspace.getPersistence().readFile(EDataFolder.CLEAN,file.getName()));
 			invertedIndexWorkerThread = new InvertedIndexWorkerThread(this.workspace, dataFile, file.getNameWithoutExtension(), index);
