@@ -13,15 +13,31 @@
 		<h:form>
 			<p:panel header="Proceso de agrupamiento difuso"
 				styleClass="align_top">
-				<p:panelGrid columns="6">
+				<p:panelGrid columns="4">
 					<p:panelGrid columns="1" style="width: 200px; height:150px">
 						<f:facet name="header"> Indice Invertido</f:facet>
 						<p:panelGrid columns="2">
 							<p:outputLabel>Cantidad Minima de Ocurrencias:</p:outputLabel>
-							<p:inputText value="#{irBean.minTermsOcurrences}" size="3"></p:inputText>
+							<p:inputText value="#{irBean.invertedIndexMinTermsOcurrences}" size="3"></p:inputText>
+							<p:outputLabel>Documentos a procesar:</p:outputLabel>
+							<p:inputText value="#{irBean.documentsAmount}" size="5"></p:inputText>
 						</p:panelGrid>
 						<p:commandButton value="Generar"
 							actionListener="#{irBean.buildInvertedIndex}">
+						</p:commandButton>
+					</p:panelGrid>
+					<p:panelGrid columns="1" style="width: 200px; height:150px">
+						<f:facet name="header"> Indice Invertido Reducido Zipf</f:facet>
+						<p:panelGrid columns="2">
+							<p:outputLabel>Zipf CutOn:</p:outputLabel>
+							<p:inputText value="#{irBean.zipfCutOn}" size="5"></p:inputText>
+							<p:outputLabel>Zipf CutOff:</p:outputLabel>
+							<p:inputText value="#{irBean.zipfCutOff}" size="5"></p:inputText>
+							<p:outputLabel>Cantidad Minima de Ocurrencias:</p:outputLabel>
+							<p:inputText value="#{irBean.zipfMinTermsOcurrences}" size="5"></p:inputText>
+						</p:panelGrid>
+						<p:commandButton value="Generar"
+							actionListener="#{irBean.buildInvertedIndexZipf}">
 						</p:commandButton>
 					</p:panelGrid>
 					<p:panel header="Construccion de Matrices">
@@ -81,6 +97,9 @@
 						</p:commandButton>
 					</p:panelGrid>
 				</p:panelGrid>
+			</p:panel>
+			<p:panel>
+				
 			</p:panel>
 		</h:form>
 	</ui:define>

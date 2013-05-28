@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import co.edu.sanmartin.fuzzyclustering.ir.index.DimensionallyReduced;
 import co.edu.sanmartin.fuzzyclustering.machinelearning.classifier.DocumentCluster;
 import co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans.FuzzyCMeansBigData;
+import co.edu.sanmartin.fuzzyclustering.machinelearning.reuters.ReutersTrainer;
 import co.edu.sanmartin.persistence.constant.EModule;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
 import co.edu.sanmartin.persistence.constant.EQueueStatus;
@@ -17,6 +18,7 @@ import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 import co.edu.sanmartin.persistence.facade.QueueFacade;
+import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
 import co.edu.sanmartin.persistence.facade.WorkspaceFacade;
 
 /**
@@ -36,7 +38,7 @@ public class Dequeue implements Runnable{
 	 */
 	public Dequeue(){
 		try {
-			this.cancelActiveQueue(EQueueEvent.GENERATE_INVERTED_INDEX);
+			this.cancelActiveQueue(EQueueEvent.GENERATE_MEMBERSHIP_INDEX);
 			this.cancelActiveQueue(EQueueEvent.GENERATE_FUZZY_CMEANS);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -76,7 +78,7 @@ public class Dequeue implements Runnable{
 	 * @throws PropertyValueNotFoundException 
 	 */
 	public void executeQueue() throws SQLException, PropertyValueNotFoundException{
-
+		logger.trace("Init machineLearning executeQueue");
 		Collection<QueueDTO> queueCol = 
 				QueueFacade.getInstance().getQueueByStatusDate(EModule.MACHINE_LEARNING, 
 						EQueueStatus.ENQUEUE, new Date());
@@ -88,7 +90,10 @@ public class Dequeue implements Runnable{
 			case GENERATE_MEMBERSHIP_INDEX:
 				this.generateMembershipIndex(queueDTO);
 				break;
-			}
+			case CLASSIFYFORFILE:
+				this.classifyForFile(queueDTO);
+				break;
+		}
 			
 		}
 		
@@ -107,10 +112,12 @@ public class Dequeue implements Runnable{
 		boolean buildMatrix = Boolean.parseBoolean(parameter[3]);
 		
 		WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
+		SendMessageAsynch.sendMessage(workspace, "Iniciando proceso de generacion de conjuntos difusos");
 		FuzzyCMeansBigData cmeans = new FuzzyCMeansBigData(workspace,DimensionallyReduced.REDUCED_FILE_NAME, 
 														centroidsAmount, iterationsAmount, mValue, buildMatrix);
 		cmeans.init();
 		cmeans.calculateFuzzyCmeans();
+		SendMessageAsynch.sendMessage(workspace, "Proceso de generacion de conjuntos difusos finalizada");
 		try {
 			QueueFacade.getInstance().deleteQueue(queueDTO);
 		} catch (SQLException e) {
@@ -125,9 +132,12 @@ public class Dequeue implements Runnable{
 	 * @param queue
 	 */
 	public void generateMembershipIndex(QueueDTO queue){
+		
 		WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queue.getWorkspace());
+		SendMessageAsynch.sendMessage(workspace, "Iniciando proceso de indice de pertenencia");
 		DocumentCluster documentCluster = new DocumentCluster(workspace);
 		documentCluster.buildMembershipIndex();
+		SendMessageAsynch.sendMessage(workspace, "Proceso de indice de pertenencia finalizado");
 		try {
 			QueueFacade.getInstance().deleteQueue(queue);
 		} catch (SQLException e) {
@@ -135,6 +145,26 @@ public class Dequeue implements Runnable{
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Genera la matriz de pertenencia de los terminos
+	 * @param queue
+	 */
+	public void classifyForFile(QueueDTO queue){
+		
+		WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queue.getWorkspace());
+		SendMessageAsynch.sendMessage(workspace, "Iniciando proceso de clasificacion");
+		ReutersTrainer reuters = new ReutersTrainer(workspace);
+		reuters.classifyDocumentsInFile();
+		SendMessageAsynch.sendMessage(workspace, "Proceso de clasificacion finalizado");
+		try {
+			QueueFacade.getInstance().deleteQueue(queue);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	
 	
 	/**

@@ -33,9 +33,10 @@ public class InitServlet extends HttpServlet {
 		try {
 			StringBuilder logPath = new StringBuilder();
 			//logPath.append(persistenceFacade.getProperty(ESystemProperty.MAIN_PATH).getValue());
-			logPath.append("\\log");
+			//logPath.append("\\log");
 			//persistenceFacade.createFolder(logPath.toString());
-			logPath.append("\\fuzzyclustering.log");
+			//logPath.append("\\fuzzyclustering.log");
+			logPath.append("fuzzyclustering.log");
 			System.setProperty("logfile.name",logPath.toString());
 			System.out.println("Initialising log4j");
 			String log4jLocation = config

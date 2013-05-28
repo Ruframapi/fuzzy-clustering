@@ -3,6 +3,7 @@ package co.edu.sanmartin.fuzzyclustering.ir.test;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Random;
 
 import org.apache.log4j.BasicConfigurator;
@@ -17,13 +18,14 @@ import co.edu.sanmartin.fuzzyclustering.ir.normalize.Cleaner;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.stemmer.Stemmer;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
+import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 import co.edu.sanmartin.persistence.facade.WorkspaceFacade;
 import co.edu.sanmartin.persistence.file.BigDoubleMatrixFileManager;
 import co.edu.sanmartin.persistence.file.BigIntegerMatrixFileManager;
 
 public class IRTest {
 
-	private WorkspaceDTO workspace = WorkspaceFacade.getWorkspace("noticias");
+	private WorkspaceDTO workspace = WorkspaceFacade.getWorkspace("noticias_economicas");
 	public IRTest() {
 		BasicConfigurator.configure();
 	}
@@ -31,13 +33,14 @@ public class IRTest {
 	@Test
 	public void cleanTextLexicon(){
 		Cleaner cleaner = new Cleaner(this.workspace);
-		cleaner.deleteLexiconStopWords("a ante bajo co contra Ricardo Carvajal Estuvo en un lugar muy importante", "miArchivo.txt", false);
+		cleaner.deleteLexiconStopWords("a ante bajo co contra Ricardo Carvajal Estuvo en un lugar muy importante");
 	}
 	
 	
 	@Test
 	public void invertedIndexTest() {
-		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(workspace,2,0);
+		workspace = WorkspaceFacade.getWorkspace("prueba_ppmi");
+		InvertedIndexThreadPool threadPool = new InvertedIndexThreadPool(workspace,0,0);
 		threadPool.run();
 		//Thread thread = new Thread(threadPool);
 		//thread.start();
@@ -75,11 +78,7 @@ public class IRTest {
 			e.printStackTrace();
 		}
 	}
-	@Test
-	public void mutualInformationTest(){
-		MutualInformation mutualInformation = new MutualInformation(workspace);
-		mutualInformation.buildMutualInformationMatrix();
-	}
+
 	
 	@Test
 	public void buildMutualInformationBigMatrixTest(){
@@ -195,8 +194,9 @@ public class IRTest {
 
 	@Test
 	public void buildReducedMatrixPpmi() throws Exception{
-		IRFacade irFacade = IRFacade.getInstance();
-		irFacade.reducedDimensionPPMIMatrix(this.workspace, 2, true,0);
+		this.workspace = WorkspaceFacade.getWorkspace("reuters_nostemmed");
+		IRFacade irFacade = IRFacade.getInstance(this.workspace);
+		irFacade.reducedDimensionPPMIMatrix(2, true, 0);
 	}
 	
 	@Test
@@ -222,6 +222,7 @@ public class IRTest {
         }
 		
 		this.saveMatrixDouble(newMatrix, "reducida.txt", 0);
+		largeMatrix.close();
 	}
 
 	
@@ -254,6 +255,7 @@ public class IRTest {
         }
 		
 		this.saveMatrixDouble(newMatrix, "reducida.txt", 0);
+		largeMatrix.close();
 	}
 	
 	
@@ -269,10 +271,15 @@ public class IRTest {
 	@Test
 	public void stemmerTest() {
 		Stemmer stemmer = new Stemmer(this.workspace);
-		String result = stemmer.stem("compró", "", false);
+		String result = stemmer.stem("compró");
 		System.out.print(result);
 	}
 	
+	@Test
+	public void normalizeTest(){
+		String dataFile = this.workspace.getPersistence().readFile(EDataFolder.DOWNLOAD, "10675.txt");
+		IRFacade.getInstance(this.workspace).getNormalizedDocumentText(dataFile);
+	}
 	/**
 	 * Prueba de la funcion ppmi
 	 */
@@ -339,12 +346,20 @@ public class IRTest {
 	
 	@Test
 	public void buildAllMatrixTest(){
-		IRFacade irFacade = IRFacade.getInstance();
+		IRFacade irFacade = IRFacade.getInstance(this.workspace);
 		try {
-			irFacade.buildCmeanMatrix(this.workspace,0,0);
+			irFacade.buildCmeanMatrix(0,0);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+	
+	@Test
+	public void zipfIndexTest(){
+		this.workspace = WorkspaceFacade.getWorkspace("noticias_economicas");
+		InvertedIndex invertedIndex = new InvertedIndex(workspace);
+		invertedIndex.reducedZipfInvertedIndex(85, 35, 1);
+	}
+	
 }

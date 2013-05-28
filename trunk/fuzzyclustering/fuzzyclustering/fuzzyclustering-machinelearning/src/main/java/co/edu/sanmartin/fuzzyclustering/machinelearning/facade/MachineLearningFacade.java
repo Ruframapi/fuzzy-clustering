@@ -1,7 +1,11 @@
 package co.edu.sanmartin.fuzzyclustering.machinelearning.facade;
 
+import java.util.ArrayList;
+
 import co.edu.sanmartin.fuzzyclustering.machinelearning.classifier.DocumentCluster;
+import co.edu.sanmartin.fuzzyclustering.machinelearning.classifier.DocumentClustering;
 import co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans.FuzzyCMeans;
+import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 
 public class MachineLearningFacade {
@@ -26,5 +30,21 @@ public class MachineLearningFacade {
 		DocumentCluster documentCluster = new DocumentCluster(workspace);
 		documentCluster.buildMembershipIndex();
 	}
+	
+	
+	/**
+	 * Retorna el cluster al que pertenece el documento y si el termino buscado 
+	 * tambien pertenece al cluster
+	 * @param document
+	 * @param word
+	 * @return
+	 */
+	public DocumentClustering getDocumentClustering(WorkspaceDTO workspace, DocumentDTO document){
+		DocumentClustering documentClustering = new DocumentClustering(workspace);
+		documentClustering.clustering(document);
+		return documentClustering;
+	}
+	
+	
 
 }

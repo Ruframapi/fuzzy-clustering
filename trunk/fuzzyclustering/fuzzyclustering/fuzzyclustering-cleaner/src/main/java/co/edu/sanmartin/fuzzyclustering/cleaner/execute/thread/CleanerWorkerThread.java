@@ -5,6 +5,7 @@ import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 
+import co.edu.sanmartin.fuzzyclustering.ir.facade.IRFacade;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.Cleaner;
 import co.edu.sanmartin.fuzzyclustering.ir.normalize.stemmer.Stemmer;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
@@ -36,18 +37,8 @@ public class CleanerWorkerThread implements Callable<String>{
 
 	public String call() throws Exception {
 		logger.trace("Init CleanerWorkerThread Call Method");
-		StringBuilder dataFile = new StringBuilder();
-		dataFile.append(this.document.getLazyData());
-		dataFile = new StringBuilder(cleaner.unescapeHtml(dataFile.toString(),document.getName(),false));
-		dataFile = new StringBuilder(cleaner.toLowerData(dataFile.toString(),document.getName(),false));
-		dataFile = new StringBuilder(cleaner.deleteLexiconStopWords(dataFile.toString(), document.getName(), false));
-		dataFile = new StringBuilder(cleaner.applyRegexExpression(dataFile.toString(),document.getName(),false));
-		String stemmerOn = workspace.getPersistence().getProperty(EProperty.TEXT_STEMMER_ON).getValue();
-		if(stemmerOn.equals("true")){
-		   dataFile = new StringBuilder(stemmer.stem(dataFile.toString(), document.getName(), false));
-		}
-		
-		workspace.getPersistence().writeFile(EDataFolder.CLEAN, document.getName(), dataFile.toString());
+		String normalizedText = IRFacade.getInstance(this.workspace).getNormalizedDocumentText(document.getLazyData());
+		workspace.getPersistence().writeFile(EDataFolder.CLEAN, document.getName(), normalizedText);
 		this.document.setCleanDate(new Date());
 		workspace.getPersistence().updateDocument(this.document);
 	    logger.info("Write Clean File: " + this.document.getName());

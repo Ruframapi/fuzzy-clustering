@@ -67,7 +67,7 @@ public class InvertedIndexThreadPool implements Runnable{
 		int counter = 0;
 		for (DocumentDTO file : fileCol) {
 			//Limitamos la creacion del indice a una cantidad de documentos limitada
-			if(documentsAmount>0 && counter>this.documentsAmount) break;
+			if(documentsAmount>0 && counter++>this.documentsAmount) break;
 			StringBuilder dataFile = new StringBuilder();
 			dataFile.append(this.workspace.getPersistence().readFile(EDataFolder.CLEAN,file.getName()));
 			invertedIndexWorkerThread = new InvertedIndexWorkerThread(this.workspace, dataFile, file.getNameWithoutExtension(), index);

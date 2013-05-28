@@ -72,7 +72,7 @@
 						<manifest>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<addClasspath>true</addClasspath>
-							<mainClass>co.edu.sanmartin.fuzzyclustering.cleaner.execute.Main</mainClass>
+							<mainClass>co.edu.sanmartin.fuzzyclustering.cleaner.execute.MainCleaner</mainClass>
 						</manifest>
 						<manifestEntries>
 							<Class-Path>../config/</Class-Path>

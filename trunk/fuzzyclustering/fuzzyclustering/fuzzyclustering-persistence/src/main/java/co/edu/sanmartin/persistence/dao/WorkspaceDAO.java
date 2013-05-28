@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.log4j.Logger;
+
 import co.edu.sanmartin.persistence.constant.EDatabase;
 import co.edu.sanmartin.persistence.constant.EModule;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
@@ -23,7 +25,7 @@ public class WorkspaceDAO{
 	protected ResultSet rs;
 	protected String sQLQuery;
 	private final String DATABASE_NAME = "fuzzyclustering";
-	
+	private static Logger logger = Logger.getLogger("WorkspaceDAO");
 	public WorkspaceDAO() {
 	}
 
@@ -103,8 +105,7 @@ public class WorkspaceDAO{
 				workspaceColl.add(workspace);
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error in selectAllWorkspace", e);
 		}
 		finally{
 			getConnectionPool().freeConnection(connection);

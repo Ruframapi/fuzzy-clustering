@@ -18,7 +18,7 @@ public class Stemmer {
 		this.workspace = workspace;
 	}
 	
-	public String stem(String data, String fileName, boolean persist) {
+	public String stem(String data) {
 		Class stemClass = null;
 		StringBuilder stemString = new StringBuilder();
 		

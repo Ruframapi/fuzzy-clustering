@@ -13,6 +13,7 @@ public class PropertyDTO implements Serializable{
 	private String name;
 	private String value;
 	private boolean global;
+	private String description;
 	
 	public boolean isGlobal() {
 		return global;
@@ -45,6 +46,14 @@ public class PropertyDTO implements Serializable{
 		this.value = value;
 	}
 	
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	/**
 	 * Retorna el valor entero de la propiedad
 	 * @return

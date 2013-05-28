@@ -39,7 +39,7 @@
                         type: chartType
                     },
                     title: {
-                        text: 'Matrix de Pertenencia',
+                        text: 'Terminos 2D',
                         style: {
                             color: '#000',
                             font: 'bold 16px "Trebuchet MS", Verdana, sans-serif'
@@ -56,7 +56,7 @@
                         ridLineWidth: 1,
                         lineColor: '#000',
                         tickColor: '#000',
-                        categories: $.parseJSON(categories),
+                        //categories: $.parseJSON(categories),
                         labels: {
                             style: {
                                 color: '#000',
@@ -113,9 +113,8 @@
                         }
                     },
                     tooltip: {
-                        formatter: function() {
-                            return ''+ this.x +': '+ Highcharts.numberFormat(this.y, 0, ',') +' ';
-                        }
+                    	headerFormat: '<b>{point.name}</b>'
+                        
                     },
                     legend: {
                         itemStyle: {

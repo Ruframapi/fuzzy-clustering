@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<script src="../resources/js/jquery.min.js" type="text/javascript"></script>
+	<script src="../resources/js/highstock.js"></script>
+	<script src="../resources/js/highcharts.js"></script>
+	<script src="../resources/js/exporting.js"></script>
+	<script type="text/javascript">
+        function renderChart(divId, chartType, chartTitle, chartData, categories){
+            var options = createOption(divId, chartType, chartTitle, categories);
+            options.series = $.parseJSON(chartData);
+            
+            var chart = new Highcharts.Chart(options);
+            chart.xAxis[0].setCategories($.parseJSON(categories));
+        }
+        
+        function createOption(divId, chartType, chartTitle, categories){
+            var options = {
+                //Init Options
+                chart: {
+            type: 'areaspline',
+            renderTo: divId
+        },
+        title: {
+            text: 'Frecuencia de Terminos'
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'left',
+            verticalAlign: 'top',
+            floating: true,
+            borderWidth: 1,
+            backgroundColor: '#FFFFFF'
+        },
+        xAxis: {
+            categories: [],
+            title: {
+                text: 'T(Terminos)'
+            }
+
+        },
+        yAxis: {
+            title: {
+                text: 'TF(Frecuencia de terminos)'
+            }
+        },
+        tooltip: {
+            shared: true,
+            valueSuffix: ' units'
+        },
+        credits: {
+            enabled: false
+        },
+        plotOptions: {
+        	series: {
+        		marker: {
+        			radius: 1
+        		}
+        	},
+            areaspline: {
+                fillOpacity: 0.5
+            }
+        },
+        marker: {
+            radius: 1
+        },
+        series: []
+                //End Options
+               
+            };
+            
+            return options; 
+        };
+        
+            
+        </script>
+</h:head>
+<body>
+	<h:form prependId="false">
+		<h:commandButton
+			onclick="renderChart('container','scatter','Sample Chart', '${termFrecuenceChartBean.chartData}', 
+			'${termFrecuenceChartBean.categories}');"
+			immediate="true" type="button"></h:commandButton>
+	</h:form>
+	<div id="container" style="width: 100%; height: 500px"></div>
+</body>
+</html>

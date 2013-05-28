@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
 import org.fuzzyclustering.web.managed.AsynchManagedBean;
 import javax.faces.context.FacesContext;
 import org.fuzzyclustering.web.managed.FacesContextBuilder;
@@ -27,7 +28,7 @@ import co.edu.sanmartin.persistence.dto.DocumentDTO;
 
 public class AsynchServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-
+	private static Logger logger = Logger.getLogger("AsynchServlet");
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
@@ -50,28 +51,35 @@ public class AsynchServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+		logger.info("Init AsynchServlet doPost Servlet");
+		try{
 
 		if (request.getParameter("status")!=null){
 			AsynchManagedBean bean1 = (AsynchManagedBean) getServletContext().getAttribute("asynch");
 			bean1.setDownloadStatus((String) request.getParameter("status"));
 		}
 		if(request.getParameter("originalDocument")!=null){
+			logger.debug("Original Document received:" + request.getParameter("originalDocument"));
 			AsynchManagedBean bean1 = (AsynchManagedBean) getServletContext().getAttribute("asynch");
 			DocumentDTO document = new DocumentDTO();
 			document.setLazyData(this.getWrappedData(request.getParameter("originalDocument")));
 			document.setLazyCleanData(this.getWrappedData(request.getParameter("cleanDocument")));
 			document.setName(request.getParameter("documentName"));
 			bean1.setDocument(document);
-
+			logger.debug("Document sended to AsynchManagedBean");
 			/*DocumentsManagedBean documents = (DocumentsManagedBean) FacesContext.getCurrentInstance().
 					getExternalContext().getSessionMap().get("documents");
 			documents.setOriginalDataDocument(this.getWrappedData(request.getParameter("originalDocument")));
 			 */
 		}
-		if(request.getParameter("message")!=null){
-			AsynchManagedBean bean1 = (AsynchManagedBean) getServletContext().getAttribute("asynch");
-			bean1.sendMessageAsynch(request.getParameter("message"));
+			String message = request.getParameter("message");
+			if(message!=null){
+				AsynchManagedBean bean1 = (AsynchManagedBean) getServletContext().getAttribute("asynch");
+				bean1.sendMessageAsynch(message);
+			}
+		}
+		catch(Exception e){
+			logger.error("Error indoPost", e);
 		}
 	}
 

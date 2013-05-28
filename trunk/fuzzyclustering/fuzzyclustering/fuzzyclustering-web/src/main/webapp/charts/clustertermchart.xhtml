@@ -91,7 +91,7 @@
                                 fontSize: '12px',
                                 fontFamily: 'Trebuchet MS, Verdana, sans-serif'
                             },
-                            text: 'Heap Memory Usage'
+                            text: 'Y Values'
                         },
                         labels: {
                             formatter: function() {
@@ -150,6 +150,6 @@
 			<h:commandButton onclick="renderChart('container','scatter','Sample Chart', '${clusterChartBean.chartData}', 
 			'${clusterChartBean.categories}');" immediate="true" type="button"></h:commandButton>
         </h:form>
-        <div id="container" style="width: 100%; height: 500px"></div>
+        <div id="container" style="width: 100%; height: 600px"></div>
     </body>
 </html>

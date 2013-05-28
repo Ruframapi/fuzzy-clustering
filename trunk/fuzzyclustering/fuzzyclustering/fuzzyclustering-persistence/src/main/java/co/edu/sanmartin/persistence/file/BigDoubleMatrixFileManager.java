@@ -33,6 +33,7 @@ public class BigDoubleMatrixFileManager implements Closeable{
     private String fileName;
     private MappedByteBuffer out;
     private WorkspaceDTO workspace;
+    private RandomAccessFile raf;
 
     public BigDoubleMatrixFileManager(WorkspaceDTO workspace){
     	this.workspace = workspace;
@@ -43,11 +44,14 @@ public class BigDoubleMatrixFileManager implements Closeable{
     	this.width = width;
         this.height = height;
     	this.fileName = fileName;
-    	this.workspace = workspace;
     	String folderPath = workspace.getPersistence().getFolderPath(dataFolder);
     	workspace.getPersistence().createFolder(folderPath);
-    	memoryMappedFile = new RandomAccessFile(folderPath + System.getProperty("file.separator") + fileName, "rw");
-    	out = memoryMappedFile.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, 8*height*width);
+    	raf = new RandomAccessFile(folderPath + System.getProperty("file.separator") + fileName, "rw");
+    	memoryMappedFile = raf;
+    	long heightLong = height;
+    	long widthLong = width;
+    	long size = 8*heightLong*widthLong;
+    	out = memoryMappedFile.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, size);
     	
     }
     
@@ -55,7 +59,8 @@ public class BigDoubleMatrixFileManager implements Closeable{
     	this.fileName = fileName;
     	this.workspace = workspace;
     	String folderPath = this.workspace.getPersistence().getFolderPath(dataFolder);
-    	this.memoryMappedFile = new RandomAccessFile(folderPath + System.getProperty("file.separator") + fileName, "r");
+    	raf = new RandomAccessFile(folderPath + System.getProperty("file.separator") + fileName, "r");
+    	this.memoryMappedFile = raf;
     	this.loadMetadata();
     	this.fileName = fileName;
     	out = memoryMappedFile.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, 8*height*width);
@@ -78,11 +83,11 @@ public class BigDoubleMatrixFileManager implements Closeable{
     public void set(int x, int y, double d) {
       int index = (x*8*width)+(8*y);
       out.putDouble(index, d);
-        
     }
 
     public void close() throws IOException {
     	memoryMappedFile.close();
+    	raf.close();
     	this.saveMetadata();
     }
     
@@ -102,6 +107,35 @@ public class BigDoubleMatrixFileManager implements Closeable{
     	
     	this.workspace.getPersistence().writeFile(EDataFolder.MATRIX, 
     							getMetadataName(), data.toString());
+    }
+    
+    /**
+     * Almacena la matrix en human readable
+     * @param limit limite de registros a almacenar en un documentos de texto normal
+     */
+    public void saveReadable(int limit){
+    	long start = System.nanoTime();
+		try {
+			if(limit==0){
+				limit = this.height();
+			}
+			double[][] matrix = new double[limit][this.width()];
+			for (int i = 0; i < limit; i++) {
+				for (int j = 0; j < this.width(); j++) {
+					matrix[i][j] = this.get(i, j);
+				}
+				System.out.println();
+			}
+			FileManager fileManager = new FileManager(this.workspace);
+			
+			String readableFileName = fileManager.getFileNameWithOutExtension(this.fileName) +".txt";
+			fileManager.saveMatrixDouble(matrix, EDataFolder.MATRIX, readableFileName,0,5);
+			
+		} catch (Exception e) {
+			logger.error(e);
+		}
+		long time = System.nanoTime() - start;
+		System.out.print("Time"+ time);
     }
     
     /**

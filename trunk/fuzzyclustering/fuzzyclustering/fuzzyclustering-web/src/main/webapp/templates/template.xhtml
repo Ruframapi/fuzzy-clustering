@@ -11,13 +11,18 @@
 
 	<link type="text/css" rel="stylesheet" href="css/styles.css" />
 	<script type="text/javascript">
-		function handleMessage(data) {
+	 function handleMessage(data) {
 			$('.display').html(data);
 		}
+
+
 		function notificationMessage(facesmessage) {
 			facesmessage.severity = 'info';
 			growl.show([ facesmessage ]);
 		}
+		
+		
+
 	</script>
 </h:head>
 <h:body>
@@ -64,6 +69,21 @@
 		</p:layoutUnit>
 
 	</p:layout>
+
+	<p:idleMonitor onactive="sessionTimeOutDialog.show();" timeout="300000">
+		<p:ajax event="idle" listener="#{workspace.invalidateSession}" />
+	</p:idleMonitor>
+	<p:dialog header="Session Caducada" widgetVar="sessionTimeOutDialog"
+		modal="true" fixedCenter="true" closable="false" width="430"
+		visible="false">
+		<p:panel style="width:400px">
+			<h:outputText
+				value="La sesion ha caducado, por favor, presiona recargar para volver a acceder a la aplicacion" />
+				<br></br>
+			<input id="confirmBackToLogin" type="button" value="Recargar"
+				onclick="window.location='#{facesContext.externalContext.requestContextPath}/index.xhtml';"/>
+		</p:panel>
+	</p:dialog>
 
 
 </h:body>

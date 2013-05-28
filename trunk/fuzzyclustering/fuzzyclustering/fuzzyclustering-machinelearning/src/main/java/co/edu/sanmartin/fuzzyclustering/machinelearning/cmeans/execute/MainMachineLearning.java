@@ -19,7 +19,7 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
  * @author Ricardo Carvajal Salamanca
  *
  */
-public class Main{
+public class MainMachineLearning{
 
 	
 	static{
@@ -35,7 +35,7 @@ public class Main{
 			System.out.println("Logging not enabled for MachineLearning" + e);       
 		}  
 	}
-	private static final Logger logger = Logger.getLogger(Main.class);
+	private static final Logger logger = Logger.getLogger(MainMachineLearning.class);
 	
 	
 	public static void main ( String args[]){

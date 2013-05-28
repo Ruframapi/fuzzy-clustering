@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.faces.bean.ManagedProperty;
+import javax.swing.text.html.HTMLDocument.Iterator;
 
 import org.fuzzyclustering.web.managed.WorkspaceManagedBean;
 import org.primefaces.model.LazyDataModel;
@@ -50,16 +51,16 @@ public class DocumentsLazyDataModel extends LazyDataModel<DocumentDTO> implement
 	@Override
 	public List<DocumentDTO> load(int first, int pageSize, String sortField,
 			SortOrder sortOrder, Map<String, String> filters) {
-		// TODO Auto-generated method stub
+		// TODO Corregir Paginacion
 		
-		List<DocumentDTO> listDocuments = 
+		this.datasource = 
 				(List<DocumentDTO>) this.workspace.getPersistence().getPaginateDocumentsColl(first, pageSize);
-		return listDocuments;
+		return this.datasource;
 	}
 	
 	@Override
 	public int getRowCount() {
-		// TODO Auto-generated method stub
+		
 		return this.workspace.getPersistence().getDownloadDocumentAmount();
 	}
 	

@@ -24,6 +24,7 @@ public class DocumentDTO implements Serializable{
     private String nameWithoutExtension;
     private String lazyData;
     private String lazyCleanData;
+    private String lazyClusterTerm;
     private String source;
     private Date downloadDate;
     private Date publishedDate;
@@ -69,8 +70,23 @@ public class DocumentDTO implements Serializable{
 		this.lazyCleanData = lazyCleanData;
 	}
 
+	
+	public String getLazyClusterTerm() {
+		return lazyClusterTerm;
+	}
+
+	public void setLazyClusterTerm(String lazyClusterTerm) {
+		this.lazyClusterTerm = lazyClusterTerm;
+	}
+
 	public String getNameWithoutExtension() {
-		String nombreArchivo=this.name.substring(0,this.name.lastIndexOf("."));
+		String nombreArchivo = null;
+		try{
+			nombreArchivo=this.name.substring(0,this.name.lastIndexOf("."));
+		}
+		catch(Exception e){
+			logger.error("Error in getNameWithoutExtension",e);
+		}
 		return nombreArchivo;	
 	}
 	

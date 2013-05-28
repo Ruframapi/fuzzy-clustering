@@ -25,6 +25,7 @@ public class CanExecuteTest {
             System.out.print((char) out.get(i));
         }
         System.out.println("Reading from Memory Mapped File is completed");
+        memoryMappedFile.close();
     }
 }
 

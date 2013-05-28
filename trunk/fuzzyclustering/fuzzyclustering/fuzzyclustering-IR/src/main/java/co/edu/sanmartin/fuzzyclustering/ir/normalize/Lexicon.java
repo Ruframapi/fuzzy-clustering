@@ -22,12 +22,31 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 public class Lexicon {
 	private static Logger logger = Logger.getLogger(Lexicon.class);
 	private static HashMap<ELexicon,String> lexiconMap;
-	private static Lexicon instance;
 	private WorkspaceDTO workspace;
+	private static Lexicon instance;
 	
-	public Lexicon(WorkspaceDTO workspace){
+	
+	
+	private Lexicon(WorkspaceDTO workspace){
 		this.workspace = workspace;
 		this.initLexiconinMemory();
+	}
+	
+	public static Lexicon getInstance(WorkspaceDTO workspace){
+		
+		if(instance==null){
+			instance = new Lexicon(workspace);
+		}
+		else{
+			try {
+				if(!instance.workspace.getPersistence().getProperty(EProperty.LANGUAGE).equals(workspace.getPersistence().getProperty(EProperty.LANGUAGE))){
+					instance.workspace = workspace;
+				}
+			} catch (PropertyValueNotFoundException e) {
+				logger.error(e);
+			}
+		}
+		return instance;
 	}
 	
 	

@@ -31,6 +31,7 @@ public class ConnectionDataSourcePoolMySQL {
 	 * Inicializacion de BasicDataSource
 	 */
 	private DataSource inicializaDataSource(EDatabase database, String databaseName, String server) {
+		logger.info("Init DataSource Server:"+ server + "database:" + database.getDatabaseName());
 		BasicDataSource basicDataSource = new BasicDataSource();
 		PropertiesLoader propertiesLoader = PropertiesLoader.getInstance();
 		String userName = propertiesLoader.getProperty(ESystemProperty.MYSQL_USER.getPropertyName());
@@ -41,7 +42,7 @@ public class ConnectionDataSourcePoolMySQL {
 		basicDataSource.setUrl("jdbc:mysql://"+server+"/"+databaseName);
 		// Opcional. Sentencia SQL que le puede servir a BasicDataSource
 		// para comprobar que la conexion es correcta.
-		logger.info("Init DataSource Server:"+ server);
+		logger.info("Init DataSource Server:"+ server + "database:" + databaseName +" - OK");
 		basicDataSource.setValidationQuery("select 1");
 		return basicDataSource;
 	}
@@ -68,8 +69,7 @@ public class ConnectionDataSourcePoolMySQL {
 			DataSource dataSource = this.getDataSource(MAIN_DATABASE_NAME, server);
 			connection = dataSource.getConnection();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error in getMainConnection", e);
 		}
 		return connection;
 	}
@@ -86,8 +86,7 @@ public class ConnectionDataSourcePoolMySQL {
 			DataSource dataSource = this.getDataSource(workspace.getName(), workspace.getDatabaseHost());
 			connection = dataSource.getConnection();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error in getConnection",e);
 		}
 		return connection;
 	}

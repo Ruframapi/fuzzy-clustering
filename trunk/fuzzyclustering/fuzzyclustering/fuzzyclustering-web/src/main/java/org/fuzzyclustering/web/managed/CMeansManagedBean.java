@@ -36,8 +36,8 @@ public class CMeansManagedBean implements Serializable {
 	private static Logger logger = Logger.getRootLogger();
 	private int termAmount;
 	private int centroidsAmount;
-	private int iterationAmount;
-	private double fuzzyValue;
+	private int iterationAmount=0;
+	private double fuzzyValue=2.0;
 	
 	
 	
@@ -125,6 +125,39 @@ public class CMeansManagedBean implements Serializable {
 			QueueDTO queue = new QueueDTO();
 			queue.setModule(EModule.MACHINE_LEARNING);
 			queue.setEvent(EQueueEvent.GENERATE_MEMBERSHIP_INDEX);
+			queue.setInitDate(QueueFacade.getInstance().getServerDate().getTime());
+			queue.setWorkspace(this.workspaceBean.getWorkspace().getName());
+			queue.setStatus(EQueueStatus.ENQUEUE);
+			try {
+				QueueFacade.getInstance().insertQueue(queue);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+					"Proceso En Curso", ".");
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+		catch(PatternSyntaxException e){
+			msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Error al realizar el proceso", e.getDescription());
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+	}
+	
+	
+	/**
+	 * Solicita la generacion de la matrix de pertenencia de terminos
+	 */
+	public void classifyDocumentsInFile(){
+		logger.debug("Start download process");
+		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+				"Realizando proceso de clasificacion", "");
+		FacesContext.getCurrentInstance().addMessage(null, msg);
+		try{
+			QueueDTO queue = new QueueDTO();
+			queue.setModule(EModule.MACHINE_LEARNING);
+			queue.setEvent(EQueueEvent.CLASSIFYFORFILE);
 			queue.setInitDate(QueueFacade.getInstance().getServerDate().getTime());
 			queue.setWorkspace(this.workspaceBean.getWorkspace().getName());
 			queue.setStatus(EQueueStatus.ENQUEUE);

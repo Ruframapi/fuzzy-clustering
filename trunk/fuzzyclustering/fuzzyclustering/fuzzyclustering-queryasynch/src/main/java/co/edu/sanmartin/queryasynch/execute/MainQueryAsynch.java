@@ -12,7 +12,7 @@ import org.apache.log4j.PropertyConfigurator;
  * @author Ricardo Carvajal Salamanca
  *
  */
-public class Main{
+public class MainQueryAsynch{
 
 	
 	static{
@@ -28,7 +28,7 @@ public class Main{
 			System.out.println("Logging not enabled for QueryAsynch" + e);       
 		}  
 	}
-	private static final Logger logger = Logger.getLogger(Main.class);
+	private static final Logger logger = Logger.getLogger(MainQueryAsynch.class);
 	
 	
 	public static void main ( String args[]){

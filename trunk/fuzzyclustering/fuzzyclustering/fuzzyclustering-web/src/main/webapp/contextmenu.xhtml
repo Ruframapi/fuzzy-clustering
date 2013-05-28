@@ -25,9 +25,16 @@
 				<p:menuitem value="Descarga de archivos" url="irdownload.xhtml" />
 				<p:menuitem value="Generar C-Means" url="processmanager.xhtml" />
 			</p:submenu>
-			<p:submenu label="Clustering" icon="ui-icon-document">
-				<p:menuitem value="Generar Conjuntos Difusos C-Means"
-					url="cmeans.xhtml" />
+			<p:submenu label="Clasificacion" icon="ui-icon-document">
+				<p:menuitem value="Pruebas de Clasificacion"
+					url="cmeanstest.xhtml" />
+			</p:submenu>
+			<p:submenu label="Graficos" icon="ui-icon-document">
+				<p:menuitem value="Frecuencia Terminos" url="charts/termfrecuencechart.xhtml" target="_blank" />
+				<p:menuitem value="Frecuencia Terminos Zipf" url="charts/termfrecuencechartzipf.xhtml" target="_blank" />
+				<p:menuitem value="Terminos" url="charts/termchart.xhtml" target="_blank" />
+				<p:menuitem value="Cluster Termino" url="charts/clustertermchart.xhtml" target="_blank"/>
+				<p:menuitem value="Pertenencia" url="charts/membership.xhtml" target="_blank"/>
 			</p:submenu>
 		</p:menubar>
 		<!-- <p:messages id="messages" showDetail="true" autoUpdate="true"

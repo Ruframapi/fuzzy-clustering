@@ -14,9 +14,9 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
  * @author Ricardo Carvajal Salamanca
  *
  */
-public class Main {
+public class MainCleaner {
 
-	private static final Logger logger = Logger.getLogger(Main.class);
+	private static final Logger logger = Logger.getLogger(MainCleaner.class);
 	
 	static{
 		final String LOG_FILE = "../config/log4j_cleaner.properties"; 

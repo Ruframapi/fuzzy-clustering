@@ -224,6 +224,36 @@ public class CMeansBigDataTest {
 		fuzzyCmeans.init();
 		fuzzyCmeans.calculateFuzzyCmeans();
 	}
+	
+	/**
+	 * Realiza la creacion de archivos para pruebas de clustezacion
+	 * @throws Exception
+	 */
+	@Test
+	public void testGenerateCMeansClusteringTest() throws Exception{
+		this.workspace = WorkspaceFacade.getWorkspace("noticias_economicas");
+		String dataFile = this.workspace.getPersistence().readRootFile(EDataFolder.TRAIN,
+				System.getProperty("file.separator")+"clustering"+System.getProperty("file.separator")+"R15ClusteringTest.txt");
+		String[] rowVector = dataFile.split(System.getProperty("line.separator"));
+		int height = rowVector.length;
+		int width = rowVector[0].split("\t").length;
+		double [][] matrix = new double[height][width];
+		for (int i = 0; i < height; i++) {
+			String[] columnVector = rowVector[i].split("\t");
+			for (int j = 0; j < width; j++) {
+				matrix[i][j] = Double.parseDouble(columnVector[j]);
+			}
+		}
+		this.workspace.getPersistence().writeFile(EDataFolder.MATRIX, "reduced.txt",dataFile);
+		this.saveMatrix(matrix, "reduced.dat");
+		BigDoubleMatrixFileManager bigMatrixFileManager = new BigDoubleMatrixFileManager(this.workspace);
+		bigMatrixFileManager.loadReadOnly(EDataFolder.MATRIX, "reduced.dat");
+		this.printBigMatrix(bigMatrixFileManager);
+		
+		//FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(this.workspace,"testNio.txt",10, 200, 2, false);
+		//fuzzyCmeans.init();
+		//fuzzyCmeans.calculateFuzzyCmeans();
+	};
 }
 
 

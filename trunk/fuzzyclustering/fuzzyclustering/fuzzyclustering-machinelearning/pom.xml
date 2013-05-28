@@ -84,7 +84,7 @@
 						<manifest>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<addClasspath>true</addClasspath>
-							<mainClass>co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans.execute.Main</mainClass>
+							<mainClass>co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans.execute.MainMachineLearning</mainClass>
 						</manifest>
 						<manifestEntries>
 							<Class-Path>../config/</Class-Path>

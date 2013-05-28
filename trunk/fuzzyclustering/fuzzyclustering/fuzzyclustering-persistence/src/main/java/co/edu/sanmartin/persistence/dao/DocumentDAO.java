@@ -1,16 +1,24 @@
 package co.edu.sanmartin.persistence.dao;
 
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.log4j.Logger;
+
 import co.edu.sanmartin.persistence.constant.ESourceType;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 
-public class DocumentDAO extends AbstractDAO<DocumentDTO>{
+public class DocumentDAO extends AbstractDAO<DocumentDTO> implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3719495893287304078L;
+	private static Logger logger = Logger.getLogger("DocumentDAO");
 	public DocumentDAO(WorkspaceDTO workspace) {
 		super(workspace);
 	}
@@ -173,8 +181,7 @@ public class DocumentDAO extends AbstractDAO<DocumentDTO>{
 				amount = rs.getInt("amount");
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error in getDownloadDocumentAmount",e);
 		}
 		finally{
 			getConnectionPool().freeConnection(connection);
