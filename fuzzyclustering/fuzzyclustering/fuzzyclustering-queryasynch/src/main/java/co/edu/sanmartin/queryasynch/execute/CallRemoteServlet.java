@@ -23,6 +23,7 @@ public class CallRemoteServlet {
 	private WorkspaceDTO workspace;
 	
 	public CallRemoteServlet(WorkspaceDTO workspace){
+
 		this.workspace = workspace;
 		
 		try{
@@ -30,13 +31,13 @@ public class CallRemoteServlet {
 			httpProtocol = this.workspace.getPersistence().getProperty(ESystemProperty.WEB_SERVER_PROTOCOL).getValue();
 		} catch (PropertyValueNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error in CallRemoteServlet",e);
 		}
 	}
 	public void sendDocument(DocumentDTO document) throws URISyntaxException{
 		logger.trace("Init sendDocument Method" + document.getId());
+		HttpClient client = new DefaultHttpClient();
 		try {
-			HttpClient client = new DefaultHttpClient();
 			URIBuilder builder = new URIBuilder();
 			builder.setScheme(this.httpProtocol).setHost(this.webServerURL).setPath("/AsynchServlet")
 			//builder.setScheme("http").setHost("localhost:8085/fuzzyclustering-web").setPath("/AsynchServlet")
@@ -49,7 +50,7 @@ public class CallRemoteServlet {
 			HttpResponse response = client.execute(httppost);
 		} catch (Throwable e) {
 			// TODO Auto-generated catch block
-			logger.error(e);
+			logger.error("Error in send Document", e);
 		} 
 		//HttpGet httpget = new HttpGet(uri);
 		//System.out.println(httppost.getURI());
@@ -60,7 +61,6 @@ public class CallRemoteServlet {
 	 * @param message
 	 */
 	public void sendMessage(String message) {
-		// TODO Auto-generated method stub
 		logger.trace("Init sendMessage Method" + message);
 		try {
 			HttpClient client = new DefaultHttpClient();
@@ -73,7 +73,6 @@ public class CallRemoteServlet {
 			HttpPost httppost = new HttpPost(uri);
 			HttpResponse response = client.execute(httppost);
 		} catch (Throwable e) {
-			// TODO Auto-generated catch block
 			logger.error(e);
 		} 
 	}

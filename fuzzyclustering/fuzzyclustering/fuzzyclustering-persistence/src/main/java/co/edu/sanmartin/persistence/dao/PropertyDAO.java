@@ -92,6 +92,7 @@ public class PropertyDAO extends AbstractDAO<PropertyDTO> {
 			throw new PropertyValueNotFoundException();
 		}
 		searchProperty = this.propertyCol.get(propertyIndex);
+		
 		if(searchProperty == null){
 			throw new PropertyValueNotFoundException();
 		}
@@ -182,6 +183,10 @@ public class PropertyDAO extends AbstractDAO<PropertyDTO> {
 				while(rs.next()){
 					PropertyDTO objectDTO = new PropertyDTO();
 					objectDTO.setName(rs.getString("name"));
+					EProperty property = EProperty.valueOf(objectDTO.getName());
+					if(property!=null){
+						objectDTO.setDescription(property.getDescription());
+					}
 					objectDTO.setValue(rs.getString("value"));
 					objectDTO.setGlobal(false);
 					this.propertyCol.add(objectDTO);

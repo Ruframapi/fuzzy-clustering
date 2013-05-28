@@ -47,26 +47,28 @@ public class AsynchManagedBean implements Serializable{
 	
 	public void setDocument(DocumentDTO document) {
 		try{
-			RequestContext requestContext = RequestContext.getCurrentInstance();  
+			logger.trace("Asynch Managed Bean received Document Info:" + document.getLazyData()); 
 			this.documentData = document.getLazyData();
 			this.cleanData = document.getLazyCleanData();
 			this.documentName= document.getName();
-			
-			this.originalDataLabel.setValue(document.getLazyData());
-			//getCleanDataLabel().setValue(this.cleanData);
-			//isValid = calculate isValid
-			
-			//RequestContext requestContext = RequestContext.getCurrentInstance();
-			//requestContext.update("originalDataLabel");
-			//requestContext.update("cleanDataLabel");
-			requestContext.update(":form2:documents");   
-	        pushContext.push("/document", document); 
-	        pushContext.notifyAll();
-	        
+	        PushContext pushContext = PushContextFactory.getDefault().getPushContext(); 
+			pushContext.push("/document", new FacesMessage("Mensaje del Servidor Remoto Recibido", document.getLazyData()));
+
 		}catch(Throwable e){
 			logger.error("Error in AsynchManagedBean setDocument",e);
 		}
         
+	}
+	
+	public void sendMessageAsynch(String message){
+		logger.info("Sending Message Asynch" + message);
+		PushContext pushContext = PushContextFactory.getDefault().getPushContext(); 
+		pushContext.push("/notifications", new FacesMessage("Mensaje del Servidor Remoto", message));
+		
+	}
+	
+	public void refreshDocuments(){
+		logger.debug("Init refresDocuments");
 	}
 	
 	public String getDocumentData() {
@@ -91,12 +93,7 @@ public class AsynchManagedBean implements Serializable{
 	public void setCleanDataLabel(OutputLabel cleanDataLabel) {
 		this.cleanDataLabel = cleanDataLabel;
 	}
-	public void sendMessageAsynch(String message){
-		logger.info("Sending Message Asynch" + message);
-		PushContext pushContext = PushContextFactory.getDefault().getPushContext(); 
-		pushContext.push("/notifications", new FacesMessage("Mensaje del Servidor Remoto", message));
-		
-	}
+
 	
 	
 

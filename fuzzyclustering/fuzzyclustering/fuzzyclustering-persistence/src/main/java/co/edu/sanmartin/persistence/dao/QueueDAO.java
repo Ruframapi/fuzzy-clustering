@@ -9,6 +9,8 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 import co.edu.sanmartin.persistence.constant.EDatabase;
 import co.edu.sanmartin.persistence.constant.EModule;
 import co.edu.sanmartin.persistence.constant.EQueueEvent;
@@ -24,6 +26,7 @@ public class QueueDAO {
 	protected PreparedStatement statement;
 	protected ResultSet rs;
 	protected String sQLQuery;
+	private static Logger logger = Logger.getLogger("QueueDAO");
 	
 
 	public void insert(QueueDTO queue) throws SQLException {
@@ -139,7 +142,7 @@ public class QueueDAO {
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		}
 		finally{
 			getConnectionPool().freeConnection(connection);

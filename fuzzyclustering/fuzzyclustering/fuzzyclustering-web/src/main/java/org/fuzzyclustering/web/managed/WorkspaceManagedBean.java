@@ -7,7 +7,9 @@ import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
@@ -37,6 +39,7 @@ public class WorkspaceManagedBean implements Serializable{
 	 * Crea un nuevo espacio de trabajo
 	 */
 	public void createWorkspace(){
+		//TODO Validar que los espacios de trabajo no tengan caracteres especiales ni espacios
 		logger.trace("Init createWorkspace method");
 		try{
 			WorkspaceFacade.getInstance().createWorkspace(this.workspace);
@@ -73,7 +76,7 @@ public class WorkspaceManagedBean implements Serializable{
 		String returnValue = null;
 		if(workspace!=null){
 			this.workspace = WorkspaceFacade.getWorkspace(workspace.getName());
-			returnValue = "irdownload.xhtml";
+			returnValue = "source.xhtml";
 		}
 		else{
 			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
@@ -110,7 +113,14 @@ public class WorkspaceManagedBean implements Serializable{
 	}
 	
 	public String systemOut(){
-		this.workspace = null;
+		this.workspace = new WorkspaceDTO();
 		return "index.xhtml";
+	}
+	
+	/**
+	 * Invalida la session del usuario
+	 */
+	public void invalidateSession(){
+		this.workspace = new WorkspaceDTO();
 	}
 }

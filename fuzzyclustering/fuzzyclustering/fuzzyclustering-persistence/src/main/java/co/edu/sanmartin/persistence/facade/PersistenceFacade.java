@@ -10,13 +10,11 @@ import org.apache.log4j.Logger;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
 import co.edu.sanmartin.persistence.dao.DocumentDAO;
 import co.edu.sanmartin.persistence.dao.PropertyDAO;
-import co.edu.sanmartin.persistence.dao.QueryDocumentDAO;
 import co.edu.sanmartin.persistence.dao.SourceDAO;
 import co.edu.sanmartin.persistence.dao.StopwordDAO;
 import co.edu.sanmartin.persistence.dao.WorkspaceDAO;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.PropertyDTO;
-import co.edu.sanmartin.persistence.dto.QueryDocumentDTO;
 import co.edu.sanmartin.persistence.dto.SourceDTO;
 import co.edu.sanmartin.persistence.dto.StopwordDTO;
 import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
@@ -41,7 +39,6 @@ public class PersistenceFacade implements Serializable{
 	private PropertyDAO propertyDAO;
 	private StopwordDAO stopwordDAO;
 	private DocumentDAO documentDAO;
-	private QueryDocumentDAO queryDocumentDAO;
 	private FileManager fileManager;
 	private WorkspaceDTO workspace;
 	
@@ -50,9 +47,7 @@ public class PersistenceFacade implements Serializable{
 		this.sourceDAO = new SourceDAO(workspace);
 		this.stopwordDAO = new StopwordDAO(workspace);
 		this.propertyDAO = new PropertyDAO(workspace);
-		
 		this.documentDAO = new DocumentDAO(workspace);
-		this.queryDocumentDAO = new QueryDocumentDAO(workspace);
 		this.workspace = workspace;
 		this.fileManager = new FileManager(this.workspace);
 		logger.debug("Facade Persistence Initialized");
@@ -135,14 +130,7 @@ public class PersistenceFacade implements Serializable{
 	public Collection<DocumentDTO> getDocumentsForClean(){
 		return this.documentDAO.getDocumentsForClean();
 	}
-	public void insertQueryDocument(QueryDocumentDTO queryDocument) throws SQLException {
-		this.queryDocumentDAO.insert(queryDocument);
-	}
-	
-	
-	public void truncateQueryDocument() throws SQLException {
-		this.queryDocumentDAO.truncate();
-	}
+
 	
 
 	public void createFolder(String folderPath) {

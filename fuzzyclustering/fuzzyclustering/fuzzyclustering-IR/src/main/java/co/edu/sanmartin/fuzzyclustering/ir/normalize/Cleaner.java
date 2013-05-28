@@ -40,12 +40,9 @@ public class Cleaner {
      * @param data datos a convertir caracteres de escape
      * @return la cadena de caracteres convertida
      */
-    public String unescapeHtml(String data, String fileName, boolean persist ){
+    public String unescapeHtml(String data){
 	    StringBuilder unescape = new StringBuilder();
 	    unescape.append(StringEscapeUtils.unescapeHtml(data));
-	    if(persist){
-	    	workspace.getPersistence().writeFile(EDataFolder.CLEAN, fileName, unescape.toString());
-	    }
 	    return unescape.toString();
     }
     
@@ -54,12 +51,9 @@ public class Cleaner {
      * @param data textos a convertir
      * @return la cadena de texto convertido a minuscula
      */
-    public String toLowerData(String data, String fileName, boolean persist ){
+    public String toLowerData(String data ){
         StringBuilder lower = new StringBuilder();
         lower.append(data.toLowerCase());
-        if(persist){
-	    	this.workspace.getPersistence().writeFile(EDataFolder.CLEAN, fileName, lower.toString());
-	    }
         return lower.toString();
     }
     
@@ -69,7 +63,7 @@ public class Cleaner {
      * @param regexProperty expresion regular a aplicar
      * @return el texto con la expresion regular aplicada.
      */
-    public String applyRegexExpression(String data, String fileName, boolean persist) throws PatternSyntaxException{
+    public String applyRegexExpression(String data) throws PatternSyntaxException{
         
         StringBuilder cleanString = new StringBuilder();
         Collection<StopwordDTO> stopwordRulesCol = null;
@@ -94,9 +88,7 @@ public class Cleaner {
            throw e;
         }
         String result = cleanString.toString();
-        if(persist){
-	    	this.workspace.getPersistence().writeFile(EDataFolder.CLEAN, fileName, result);
-	    }
+       
         return result;
     }
     
@@ -107,10 +99,10 @@ public class Cleaner {
      * @param persist indica si persiste el proceso en un archivo
      * @return
      */
-    public String deleteLexiconStopWords(String data, String fileName, boolean persist){
+    public String deleteLexiconStopWords(String data){
     	StringBuilder cleanString = new StringBuilder();
     	cleanString.append(data);
-    	Lexicon lexicon = new Lexicon(this.workspace);
+    	Lexicon lexicon = Lexicon.getInstance(this.workspace);
     	HashMap<ELexicon,String> lexiconMap = lexicon.getLexiconMap();
     	Iterator it = lexiconMap.entrySet().iterator();
     	while (it.hasNext()) {

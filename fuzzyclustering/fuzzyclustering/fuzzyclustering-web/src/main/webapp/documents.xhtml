@@ -4,14 +4,14 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:p="http://primefaces.org/ui">
 	<p:panel>
-		<h:form id="form2">
+		<h:form id="documentsform">
 			<p:panelGrid columns="2" styleClass="align_top">
 
 				<p:dataTable id="documents" value="#{documents.documents}"
 					var="document" selection="#{documents.document}"
 					selectionMode="single" rowKey="#{document.id}" paginator="true"
-					rows="10" lazy="true">
-					<p:ajax event="rowSelect" listener="#{documents.onRowSelect}" />
+					rows="10" lazy="true" first="#{document.id}">
+					<p:ajax event="rowSelect" listener="#{documents.onRowSelect}"/>
 					<f:facet name="header">  
 			            Listado de Archivos 
 			        </f:facet>
@@ -63,16 +63,23 @@
 							styleClass="display"></p:outputLabel>
 						<p:separator></p:separator>
 						<p:commandButton value="Normalizar"
-							actionListener="#{documents.normalize}" update=":form2:dataFile"></p:commandButton>
+							actionListener="#{documents.normalize}" update=":#{p:component('dataFile')}"></p:commandButton>
 					</p:panel>
 				</p:panel>
 			</p:panelGrid>
 		</h:form>
-		<p:outputLabel binding="#{asynch.originalDataLabel}"></p:outputLabel>
+		<p:outputLabel styleClass="display"></p:outputLabel>
 	</p:panel>
-
-	<p:socket onMessage="handleMessage" channel="/document">
-		<p:ajax event="message"
-			update=":form2:dataFile, :form2:archivoOriginal" />
+	<script>
+	function handleMessage1(data) {
+		facesmessage.severity = 'info';
+		growl.show([data]);
+		//$('.display').html(data);
+		//alert("Test");
+	}
+	</script>
+	<p:socket onMessage="handleMessage1" channel="/document" >
+		<p:ajax event="message" update=":#{p:component('dataFile')}"/>
 	</p:socket>
+	
 </ui:composition>

@@ -16,12 +16,12 @@ import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 public class WorkspaceFacade {
 	private static Logger logger = Logger.getRootLogger();
 	private static WorkspaceFacade instance;
-	private  HashMap<String,WorkspaceDTO> workspacePool;
+	private static HashMap<String,WorkspaceDTO> workspacePool;
 	private static WorkspaceDAO workspaceDAO;
 	
 	private WorkspaceFacade(){
 		WorkspaceFacade.workspaceDAO = new WorkspaceDAO();
-		this.workspacePool = new HashMap<String,WorkspaceDTO>();
+		workspacePool = new HashMap<String,WorkspaceDTO>();
 	}
 	
 	public static WorkspaceFacade getInstance(){
@@ -33,13 +33,13 @@ public class WorkspaceFacade {
 	
 	
 	
-	public HashMap<String, WorkspaceDTO> getWorkspacePool() {
+	public static HashMap<String, WorkspaceDTO> getWorkspacePool() {
 		return workspacePool;
 	}
 
-	public void setWorkspacePool(HashMap<String, WorkspaceDTO> workspacePool) {
-		this.workspacePool = workspacePool;
-	}
+	/*public static void setWorkspacePool(HashMap<String, WorkspaceDTO> workspacePool) {
+		workspacePool = workspacePool;
+	}*/
 
 	/**
 	 * Crea un espacio de trabajo
@@ -85,11 +85,10 @@ public class WorkspaceFacade {
 		if(workspaceName == null){
 			throw new RuntimeException("El espacio de trabajo no puede ser null");
 		}
-		WorkspaceFacade worksapceFacade = WorkspaceFacade.getInstance();
-		if(worksapceFacade.getWorkspacePool() == null){
-			worksapceFacade.setWorkspacePool(new HashMap<String,WorkspaceDTO>());
+		if(instance== null){
+			instance = new WorkspaceFacade();
 		}
-		WorkspaceDTO workspace = worksapceFacade.getWorkspacePool().get(workspaceName);
+		WorkspaceDTO workspace = getWorkspacePool().get(workspaceName);
 		if(workspace==null){
 			try {
 				workspace = workspaceDAO.selectWorkspace(workspaceName);
@@ -97,7 +96,7 @@ public class WorkspaceFacade {
 				// TODO Auto-generated catch block
 				logger.error(e.getMessage());
 			}
-			worksapceFacade.getWorkspacePool().put(workspaceName, workspace);
+			getWorkspacePool().put(workspaceName, workspace);
 		}
 		return workspace;
 	}

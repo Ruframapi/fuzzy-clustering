@@ -37,7 +37,11 @@ public class IRManagedBean implements Serializable {
 	@ManagedProperty(value = "#{workspace}") 
 	private WorkspaceManagedBean workspaceBean;
 	
-	private Integer minTermsOcurrences;
+	private Integer invertedIndexMinTermsOcurrences=1;
+	private Integer zipfMinTermsOcurrences=1;
+	private Integer documentsAmount=0;
+	private Integer zipfCutOn=20;
+	private Integer zipfCutOff=35;
 	private Integer newDimension = 2;
 	private boolean saveReadable = false;
 	private Integer readableRowsAmount = 0;
@@ -62,9 +66,46 @@ public class IRManagedBean implements Serializable {
 				"Inicializa Proceso de Creación de Indices", "Procesando los documentos descargados.");
 		FacesContext.getCurrentInstance().addMessage(null, msg);
 		try{
+			StringBuilder params = new StringBuilder();
+			params.append(this.invertedIndexMinTermsOcurrences);
+			params.append(",");
+			params.append(this.documentsAmount);
+			params.append(",");
+			params.append(this.zipfCutOn);
+			params.append(",");
+			params.append(this.zipfCutOff);
 			this.addQueueDownload(EQueueEvent.GENERATE_INVERTED_INDEX, 
 									QueueFacade.getInstance().getServerDate().getTime(),
-									this.minTermsOcurrences.toString());
+									params.toString());
+			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+					"Proceso En Curso", ".");
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+			
+		}
+		catch(PatternSyntaxException e){
+			msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Error al realizar el proceso", e.getDescription());
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+		
+	}
+	
+	public void buildInvertedIndexZipf(){
+		logger.debug("Start buildInvertedIndexZipf");
+		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+				"Inicializa Proceso de Reduccion de Indices Zipf", "Procesando los documentos descargados.");
+		FacesContext.getCurrentInstance().addMessage(null, msg);
+		try{
+			StringBuilder params = new StringBuilder();
+			params.append(this.zipfCutOn);
+			params.append(",");
+			params.append(this.zipfCutOff);
+			params.append(",");
+			params.append(this.zipfMinTermsOcurrences);
+
+			this.addQueueDownload(EQueueEvent.REDUCED_INVERTED_INDEX_ZIPF, 
+									QueueFacade.getInstance().getServerDate().getTime(),
+									params.toString());
 			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 					"Proceso En Curso", ".");
 			FacesContext.getCurrentInstance().addMessage(null, msg);
@@ -164,7 +205,7 @@ public class IRManagedBean implements Serializable {
 		try{
 			this.addQueueDownload(EQueueEvent.GENERATE_ALL_MATRIX, 
 									QueueFacade.getInstance().getServerDate().getTime(),
-									this.minTermsOcurrences.toString());
+									this.invertedIndexMinTermsOcurrences.toString());
 			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
 					"Proceso En Curso", ".");
 			FacesContext.getCurrentInstance().addMessage(null, msg);
@@ -197,12 +238,23 @@ public class IRManagedBean implements Serializable {
 		}
 	}
 
-	public Integer getMinTermsOcurrences() {
-		return minTermsOcurrences;
+	
+
+	public Integer getInvertedIndexMinTermsOcurrences() {
+		return invertedIndexMinTermsOcurrences;
 	}
 
-	public void setMinTermsOcurrences(Integer minTermsOcurrences) {
-		this.minTermsOcurrences = minTermsOcurrences;
+	public void setInvertedIndexMinTermsOcurrences(
+			Integer invertedIndexMinTermsOcurrences) {
+		this.invertedIndexMinTermsOcurrences = invertedIndexMinTermsOcurrences;
+	}
+
+	public Integer getZipfMinTermsOcurrences() {
+		return zipfMinTermsOcurrences;
+	}
+
+	public void setZipfMinTermsOcurrences(Integer zipfMinTermsOcurrences) {
+		this.zipfMinTermsOcurrences = zipfMinTermsOcurrences;
 	}
 
 	public Integer getNewDimension() {
@@ -229,6 +281,33 @@ public class IRManagedBean implements Serializable {
 		this.readableRowsAmount = readableRowsAmount;
 	}
 
+	public Integer getDocumentsAmount() {
+		return documentsAmount;
+	}
+
+	public void setDocumentsAmount(Integer documentsAmount) {
+		this.documentsAmount = documentsAmount;
+	}
+
+	public Integer getZipfCutOn() {
+		return zipfCutOn;
+	}
+
+	public void setZipfCutOn(Integer zipfCutOn) {
+		this.zipfCutOn = zipfCutOn;
+	}
+
+	public Integer getZipfCutOff() {
+		return zipfCutOff;
+	}
+
+	public void setZipfCutOff(Integer zipfCutOff) {
+		this.zipfCutOff = zipfCutOff;
+	}
+	
+	
+
+	
 	
 	
 	

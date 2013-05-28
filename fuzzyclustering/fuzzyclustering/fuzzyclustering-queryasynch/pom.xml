@@ -92,7 +92,7 @@
 						<manifest>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<addClasspath>true</addClasspath>
-							<mainClass>co.edu.sanmartin.queryasynch.execute.Main</mainClass>
+							<mainClass>co.edu.sanmartin.queryasynch.execute.MainQueryAsynch</mainClass>
 						</manifest>
 						<manifestEntries>
 							<Class-Path>../config/</Class-Path>

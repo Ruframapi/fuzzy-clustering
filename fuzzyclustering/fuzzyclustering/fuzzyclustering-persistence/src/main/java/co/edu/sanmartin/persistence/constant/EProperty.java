@@ -31,9 +31,11 @@ public enum EProperty {
 	TEXT_STEMMER_ON("text.stemmer.on","Indica si realiza lematizacion(stemming) al texto");
 	
 	private String propertyName;
+	private String description;
 
-	EProperty(String propertyName, String label) {
+	EProperty(String propertyName, String description) {
 		this.propertyName = propertyName;
+		this.description = description;
 	}
 	/**
 	 * @return the propertyName
@@ -42,6 +44,9 @@ public enum EProperty {
 		return propertyName;
 	}
 
+	public String getDescription() {
+		return description;
+	}
 	public static Collection<EProperty> toList(){
 		List<EProperty> list = Arrays.asList(EProperty.values()); 
 		return list;

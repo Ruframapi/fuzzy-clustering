@@ -28,7 +28,7 @@ public class Dequeue implements Runnable{
 	 */
 	public Dequeue(){
 	}
-	
+
 	public void run() {
 		// TODO Auto-generated method stub
 		while(true){
@@ -45,7 +45,7 @@ public class Dequeue implements Runnable{
 				Thread.sleep(10000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 	}
@@ -57,18 +57,23 @@ public class Dequeue implements Runnable{
 	 * @throws PropertyValueNotFoundException 
 	 */
 	public void executeQueue() throws SQLException, PropertyValueNotFoundException{
-		logger.trace("Init executeQueue");
-		Collection<WorkspaceDTO> workspaceColl = WorkspaceFacade.getInstance().getAllWorkspace();
-		
-		for (WorkspaceDTO workspaceDTO : workspaceColl) {
-			CleanerThreadPool threadPool = new CleanerThreadPool(workspaceDTO);
-			if(threadPool.getExecutor()!=null && threadPool.getExecutor().getQueue().size()==0){
-				threadPool.executeThreadPool();
+		try{
+			logger.trace("Init cleaner executeQueue");
+			Collection<WorkspaceDTO> workspaceColl = WorkspaceFacade.getInstance().getAllWorkspace();
+
+			for (WorkspaceDTO workspaceDTO : workspaceColl) {
+				CleanerThreadPool threadPool = new CleanerThreadPool(workspaceDTO);
+				if(threadPool.getExecutor()!=null && threadPool.getExecutor().getQueue().size()==0){
+					threadPool.executeThreadPool();
+				}
 			}
 		}
-		
+		catch(Throwable e){
+			logger.error("Error in executeQueue Clean", e);
+		}
+
 	}
 
-	
+
 }
 

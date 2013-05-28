@@ -14,6 +14,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
@@ -36,8 +37,8 @@ public class FileManager {
 	private static Logger logger = Logger.getRootLogger();
 
 	private WorkspaceDTO workspace;
-	
-	
+
+
 	public FileManager( WorkspaceDTO workspace ){
 		this.workspace = workspace;
 	}
@@ -119,7 +120,7 @@ public class FileManager {
 		stringBuider.append(fileName);
 		return this.readFileNio(stringBuider.toString());
 	}
-	
+
 	/**
 	 * Retorna el archivo de la carpeta especificada
 	 * @param dataFolder
@@ -133,7 +134,7 @@ public class FileManager {
 		stringBuider.append(fileName);
 		return this.readFileNio(stringBuider.toString());
 	}
-	
+
 
 	/**
 	 * Retorna la información del archivo
@@ -220,7 +221,7 @@ public class FileManager {
 		String[] fileNameColl = fileName.split(System.getProperty("file.separator")+".");
 		return fileNameColl[0];
 	}
-	
+
 	/**
 	 * Retorna el path de las carpetas que gestiona el sistema
 	 * @param dataFolder enumeracion con las diferentes carpetas del sistema
@@ -247,14 +248,15 @@ public class FileManager {
 	 */
 	public String getFolderPath(EDataFolder dataFolder){
 		StringBuilder folderPath = new StringBuilder();
+
 		try {
 			folderPath.append(this.workspace.getPersistence().getProperty(
 					ESystemProperty.MAIN_PATH).getValue() );
-			folderPath.append(System.getProperty("file.separator"));
+			folderPath.append(this.getFileSeparator());
 			folderPath.append("workspace");
-			folderPath.append(System.getProperty("file.separator"));
+			folderPath.append(this.getFileSeparator());
 			folderPath.append(this.workspace.getName());
-			folderPath.append(System.getProperty("file.separator"));
+			folderPath.append(this.getFileSeparator());
 			folderPath.append(dataFolder.getPath());
 		} catch (PropertyValueNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -263,6 +265,22 @@ public class FileManager {
 		return folderPath.toString();
 	}
 
+	/**
+	 * Retorna el separador del archivo dependiendo del sistema operativo
+	 * @return
+	 */
+	private String getFileSeparator(){
+		String os = System.getProperty("os.name").toLowerCase();
+		StringBuilder builder = new StringBuilder();
+		if(os.indexOf("win") >= 0){
+			builder.append(System.getProperty("file.separator"));
+			builder.append(System.getProperty("file.separator"));
+		}
+		else{
+			builder.append(System.getProperty("file.separator"));
+		}
+		return builder.toString();
+	}
 
 	/**
 	 * Lee un archivo utilizando la libreria java.nio
@@ -299,23 +317,33 @@ public class FileManager {
 	}
 
 	public void writeFileNio(String folderPath, String fileName, String data){
-
+		FileOutputStream fos = null;
+		FileChannel fc = null;
 		try {
 			this.createFolder(folderPath);
 			File file = new File(folderPath + System.getProperty("file.separator") + fileName);
 			if (file.exists()) {
 				file.delete();
 			}
-			FileChannel fc = new FileOutputStream(folderPath + System.getProperty("file.separator") + fileName).getChannel();
+			fos = new FileOutputStream(folderPath + System.getProperty("file.separator") + fileName);
+			fc = fos.getChannel();
 			fc.write(ByteBuffer.wrap(data.getBytes("UTF-8")));
-			fc.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			logger.error("Error en writeFileNio",e);
 		}
+		finally{
+			try {
+				fos.close();
+				fc.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
-	
-	
+
+
 	/**
 	 * Almacena la matriz double en disco utilizando MappedFiles
 	 **/
@@ -324,14 +352,14 @@ public class FileManager {
 		bigMatrixFileManager.loadReadWrite(EDataFolder.MATRIX, fileName,matrix.length,matrix[0].length);
 		System.out.println("Init savematrix");
 		for (int i = 0; i < matrix.length; i++) {;
-			for (int j = 0; j < matrix[i].length; j++) {
-				bigMatrixFileManager.set(i,j, matrix[i][j]);
-			}
+		for (int j = 0; j < matrix[i].length; j++) {
+			bigMatrixFileManager.set(i,j, matrix[i][j]);
+		}
 		}
 		bigMatrixFileManager.close();
 	}
-	
-	
+
+
 	/**
 	 * Almacena la matriz double en disco human readable
 	 * 
@@ -340,27 +368,27 @@ public class FileManager {
 	 * @param matrixLimit limite de filas a almacenar
 	 */
 	public void saveMatrixDouble(double[][] matrix, EDataFolder dataFolder, 
-									String fileName, int matrixLimit, int roundScale){
+			String fileName, int matrixLimit, int roundScale){
 		System.out.print("Init savematrix");
 		StringBuilder data = new StringBuilder();
 		if(matrixLimit==0){
 			matrixLimit = matrix.length;
 		}
 		for (int i = 0; i < matrixLimit; i++) {;
-			for (int j = 0; j < matrix[i].length; j++) {
-				BigDecimal bigDecimal = new BigDecimal(matrix[i][j]);
-				bigDecimal = bigDecimal.setScale(roundScale, RoundingMode.HALF_UP);
-				data.append(bigDecimal);
-				if(j+1<matrix[i].length){
-					data.append("\t");
-				}
+		for (int j = 0; j < matrix[i].length; j++) {
+			BigDecimal bigDecimal = new BigDecimal(matrix[i][j]);
+			bigDecimal = bigDecimal.setScale(roundScale, RoundingMode.HALF_UP);
+			data.append(bigDecimal);
+			if(j+1<matrix[i].length){
+				data.append("\t");
 			}
-			data.append(System.getProperty("line.separator"));
+		}
+		data.append(System.getProperty("line.separator"));
 		}
 		this.workspace.getPersistence().writeFile(dataFolder, 
-												  fileName, data.toString());
+				fileName, data.toString());
 	}
-	
+
 	/**
 	 * Convierte un archivo de texto en una matrix en memoria en java.
 	 * @param dataFolder
@@ -375,11 +403,14 @@ public class FileManager {
 			String[] rowVector = row.split("\t");
 			Double[] doubleVector = new Double[rowVector.length];
 			for (int i = 0; i < doubleVector.length; i++) {
+				doubleVector[i]=0.0;
+			}
+			for (int i = 0; i < doubleVector.length; i++) {
 				doubleVector[i]=Double.parseDouble(rowVector[i]);
 			}
 			vectorArray.add((T) doubleVector);
 		}
-		
+
 		return vectorArray;
 	}
 }

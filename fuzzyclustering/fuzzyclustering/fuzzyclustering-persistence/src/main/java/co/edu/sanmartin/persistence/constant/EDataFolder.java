@@ -7,15 +7,15 @@ import java.util.List;
 public  enum EDataFolder {
 	
 	
-	DATA_ROOT("dataRoot",System.getProperty("file.separator")+"data"),
-	CLEAN("clean",System.getProperty("file.separator")+"clean"), 
-	DOWNLOAD("download",System.getProperty("file.separator")+"download"),
-	INVERTED_INDEX("inverted index","data"+System.getProperty("file.separator")+"invertedindex"),
-	MATRIX("matrix",System.getProperty("file.separator")+"matrix"),
-	MACHINE_LEARNING("machine learning", System.getProperty("file.separator")+"machinelearning"),
-	BACKUP("BACKUP",System.getProperty("file.separator")+"backup"),
-	LEXICON("LEXICON",System.getProperty("file.separator")+"lexicon"),
-	TRAIN("TRAIN",System.getProperty("file.separator")+"train");
+	DATA_ROOT("dataRoot","data"),
+	CLEAN("clean","clean"), 
+	DOWNLOAD("download","download"),
+	INVERTED_INDEX("inverted index","invertedindex"),
+	MATRIX("matrix","matrix"),
+	MACHINE_LEARNING("machine learning","machinelearning"),
+	BACKUP("BACKUP","backup"),
+	LEXICON("LEXICON","lexicon"),
+	TRAIN("TRAIN","train");
 	
 	private String name;
 	private String path;

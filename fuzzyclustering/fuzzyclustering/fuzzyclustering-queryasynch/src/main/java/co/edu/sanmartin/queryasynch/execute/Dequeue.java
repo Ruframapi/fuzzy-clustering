@@ -18,6 +18,7 @@ import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.exception.PropertyValueNotFoundException;
 import co.edu.sanmartin.persistence.facade.PersistenceFacade;
 import co.edu.sanmartin.persistence.facade.QueueFacade;
+import co.edu.sanmartin.persistence.facade.SendMessageAsynch;
 import co.edu.sanmartin.persistence.facade.WorkspaceFacade;
 
 /**
@@ -36,6 +37,13 @@ public class Dequeue implements Runnable{
 	public Dequeue(){
 		try {
 			this.cancelActiveQueue(EQueueEvent.QUERY_DOCUMENT);
+			this.cancelActiveQueue(EQueueEvent.GENERATE_INVERTED_INDEX);
+			this.cancelActiveQueue(EQueueEvent.REDUCED_INVERTED_INDEX_ZIPF);
+			this.cancelActiveQueue(EQueueEvent.GENERATE_TERM_TERM_MATRIX);
+			this.cancelActiveQueue(EQueueEvent.GENERATE_PPMI_MATRIX);
+			this.cancelActiveQueue(EQueueEvent.GENERATE_ALL_MATRIX);
+			this.cancelActiveQueue(EQueueEvent.GENERATE_REDUCED_PPMI_MATRIX);
+			this.cancelActiveQueue(EQueueEvent.SEND_MESSAGE);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.error(e);
@@ -74,7 +82,7 @@ public class Dequeue implements Runnable{
 	 * @throws PropertyValueNotFoundException 
 	 */
 	public void executeQueue() throws SQLException, PropertyValueNotFoundException{
-
+		logger.trace("Init queryAsynch executeQueue");
 		Collection<QueueDTO> queueCol = 
 				QueueFacade.getInstance().getQueueByStatusDate(EModule.QUERYASYNCH, 
 						EQueueStatus.ENQUEUE, new Date());
@@ -86,6 +94,9 @@ public class Dequeue implements Runnable{
 					break;
 				case GENERATE_INVERTED_INDEX:
 					this.generateInvertedIndex(queueDTO);
+					break;
+				case REDUCED_INVERTED_INDEX_ZIPF:
+					this.reducedInvertedIndexZipf(queueDTO);
 					break;
 				case GENERATE_TERM_TERM_MATRIX:
 					this.generateTermTermMatrix(queueDTO);
@@ -120,11 +131,13 @@ public class Dequeue implements Runnable{
 		try {
 			String[] params = queueDTO.getParams().split(",");
 			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
+			SendMessageAsynch.sendMessage(workspace, "Iniciando construccion proyeccion de Matriz");
 			int newDimension = Integer.parseInt(params[0]);
 			Boolean saveReadable  = Boolean.parseBoolean(params[1]);
 			int readableRowsAmount = Integer.parseInt(params[2]);
-			IRFacade irFacade = IRFacade.getInstance();
-			irFacade.reducedDimensionPPMIMatrix(workspace, newDimension, saveReadable, readableRowsAmount);
+			IRFacade irFacade = IRFacade.getInstance(workspace);
+			irFacade.reducedDimensionPPMIMatrix(newDimension, saveReadable, readableRowsAmount);
+			SendMessageAsynch.sendMessage(workspace, "Proyeccion de Matriz finalida");
 		} catch (Exception e) {
 			logger.error("Error in generateReducedPPMIMatrix",e);
 		}
@@ -138,6 +151,30 @@ public class Dequeue implements Runnable{
 		}
 	}
 
+	private void reducedInvertedIndexZipf(QueueDTO queueDTO){
+		try {
+			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
+			String[] params = queueDTO.getParams().split(",");
+			int zipfCutOn = Integer.parseInt(params[0]);
+			int zipfCutOff = Integer.parseInt(params[1]);
+			int minTermOcurrences = Integer.parseInt(params[2]);
+			IRFacade irFacade = IRFacade.getInstance(workspace);
+			irFacade.reducedZipfInvertedIndex(zipfCutOn, zipfCutOff, minTermOcurrences);
+			QueueFacade.getInstance().deleteQueue(queueDTO);
+			logger.info("Reduced Inverted Index Zipf Finished");
+			
+		} catch (Exception e) {
+			logger.error("Error in ZipfInvertedIndex",e);
+		}
+		finally{
+			try {
+				QueueFacade.getInstance().deleteQueue(queueDTO);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
 	/**
 	 * Envia un mensaje al cliente
 	 * @param queueDTO
@@ -175,8 +212,8 @@ public class Dequeue implements Runnable{
 			String[] params = queueDTO.getParams().split(",");
 			int minTermsOcurrences = Integer.parseInt(params[0]);
 			int documentsAmount = Integer.parseInt(params[1]);
-			IRFacade irFacade = IRFacade.getInstance();
-			irFacade.createInvertedIndex(workspace, minTermsOcurrences,documentsAmount);	
+			IRFacade irFacade = IRFacade.getInstance(workspace);
+			irFacade.createInvertedIndex(minTermsOcurrences, documentsAmount);	
 			QueueFacade.getInstance().deleteQueue(queueDTO);
 		} catch (Exception e) {
 			logger.error("Error in generateInvertedIndex",e);
@@ -197,10 +234,13 @@ public class Dequeue implements Runnable{
 	 */
 	private void generateTermTermMatrix(QueueDTO queueDTO) {
 		logger.trace("Init generateTermTermMatrix Method");
+		
 		try {
 			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
-			IRFacade irFacade = IRFacade.getInstance();
-			irFacade.createTermTermBigMatrix(workspace, true);	
+			SendMessageAsynch.sendMessage(workspace, "Iniciando construccion de Matrix Termino Termino");
+			IRFacade irFacade = IRFacade.getInstance(workspace);
+			irFacade.createTermTermBigMatrix(true);	
+			SendMessageAsynch.sendMessage(workspace, "Construccion de Matrix Termino Termino Finalizada");
 		} catch (Exception e) {
 			logger.error("Error in generateTermTermMatrix",e);
 		}
@@ -222,9 +262,12 @@ public class Dequeue implements Runnable{
 		// TODO Auto-generated method stub
 
 		try {
+			
 			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
-			IRFacade irFacade = IRFacade.getInstance();
-			irFacade.createPPMIBigMatrix(workspace, true);
+			SendMessageAsynch.sendMessage(workspace, "Iniciando construccion de Matrix PPMI");
+			IRFacade irFacade = IRFacade.getInstance(workspace);
+			irFacade.createPPMIBigMatrix(true);
+			SendMessageAsynch.sendMessage(workspace, "Construccion de Matrix PPMI Finalizada");
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -251,8 +294,8 @@ public class Dequeue implements Runnable{
 				String[] params = queueDTO.getParams().split(",");
 				int minTermsOcurrences = Integer.parseInt(params[1]);
 				int documentsAmount = Integer.parseInt(params[1]);
-				IRFacade irFacade = IRFacade.getInstance();
-				irFacade.buildCmeanMatrix(workspace,minTermsOcurrences, documentsAmount);
+				IRFacade irFacade = IRFacade.getInstance(workspace);
+				irFacade.buildCmeanMatrix(minTermsOcurrences,documentsAmount);
 				QueueFacade.getInstance().deleteQueue(queueDTO);
 			}
 		} catch (Exception e) {
@@ -270,7 +313,6 @@ public class Dequeue implements Runnable{
 	}
 	
 
-
 	/**
 	 * Realiza la consulta de documentos de forma asincronica
 	 * @param queue
@@ -287,10 +329,15 @@ public class Dequeue implements Runnable{
 				DocumentDTO document = workspace.getPersistence().selectDocumentById(idDocument);
 				logger.info("QueryDocumentAsynch: id:" + idDocument + " Name:" + document.getName());
 				String lazyData = workspace.getPersistence().readFile(EDataFolder.DOWNLOAD, document.getName());
-				String lazyCleanData = workspace.getPersistence().readFile(EDataFolder.CLEAN, document.getName());
-
+				String lazyCleanData = null;
+				try{
+				 lazyCleanData = workspace.getPersistence().readFile(EDataFolder.CLEAN, document.getName());
+				}
+				catch(Exception e){
+					logger.error(e);
+				}
 				if(lazyData.length()>1000) lazyData=lazyData.substring(0, 1000);
-				if(lazyCleanData.length()>1000) lazyCleanData=lazyCleanData.substring(0, 1000);
+				if(lazyCleanData!=null && lazyCleanData.length()>1000) lazyCleanData=lazyCleanData.substring(0, 1000);
 				document.setLazyData(lazyData);
 				document.setLazyCleanData(lazyCleanData);
 				logger.debug("Document query"+document.getId());
