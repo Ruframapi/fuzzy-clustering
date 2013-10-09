@@ -110,6 +110,9 @@ public class Dequeue implements Runnable{
 				case GENERATE_REDUCED_PPMI_MATRIX:
 					this.generateReducedPPMIMatrix(queueDTO);
 					break;
+				case INVERTED_INDEX_ZIPF_IMPROVED:
+					this.invertedIndexZipfImproved(queueDTO);
+					break;
 				case SEND_MESSAGE:
 					this.sendMessage(queueDTO);
 					break;
@@ -131,13 +134,12 @@ public class Dequeue implements Runnable{
 		try {
 			String[] params = queueDTO.getParams().split(",");
 			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
-			SendMessageAsynch.sendMessage(workspace, "Iniciando construccion proyeccion de Matriz");
 			int newDimension = Integer.parseInt(params[0]);
 			Boolean saveReadable  = Boolean.parseBoolean(params[1]);
 			int readableRowsAmount = Integer.parseInt(params[2]);
 			IRFacade irFacade = IRFacade.getInstance(workspace);
 			irFacade.reducedDimensionPPMIMatrix(newDimension, saveReadable, readableRowsAmount);
-			SendMessageAsynch.sendMessage(workspace, "Proyeccion de Matriz finalida");
+			
 		} catch (Exception e) {
 			logger.error("Error in generateReducedPPMIMatrix",e);
 		}
@@ -160,6 +162,31 @@ public class Dequeue implements Runnable{
 			int minTermOcurrences = Integer.parseInt(params[2]);
 			IRFacade irFacade = IRFacade.getInstance(workspace);
 			irFacade.reducedZipfInvertedIndex(zipfCutOn, zipfCutOff, minTermOcurrences);
+			QueueFacade.getInstance().deleteQueue(queueDTO);
+			
+			logger.info("Reduced Inverted Index Zipf Finished");
+			
+		} catch (Exception e) {
+			logger.error("Error in ZipfInvertedIndex",e);
+		}
+		finally{
+			try {
+				QueueFacade.getInstance().deleteQueue(queueDTO);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	
+	private void invertedIndexZipfImproved(QueueDTO queueDTO){
+		try {
+			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
+			String[] params = queueDTO.getParams().split(",");
+			int minTermOcurrences = Integer.parseInt(params[0]);
+			IRFacade irFacade = IRFacade.getInstance(workspace);
+			irFacade.invertedIndexZipf(minTermOcurrences);
 			QueueFacade.getInstance().deleteQueue(queueDTO);
 			logger.info("Reduced Inverted Index Zipf Finished");
 			
@@ -264,10 +291,8 @@ public class Dequeue implements Runnable{
 		try {
 			
 			WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
-			SendMessageAsynch.sendMessage(workspace, "Iniciando construccion de Matrix PPMI");
 			IRFacade irFacade = IRFacade.getInstance(workspace);
 			irFacade.createPPMIBigMatrix(true);
-			SendMessageAsynch.sendMessage(workspace, "Construccion de Matrix PPMI Finalizada");
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
