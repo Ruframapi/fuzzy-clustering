@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -135,19 +136,27 @@ public class ChartTermFrecuence implements Serializable {
 					InvertedIndex invertedIndexOriginal = irFacade.getInvertedIndexOriginal();
 					List<Integer> original =this.getInvertedIndexList(invertedIndexOriginal);
 					List<Integer> zipf =this.getInvertedIndexListZipf();
-					List<Integer> transitionPoint = new ArrayList<Integer>();
+					List<Integer> left = new ArrayList<Integer>();
+					List<Integer> right = new ArrayList<Integer>();
 					
-					if(type.equals("original")){
-						series.add(new Series<Integer>("Completo",original));
-					}
-					else{
-						series.add(new Series<Integer>("Zipf",zipf));
-					}
+					//if(type.equals("original")){
+					//	series.add(new Series<Integer>("Completo",original));
+					//}
 					//series.add(new Series<Integer>("Zipf",zipf));
-					Integer transitionPointInteger = new Integer(new Double(invertedIndexOriginal.getTransitionPoint(2)).intValue());
-					transitionPoint.add(transitionPointInteger);
-					series.add(new Series<Integer>("TrasitionPoint",transitionPoint));
+					Integer transitionPointInteger = new Integer(new Double(invertedIndexOriginal.getTransitionPoint(1)).intValue());
+					for (Integer frecuency : original) {
+						if(frecuency>=transitionPointInteger){
+							left.add(frecuency);
+							right.add(null);
+						}
+						else{
+							left.add(null);
+							right.add(frecuency);
+						}
+					}
 					
+					series.add(new Series<Integer>("Mayor Frecuencia",left));
+					series.add(new Series<Integer>("Menor Frecuencia",right));
 					
 					setChartData(new Gson().toJson(series));
 					for (Object term : keys) {
@@ -174,7 +183,7 @@ public class ChartTermFrecuence implements Serializable {
 		
 		
 		String[] termList = invertedIndex.getTermList();
-		HashMap<String,Integer> filterList = new HashMap<String,Integer>();
+		LinkedHashMap<String,Integer> filterList = new LinkedHashMap<String,Integer>();
 		for (int i = 0; i < termList.length; i++) {
 			filterList.put(termList[i].split("\t")[0],Integer.parseInt(termList[i].split("\t")[2]));
 		}

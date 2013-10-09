@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -144,7 +145,7 @@ public class ChartTermFrecuenceZipf implements Serializable {
 						series.add(new Series<Integer>("Zipf",zipf));
 					}
 					//series.add(new Series<Integer>("Zipf",zipf));
-					Integer transitionPointInteger = new Integer(new Double(invertedIndexOriginal.getTransitionPoint(2)).intValue());
+					Integer transitionPointInteger = new Integer(new Double(invertedIndexOriginal.getTransitionPoint(1)).intValue());
 					transitionPoint.add(transitionPointInteger);
 					//series.add(new Series<Integer>("TrasitionPoint",transitionPoint));
 					
@@ -174,7 +175,7 @@ public class ChartTermFrecuenceZipf implements Serializable {
 		
 		
 		String[] termList = invertedIndex.getTermList();
-		HashMap<String,Integer> filterList = new HashMap<String,Integer>();
+		LinkedHashMap<String,Integer> filterList = new LinkedHashMap<String,Integer>();
 		for (int i = 0; i < termList.length; i++) {
 			filterList.put(termList[i].split("\t")[0],Integer.parseInt(termList[i].split("\t")[2]));
 		}

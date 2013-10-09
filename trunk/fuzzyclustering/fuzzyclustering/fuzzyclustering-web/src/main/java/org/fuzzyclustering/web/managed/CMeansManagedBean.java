@@ -34,10 +34,11 @@ public class CMeansManagedBean implements Serializable {
 	 */
 	private static final long serialVersionUID = -4059587653963594498L;
 	private static Logger logger = Logger.getRootLogger();
-	private int termAmount;
+	private boolean reducedMatrix = true;
 	private int centroidsAmount;
-	private int iterationAmount=0;
+	private int iterationAmount=10000;
 	private double fuzzyValue=2.0;
+	private double stopValue = 0.0000001;
 	
 	
 	
@@ -46,16 +47,16 @@ public class CMeansManagedBean implements Serializable {
 		this.workspaceBean = workspaceBean;
 	}
 
+	
 
-
-	public int getTermAmount() {
-		return termAmount;
+	public boolean isReducedMatrix() {
+		return reducedMatrix;
 	}
 
 
 
-	public void setTermAmount(int termAmount) {
-		this.termAmount = termAmount;
+	public void setReducedMatrix(boolean reducedMatrix) {
+		this.reducedMatrix = reducedMatrix;
 	}
 
 
@@ -82,18 +83,21 @@ public class CMeansManagedBean implements Serializable {
 		this.iterationAmount = iterationAmount;
 	}
 
-
-
 	public double getFuzzyValue() {
 		return fuzzyValue;
 	}
-
-
 
 	public void setFuzzyValue(double fuzzyValue) {
 		this.fuzzyValue = fuzzyValue;
 	}
 
+	public double getStopValue() {
+		return stopValue;
+	}
+
+	public void setStopValue(double stopValue) {
+		this.stopValue = stopValue;
+	}
 
 	public void generate(){
 		logger.debug("Start download process");
@@ -188,11 +192,15 @@ public class CMeansManagedBean implements Serializable {
 		queue.setModule(EModule.MACHINE_LEARNING);
 		queue.setEvent(queueEvent);
 		StringBuilder params = new StringBuilder();
+		params.append(String.valueOf(this.reducedMatrix));
+		params.append(",");
 		params.append(this.centroidsAmount);
 		params.append(",");
 		params.append(this.iterationAmount);
 		params.append(",");
 		params.append(this.fuzzyValue);
+		params.append(",");
+		params.append(this.stopValue);
 		params.append(",");
 		params.append("true");
 		queue.setParams(params.toString());

@@ -14,24 +14,31 @@
 				<p:panelGrid columns="2">
 					<p:outputLabel value="Texto a categorizar">
 					</p:outputLabel>
-					<p:inputTextarea value="#{cmeanstest.documentText}"
-						autoResize="true" cols="100"></p:inputTextarea>
+					<p:inputTextarea value="#{tableBean.documentText}"
+						autoResize="true" cols="250" rows="6"></p:inputTextarea>
 					<p:outputLabel value="Termino de Comparacion(Opcional)">
 					</p:outputLabel>
-					<p:inputText value="#{cmeanstest.term}"></p:inputText>
+					<p:inputText value="#{tableBean.term}"></p:inputText>
 
 				</p:panelGrid>
 				<p:commandButton value="Categorizar"
-					actionListener="#{cmeanstest.buildDocumentMembership}"
+					actionListener="#{tableBean.buildDocumentMembership}"
 					update=":cmeansTest:result,cmeansTest:resume"></p:commandButton>
 			</p:panel>
 			<p:panel id="result" header="Resultados">
 				<p:panel header="Matriz de Pertenencia">
-
-					<p:dataList value="#{cmeanstest.membershipDataTable.rowData}"
-						var="membership" itemType="disc">  
-					    #{membership.rowData}  
-					</p:dataList>
+					<p:dataTable id="membership" var="membership"
+						value="#{tableBean.data}" >
+						<p:columns value="#{tableBean.columns}" var="column"
+							columnIndexVar="colIndex">
+							<f:facet name="header">  
+				                #{column.header}  
+				            </f:facet>  
+				            <p:outputLabel value="#{membership[column.property]}" 
+				            styleClass="#{column.property != 'term' and membership[column.property] == membership[column.maxValue]? 'redCell':'whiteCell'}"></p:outputLabel>
+				        </p:columns>
+					</p:dataTable>
+					
 					<p:panelGrid id="resume" columns="2">
 						<p:outputLabel value="Cluster Documento:"></p:outputLabel>
 						<p:outputLabel
@@ -45,7 +52,7 @@
 				</p:panel>
 			</p:panel>
 			<p:panel>
-			<p:commandButton value="Categorizar"
+				<p:commandButton value="Categorizar"
 					actionListener="#{cmean.classifyDocumentsInFile}"></p:commandButton>
 			</p:panel>
 

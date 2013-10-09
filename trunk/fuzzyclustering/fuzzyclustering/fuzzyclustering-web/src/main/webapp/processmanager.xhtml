@@ -13,18 +13,24 @@
 		<h:form>
 			<p:panel header="Proceso de agrupamiento difuso"
 				styleClass="align_top">
-				<p:panelGrid columns="4">
+				<p:panelGrid columns="6">
 					<p:panelGrid columns="1" style="width: 200px; height:150px">
 						<f:facet name="header"> Indice Invertido</f:facet>
 						<p:panelGrid columns="2">
 							<p:outputLabel>Cantidad Minima de Ocurrencias:</p:outputLabel>
-							<p:inputText value="#{irBean.invertedIndexMinTermsOcurrences}" size="3"></p:inputText>
+							<p:inputText value="#{irBean.invertedIndexMinTermsOcurrences}"
+								size="3"></p:inputText>
 							<p:outputLabel>Documentos a procesar:</p:outputLabel>
 							<p:inputText value="#{irBean.documentsAmount}" size="5"></p:inputText>
 						</p:panelGrid>
 						<p:commandButton value="Generar"
 							actionListener="#{irBean.buildInvertedIndex}">
 						</p:commandButton>
+						<p:commandButton id="view1Btn" value="Ver" rendered="false"
+							actionListener="#{irBean.queryInvertedIndex}"
+							oncomplete="dlg2.show();" update="modalDialog">
+						</p:commandButton>
+
 					</p:panelGrid>
 					<p:panelGrid columns="1" style="width: 200px; height:150px">
 						<f:facet name="header"> Indice Invertido Reducido Zipf</f:facet>
@@ -39,6 +45,10 @@
 						<p:commandButton value="Generar"
 							actionListener="#{irBean.buildInvertedIndexZipf}">
 						</p:commandButton>
+						<p:commandButton value="Generar Relevancia"
+							actionListener="#{irBean.buildInvertedIndexZipfImproved}">
+						</p:commandButton>
+
 					</p:panelGrid>
 					<p:panel header="Construccion de Matrices">
 						<p:panelGrid columns="1" style="width: 200px; height:75px">
@@ -58,6 +68,7 @@
 							<p:commandButton value="Generar"
 								actionListener="#{irBean.buildPPMIMatrix}">
 							</p:commandButton>
+
 						</p:panelGrid>
 					</p:panel>
 					<p:panelGrid columns="1" style="width: 200px; height:150px">
@@ -78,29 +89,83 @@
 					<p:panel>
 						<p:panelGrid columns="2" style="width: 200px; height:150px">
 							<f:facet name="header">Generacion de Conjuntos Difusos</f:facet>
-							<p:outputLabel value="Cantidad de Terminos"></p:outputLabel>
-							<p:inputText value="#{cmean.termAmount}"></p:inputText>
+							<p:outputLabel value="Utilizar Matriz Reducida"></p:outputLabel>
+							<p:selectBooleanCheckbox value="#{cmean.reducedMatrix}"></p:selectBooleanCheckbox>
 							<p:outputLabel value="Cantidad de Centroides"></p:outputLabel>
 							<p:inputText value="#{cmean.centroidsAmount}"></p:inputText>
-							<p:outputLabel value="Iteraciones"></p:outputLabel>
-							<p:inputText value="#{cmean.iterationAmount}"></p:inputText>
 							<p:outputLabel value="Valor de Fuzzyficacion"></p:outputLabel>
 							<p:inputText value="#{cmean.fuzzyValue}"></p:inputText>
+							<p:outputLabel value="Valor de Parada"></p:outputLabel>
+							<p:inputText value="#{cmean.stopValue}"></p:inputText>
+							<p:outputLabel value="Iteraciones"></p:outputLabel>
+							<p:inputText value="#{cmean.iterationAmount}"></p:inputText>
+
 						</p:panelGrid>
 						<p:commandButton value="Clusterizar"
 							actionListener="#{cmean.generate}"></p:commandButton>
+						<p:separator></p:separator>
+
 					</p:panel>
+
+
 					<p:panelGrid columns="1" style="width: 200px; height:150px">
 						<f:facet name="header">Indice de Pertenencia</f:facet>
-						<p:commandButton value="Generar"
-							actionListener="#{cmean.generateMembershipIndex}">
-						</p:commandButton>
+						<div>
+							<p:commandButton value="Generar"
+								actionListener="#{cmean.generateMembershipIndex}">
+							</p:commandButton>
+
+							<p:commandButton value="Categorizar Archivo"
+								actionListener="#{cmean.classifyDocumentsInFile}"></p:commandButton>
+						</div>
+					</p:panelGrid>
+					<p:commandButton value="Descargar Indice Invertido" ajax="false"
+						onclick="PrimeFaces.monitorDownload(start, stop)">
+						<p:fileDownload value="#{irBean.downloadInvertedIndex}" />
+					</p:commandButton>
+					<p:commandButton value="Descargar Indice Reducido" ajax="false"
+						onclick="PrimeFaces.monitorDownload(start, stop)">
+						<p:fileDownload value="#{irBean.downloadInvertedIndexZipf}" />
+					</p:commandButton>
+					<p:commandButton value="Descargar PMI" ajax="false"
+						onclick="PrimeFaces.monitorDownload(start, stop)">
+						<p:fileDownload value="#{irBean.downloadPMI}" />
+					</p:commandButton>
+					<p:commandButton value="Descargar Matrix Reducida" ajax="false"
+						onclick="PrimeFaces.monitorDownload(start, stop)">
+						<p:fileDownload value="#{irBean.downloadReduced}" />
+					</p:commandButton>
+					<p:panelGrid columns="1">
+					<p:commandButton value="Descargar Matrix Pertenencia" ajax="false"
+						onclick="PrimeFaces.monitorDownload(start, stop)">
+						<p:fileDownload value="#{irBean.downloadMembershipMatrix}" />
+					</p:commandButton>
+					<p:commandButton value="Descargar Centroides" ajax="false"
+						onclick="PrimeFaces.monitorDownload(start, stop)">
+						<p:fileDownload value="#{irBean.downloadCentroids}" />
+					</p:commandButton>
+					
+					</p:panelGrid>
+					<p:panelGrid columns="1">
+					<p:commandButton value="Descargar Indice de Pertenencia"
+						ajax="false" onclick="PrimeFaces.monitorDownload(start, stop)">
+						<p:fileDownload value="#{irBean.downloadMembershipIndex}" />
+					</p:commandButton>
+					<p:commandButton value="Descargar Archivo clusterizado"
+						ajax="false" onclick="PrimeFaces.monitorDownload(start, stop)">
+						<p:fileDownload value="#{irBean.downloadDocumentCluster}" />
+					</p:commandButton>
 					</p:panelGrid>
 				</p:panelGrid>
 			</p:panel>
 			<p:panel>
-				
 			</p:panel>
+			<p:dialog id="modalDialog" header="Información del Archivo"
+				widgetVar="dlg2" modal="true" closeOnEscape="false"
+				appendToBody="true" width="1200px" height="600px">
+				<p:outputLabel value="#{irBean.documentData}"
+					styleClass="documentview" escape="false"></p:outputLabel>
+			</p:dialog>
 		</h:form>
 	</ui:define>
 </ui:composition>

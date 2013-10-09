@@ -117,6 +117,7 @@ public class IRDownloadManagedBean implements Serializable {
 	 * Elimina completamente la descarga de los archivos y los archivos procesados.
 	 */
 	public void deleteDownloadSources(){
+		logger.info("Init delete Download Sources");
 		QueueDTO queue = new QueueDTO();
 		queue.setModule(EModule.WEBSCRAPPING);
 		queue.setEvent(EQueueEvent.CLEAN_DOWNLOAD);
@@ -142,6 +143,7 @@ public class IRDownloadManagedBean implements Serializable {
 		this.downloadActive = QueueFacade.getInstance().getQueueByStatusDate(EModule.WEBSCRAPPING, 
 																			EQueueStatus.ACTIVE, new Date());
 		this.downloadDocumentAmount = this.workspaceBean.getWorkspace().getPersistence().getDownloadDocumentAmount();
+		this.documents.getDocuments();
 	}
 
 	public Collection<QueueDTO> getDownloadEnqueue() {

@@ -1,23 +1,15 @@
 package org.fuzzyclustering.web.servlet;
 
 import java.io.IOException;
-import java.util.Date;
 
-import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedProperty;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.fuzzyclustering.web.managed.AsynchManagedBean;
-import javax.faces.context.FacesContext;
-import org.fuzzyclustering.web.managed.FacesContextBuilder;
-import org.fuzzyclustering.web.managed.documents.DocumentsManagedBean;
-import org.primefaces.component.outputlabel.OutputLabel;
 
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 
@@ -51,7 +43,7 @@ public class AsynchServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		logger.info("Init AsynchServlet doPost Servlet");
+		logger.debug("Init AsynchServlet doPost Servlet");
 		try{
 
 		if (request.getParameter("status")!=null){
@@ -75,7 +67,9 @@ public class AsynchServlet extends HttpServlet {
 			String message = request.getParameter("message");
 			if(message!=null){
 				AsynchManagedBean bean1 = (AsynchManagedBean) getServletContext().getAttribute("asynch");
-				bean1.sendMessageAsynch(message);
+				if(bean1!=null){
+					bean1.sendMessageAsynch(message);
+				}
 			}
 		}
 		catch(Exception e){

@@ -8,3 +8,18 @@
 .align_top td{
 	vertical-align: top; 
 }
+
+.redCell{
+	background-color: yellow;
+	font-weight: bold;
+}
+
+.whiteCell{
+	background-color:white;
+}
+
+.documentview{
+	font-size: 70% !important;
+	font-family:Arial, Helvetica, sans-serif;
+	color: graytext;
+}

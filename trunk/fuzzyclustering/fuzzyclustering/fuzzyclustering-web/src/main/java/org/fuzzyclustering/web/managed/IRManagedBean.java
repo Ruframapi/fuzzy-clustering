@@ -1,6 +1,8 @@
 package org.fuzzyclustering.web.managed;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.Date;
@@ -14,6 +16,8 @@ import javax.faces.context.FacesContext;
 
 import org.apache.log4j.Logger;
 import org.fuzzyclustering.web.managed.documents.DocumentsManagedBean;
+import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.StreamedContent;
 
 import co.edu.sanmartin.fuzzyclustering.ir.facade.IRFacade;
 import co.edu.sanmartin.persistence.constant.EDataFolder;
@@ -45,6 +49,7 @@ public class IRManagedBean implements Serializable {
 	private Integer newDimension = 2;
 	private boolean saveReadable = false;
 	private Integer readableRowsAmount = 0;
+	private String documentData;
 	
 	
 	public void load(){
@@ -104,6 +109,31 @@ public class IRManagedBean implements Serializable {
 			params.append(this.zipfMinTermsOcurrences);
 
 			this.addQueueDownload(EQueueEvent.REDUCED_INVERTED_INDEX_ZIPF, 
+									QueueFacade.getInstance().getServerDate().getTime(),
+									params.toString());
+			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+					"Proceso En Curso", ".");
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+			
+		}
+		catch(PatternSyntaxException e){
+			msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Error al realizar el proceso", e.getDescription());
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+		
+	}
+	
+	public void buildInvertedIndexZipfImproved(){
+		logger.debug("Start buildInvertedIndexZipf");
+		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+				"Inicializa Proceso de categorizacion de terminos por Zipf", "Procesando los documentos descargados.");
+		FacesContext.getCurrentInstance().addMessage(null, msg);
+		try{
+			StringBuilder params = new StringBuilder();
+			params.append(this.zipfMinTermsOcurrences);
+			params.append(",");
+			this.addQueueDownload(EQueueEvent.INVERTED_INDEX_ZIPF_IMPROVED, 
 									QueueFacade.getInstance().getServerDate().getTime(),
 									params.toString());
 			msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
@@ -304,6 +334,89 @@ public class IRManagedBean implements Serializable {
 	public void setZipfCutOff(Integer zipfCutOff) {
 		this.zipfCutOff = zipfCutOff;
 	}
+	
+	
+	
+	public String getDocumentData() {
+		return documentData;
+	}
+
+	/**
+	 * Consulta el indice invertido
+	 */
+	public void queryInvertedIndex(){
+		String data = 
+				this.workspaceBean.getWorkspace().getPersistence().readFile(EDataFolder.INVERTED_INDEX, "invertedIndex.txt");
+		this.documentData = data.replace("\r\n", "<BR>");		
+	}
+	
+	/**
+	 * Consulta el indice invertido
+	 */
+	public void queryInvertedIndexZipf(){
+		String data = 
+				this.workspaceBean.getWorkspace().getPersistence().readFile(EDataFolder.INVERTED_INDEX, "invertedIndexZipf.txt");
+		this.documentData = data.replace("\r\n", "<BR>");		
+	}
+	
+	public void queryMembershipIndex(){
+		String data = 
+				this.workspaceBean.getWorkspace().getPersistence().readFile(EDataFolder.MACHINE_LEARNING, "membershipt_term.txt");
+		this.documentData = data.replace("\r\n", "<BR>");
+	}
+	
+
+	
+	public StreamedContent getDownloadInvertedIndex(){
+		return getDownload(EDataFolder.INVERTED_INDEX,"invertedIndex.txt");
+	}
+	public StreamedContent getDownloadInvertedIndexZipf(){
+		return getDownload(EDataFolder.INVERTED_INDEX,"invertedIndexZipf.txt");
+	}
+	
+	public StreamedContent getDownloadPMI(){
+		return getDownload(EDataFolder.MATRIX,"ppmi.txt");
+	}
+	
+	public StreamedContent getDownloadReduced(){
+		return getDownload(EDataFolder.MATRIX,"reduced.txt");
+	}
+	
+	public StreamedContent getDownloadMembershipIndex(){
+		return getDownload(EDataFolder.MACHINE_LEARNING,"membershipt_term.txt");
+	}
+	
+	public StreamedContent getDownloadMembershipMatrix(){
+		return getDownload(EDataFolder.MACHINE_LEARNING,"reduced_membership.txt");
+	}
+	
+	public StreamedContent getDownloadCentroids(){
+		return getDownload(EDataFolder.MACHINE_LEARNING,"reduced_centroids.txt");
+	}
+	
+	public StreamedContent getDownloadDocumentCluster(){
+		return getDownload(EDataFolder.MACHINE_LEARNING,"clusterdocument.txt");
+	}
+	
+	public StreamedContent getDownload(EDataFolder folder, String fileName){
+		StreamedContent file = null;
+		try{
+		String data = 
+				this.workspaceBean.getWorkspace().getPersistence().readFile(folder, fileName);
+		InputStream stream = new ByteArrayInputStream(data.getBytes());
+		file = new DefaultStreamedContent(stream, "text/plain", fileName);
+		}
+		catch(java.lang.NullPointerException e){
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_WARN,
+					"El Archivo No existe", "Verifique el proceso");
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+		return file;
+	}
+	
+	
+	
+	
 	
 	
 
