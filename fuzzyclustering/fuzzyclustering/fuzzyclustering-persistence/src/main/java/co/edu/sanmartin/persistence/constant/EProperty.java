@@ -18,7 +18,7 @@ public enum EProperty {
 	TWITTER_ACCESS_TOKEN_SECRET("twitter.access.token.secret", "Twitter Access Token Secret"),
 	TWITTER_HOME_TIMELINE_PAGES("twitter.home.timeline.pages","Cantidad de paginas de descarga de twitter"),
 	WEB_SCRAPPING_RSS_DOWNLOAD_TIME("webscraping.rss.download.time","tiempo entre busquedas de noticicas RSS"),
-	WEB_SCRAPPING_TWITTER_DOWNLOAD_TIME("webscraping.twitter.download.time","tiempo entre busquedas de noticicas RSS"),
+	WEB_SCRAPPING_TWITTER_DOWNLOAD_TIME("webscraping.twitter.download.time","tiempo entre busquedas de noticicas Twitter"),
 	WEB_SCRAPPING_THREAD_NUMBER("webscrapin.thread.number", "Numero de Hilos de Descarga"),
 	CLEAN_THREAD_NUMBER("clean.thread.number", "Numero de Hilos de Proceso de Limpieza"),
 	INVERTED_INDEX_THREAD_NUMBER("inverted.index.thread.number", "Numero de Hilos de Indices Invertidos"),
@@ -27,6 +27,8 @@ public enum EProperty {
 	IR_DELETE_DETERMINANTS("ir.delete.determinants", "Elimina Determinantes"),
 	IR_DELETE_PREPOSITIONS("ir.delete.prepositions", "Elimina Preposiciones"),
 	IR_DELETE_PRONOUNS("ir.delete.pronouns", "Elimina Pronombres"),
+	IR_DELETE_ARTICLES("ir.delete.articles", "Elimina Articulos"),
+	IR_DELETE_VERBS("ir.delete.verbs","Elimina Verbos"),
 	TEXT_SPLIT_TOKEN("text.split.token", "Token para separacion de textos"),
 	TEXT_STEMMER_ON("text.stemmer.on","Indica si realiza lematizacion(stemming) al texto");
 	

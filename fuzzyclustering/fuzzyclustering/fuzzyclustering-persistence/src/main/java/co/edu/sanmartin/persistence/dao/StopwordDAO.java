@@ -15,6 +15,7 @@ import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
  */
 public class StopwordDAO extends AbstractDAO<StopwordDTO> {
 
+	
 	public StopwordDAO(WorkspaceDTO workspace) {
 		super(workspace);
 	}
@@ -158,6 +159,22 @@ public class StopwordDAO extends AbstractDAO<StopwordDTO> {
 	
 	public void restoreTable(){
 		super.restoreTable("stopword", "name,regex,regexreplace,stopwordorder,enabled");
+	}
+	
+	public void initData() {
+		String sQLQuery = "INSERT INTO stopword (SELECT * FROM fuzzyclustering.stopword);";
+		try {
+			connection = getConnectionPool().getConnection(this.workspace);
+			statement = connection.prepareStatement(sQLQuery);
+			statement.execute();
+		}
+		catch(Exception e){
+			System.out.print(e);
+		}
+		finally{
+			getConnectionPool().freeConnection(connection);
+		};
+		
 	}
 
 }
