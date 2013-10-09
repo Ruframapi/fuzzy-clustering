@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import co.edu.sanmartin.fuzzyclustering.machinelearning.classifier.DocumentCluster;
 import co.edu.sanmartin.fuzzyclustering.machinelearning.classifier.DocumentClustering;
+import co.edu.sanmartin.fuzzyclustering.machinelearning.classifier.DocumentClusteringFunctions;
 import co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans.FuzzyCMeans;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
@@ -43,6 +44,7 @@ public class MachineLearningFacade {
 		DocumentClustering documentClustering = new DocumentClustering(workspace);
 		documentClustering.clustering(document);
 		return documentClustering;
+		
 	}
 	
 	

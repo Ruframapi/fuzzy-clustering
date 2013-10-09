@@ -1,8 +1,8 @@
 package co.edu.sanmartin.fuzzyclustering.machinelearning.classifier;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,11 +21,13 @@ import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
  */
 public class DocumentClusteringFunctions {
 
-	private HashMap<String,Double[]>  membershipTerm = new HashMap<String,Double[]>();
+	private LinkedHashMap<String,Double[]>  membershipTerm = new LinkedHashMap<String,Double[]>();
 	private WorkspaceDTO workspace;
-
+	private InvertedIndex invertedIndex;
+	
 	public DocumentClusteringFunctions(WorkspaceDTO workspace){
 		this.workspace = workspace;
+		this.invertedIndex = IRFacade.getInstance(this.workspace).getInvertedIndexZipf();
 	}
 
 	/**
@@ -34,33 +36,67 @@ public class DocumentClusteringFunctions {
 	public void loadMembershipTermMatrix(){
 		List<Double[]> membershipMatrix = 
 				this.workspace.getPersistence().readFileMatrix(EDataFolder.MACHINE_LEARNING, 
-						"membership.txt");
-		InvertedIndex invertedIndex = IRFacade.getInstance(this.workspace).getInvertedIndexZipf();
+						"reduced_membership.txt");
+		
 		invertedIndex.loadInvertedIndexDataZipf();
 		for (int i = 0; i < invertedIndex.getTermCount(); i++) {
 			String term = invertedIndex.getWordList().get(i);
-
 			Double[] membershipTermCluster = membershipMatrix.get(i);
+			//Adicionamos la penalización
+			//membershipTermCluster = this.penalizeFCM(term,membershipTermCluster);
+
 			this.membershipTerm.put(term, membershipTermCluster);
 		}
+	}
+	
+	/**
+	 * Penalizamos el grado de pertenencia del termino al cluster dependiendo la posición Zipf
+	 */
+	public Double[] penalizeFCM(String term, Double[] membershipTermCluster){
+		double relevance = invertedIndex.getRelevanceTermValue(term);
+		double maxClusterValue = 0.0;
+		for (int i = 0; i < membershipTermCluster.length; i++) {
+			if(membershipTermCluster[i]>maxClusterValue){
+				maxClusterValue =membershipTermCluster[i];
+			}
+//			membershipTermCluster[i]= membershipTermCluster[i]*(relevance);
+		}
+//		if(maxClusterValue>0.4 && maxClusterValue < 0.6){
+//			for (int i = 0; i < membershipTermCluster.length; i++) {				
+//				membershipTermCluster[i] = 0.0;
+//			}
+//		}
+		return membershipTermCluster;
 	}
 
 	/**
 	 * Carga los valores de termino pertenencia de los terminos que componen el documento
 	 */
-	public HashMap<String,Double[]> getDocumentMembershipMatrix(DocumentDTO document){
+	public LinkedHashMap<String,Double[]> getDocumentMembershipMatrix(DocumentDTO document){
 
 		String normalizedText = IRFacade.getInstance(this.workspace).getNormalizedDocumentText(document.getLazyData());
 		document.setLazyCleanData(normalizedText);
 
 		String cleanData = document.getLazyCleanData();
 		String[] documentTermArray = cleanData.split(",");
-		HashMap<String, Double[]> membeshipDocument = new HashMap<String,Double[]>();
+		LinkedHashMap<String, Double[]> membeshipDocument = new LinkedHashMap<String,Double[]>();
 		for (String term : documentTermArray) {
 			Double[] membershipValues = this.getMembershipTerm(term);
 			membeshipDocument.put(term, membershipValues);
 		}
 		return membeshipDocument;
+	}
+	
+	
+	/**
+	 * Retorna la cantidad de terminos del documento
+	 * @param document
+	 * @return
+	 */
+	public int getDocumentTermCount(DocumentDTO document){
+		String cleanData = document.getLazyCleanData();
+		String[] documentTermArray = cleanData.split(",");
+		return documentTermArray.length;
 	}
 
 
@@ -77,7 +113,7 @@ public class DocumentClusteringFunctions {
 	 * Retorna los promedios de la matrix de pertenencia
 	 * @return
 	 */
-	public Double[] getAvgMembershipMatrix(HashMap<String, Double[]> membershipMatrix){
+	public Double[] getAvgMembershipMatrix(LinkedHashMap<String, Double[]> membershipMatrix){
 		Iterator iterator = membershipMatrix.entrySet().iterator();
 
 		ArrayList<Double[]> matrix = new ArrayList<Double[]>();
@@ -113,7 +149,7 @@ public class DocumentClusteringFunctions {
 	 * Retorna los votos de la matrix de pertenencia
 	 * @return
 	 */
-	public Double[] getVoteMembershipMatrix(HashMap<String, Double[]> membershipMatrix){
+	public Double[] getVoteMembershipMatrix(LinkedHashMap<String, Double[]> membershipMatrix){
 		Iterator iterator = membershipMatrix.entrySet().iterator();
 
 		ArrayList<Double[]> matrix = new ArrayList<Double[]>();
@@ -140,7 +176,10 @@ public class DocumentClusteringFunctions {
 						maxCluster = j;
 					}
 				}
-				voteColl[maxCluster]++;
+				
+				if(maxCluster>=0){
+					voteColl[maxCluster]++;
+				}
 			}
 
 		}
@@ -152,7 +191,7 @@ public class DocumentClusteringFunctions {
 	 * @param voteMembershipMatrix
 	 * @return
 	 */
-	public Double[] getFuzzyWeightedAverage(Double[] avgMembershipMatrix,Double[] voteMembershipMatrix){
+	public Double[] getFuzzyWeightedAverage(Double[] avgMembershipMatrix,Double[] voteMembershipMatrix, int termDocumentQuantity){
 		Double[] weightedAverage = new Double[avgMembershipMatrix.length];
 		Double voteSum = 0.00;
 		for (Double vote : voteMembershipMatrix) {
@@ -207,8 +246,6 @@ public class DocumentClusteringFunctions {
 		}
 		return cluster;
 	}
-
-
 
 
 

@@ -1,8 +1,11 @@
 package co.edu.sanmartin.fuzzyclustering.machinelearning.classifier;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 
+import co.edu.sanmartin.fuzzyclustering.ir.index.InvertedIndex;
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 import co.edu.sanmartin.persistence.dto.WorkspaceDTO;
 import co.edu.sanmartin.persistence.facade.WorkspaceFacade;
@@ -15,6 +18,7 @@ import co.edu.sanmartin.persistence.facade.WorkspaceFacade;
 public class DocumentClustering {
 
 	private DocumentDTO document;
+	private int termQuantity = 0;
 	//Promedio de la matrix de pertenencia
 	private Double[] membershipAverage;
 	//Cantidad de maximos
@@ -22,19 +26,21 @@ public class DocumentClustering {
 	//Promedio ponderado difuso
 	private Double[] weightAverage;
 	//Tabla de pertenencia
-	HashMap<String,Double[]> membershipMatrix;
-	
+	LinkedHashMap<String,Double[]> membershipMatrix;
+	//Categoria de los cluster por voto
+	private Double[] clusterCategory;
+
 	private int documentCluster;
 	private int termCluster;
 	
 	private WorkspaceDTO workspace;
-	private DocumentClusteringFunctions documentClustering;
+	private DocumentClusteringFunctions documentClusteringFunction;
 	private static Logger logger = Logger.getLogger("DocumentClustering");
 	
 	public DocumentClustering(WorkspaceDTO workspace){
 		this.workspace = workspace;
-		documentClustering = new DocumentClusteringFunctions(workspace);
-		documentClustering.loadMembershipTermMatrix();
+		documentClusteringFunction = new DocumentClusteringFunctions(workspace);
+		documentClusteringFunction.loadMembershipTermMatrix();
 	}
 	
 	/**
@@ -44,25 +50,29 @@ public class DocumentClustering {
 	public void clustering(DocumentDTO document){
 		this.document = document;
 		
-		this.membershipMatrix = documentClustering.getDocumentMembershipMatrix(document);
+		this.membershipMatrix = documentClusteringFunction.getDocumentMembershipMatrix(document);
+		this.membershipAverage = documentClusteringFunction.getAvgMembershipMatrix(membershipMatrix);
+		this.termQuantity = documentClusteringFunction.getDocumentTermCount(document);
 		if(membershipMatrix==null){
 			logger.info("El documento: " + document.getName() + "no tiene matrix de pertenencia");
 		}
 		else{
-			this.membershipAverage = documentClustering.getAvgMembershipMatrix(membershipMatrix);
+			
 			if(this.membershipAverage== null){
 				logger.info("Todos los terminos del documento" + document.getName() + "no se encuentran en el indice");
 			}
 			else{
-				this.voteArray = documentClustering.getVoteMembershipMatrix(membershipMatrix);
-				this.weightAverage = documentClustering.getFuzzyWeightedAverage(membershipAverage, voteArray);
-				this.documentCluster = documentClustering.getDocumentCluster(weightAverage);
-				this.termCluster = documentClustering.getTermCluster(document.getLazyClusterTerm());
+				this.voteArray = documentClusteringFunction.getVoteMembershipMatrix(membershipMatrix);
+				
+				this.weightAverage = documentClusteringFunction.getFuzzyWeightedAverage(membershipAverage, voteArray, termQuantity);
+				this.documentCluster = documentClusteringFunction.getDocumentCluster(weightAverage);
+				this.termCluster = documentClusteringFunction.getTermCluster(document.getLazyClusterTerm());
 			}
 		}
 	}
 	
 	
+
 	public DocumentDTO getDocument() {
 		return document;
 	}
@@ -91,13 +101,7 @@ public class DocumentClustering {
 	public int getTermCluster() {
 		return termCluster;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
+
+
 	
 }
