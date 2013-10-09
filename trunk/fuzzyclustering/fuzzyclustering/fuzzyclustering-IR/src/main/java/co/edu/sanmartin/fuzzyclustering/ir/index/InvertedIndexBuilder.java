@@ -28,7 +28,7 @@ public class InvertedIndexBuilder {
 	private WorkspaceDTO workspace;
 
 	public InvertedIndexBuilder(WorkspaceDTO workspace, ConcurrentLinkedDeque<String> index){
-		logger.debug("Init Inverted Index");
+		logger.info("Init Inverted Index");
 		this.index = index;
 		this.workspace = workspace;
 	}
@@ -46,7 +46,7 @@ public class InvertedIndexBuilder {
 	 */
 	private void buildIndex(int minQuantityTerms){
 		//Ordena Alfabeticamente el indice
-
+		logger.info("Iniciando Creacion de indice invertido");
 		this.invertedIndex = new ArrayList<String>();
 		Collection<String> termCol =  index;
 		ArrayList<String> termList =new ArrayList<String>(termCol);
@@ -97,6 +97,7 @@ public class InvertedIndexBuilder {
 			
 		}
 		invertedIndex.add(stringBuilder.toString());
+		logger.info("Indice Invertido Creado");
 	}
 
 
@@ -139,6 +140,8 @@ public class InvertedIndexBuilder {
 			}
 			sortedString.append("\t");
 			sortedString.append(documentsArray.size());
+			sortedString.append("\t");
+			sortedString.append("100.00");
 			sortedIndex.add(sortedString.toString());
 		}
 

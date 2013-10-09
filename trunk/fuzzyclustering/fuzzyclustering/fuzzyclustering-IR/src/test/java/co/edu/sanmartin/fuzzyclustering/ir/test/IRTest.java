@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Assert;
 import org.junit.Test;
@@ -277,7 +278,8 @@ public class IRTest {
 	
 	@Test
 	public void normalizeTest(){
-		String dataFile = this.workspace.getPersistence().readFile(EDataFolder.DOWNLOAD, "10675.txt");
+		this.workspace = WorkspaceFacade.getWorkspace("noticias_economicas");
+		String dataFile = this.workspace.getPersistence().readFile(EDataFolder.DOWNLOAD, "8112.txt");
 		IRFacade.getInstance(this.workspace).getNormalizedDocumentText(dataFile);
 	}
 	/**
@@ -357,9 +359,21 @@ public class IRTest {
 	
 	@Test
 	public void zipfIndexTest(){
-		this.workspace = WorkspaceFacade.getWorkspace("noticias_economicas");
+		this.workspace = WorkspaceFacade.getWorkspace("reuters_nostemmed");
 		InvertedIndex invertedIndex = new InvertedIndex(workspace);
-		invertedIndex.reducedZipfInvertedIndex(85, 35, 1);
+		invertedIndex.reducedZipfInvertedIndex(20, 35, 1);
+	}
+	@Test
+	public void zipfIndexRelevanceTest(){
+		this.workspace = WorkspaceFacade.getWorkspace("reuters_nostemmed");
+		InvertedIndex invertedIndex = new InvertedIndex(workspace);
+		invertedIndex.relevanceZipfInvertedIndex(1);
 	}
 	
+	@Test
+	public void unscape(){
+		String data = "&#F1";
+		String result = StringEscapeUtils.unescapeHtml(data);
+		System.out.print(result);
+	}
 }

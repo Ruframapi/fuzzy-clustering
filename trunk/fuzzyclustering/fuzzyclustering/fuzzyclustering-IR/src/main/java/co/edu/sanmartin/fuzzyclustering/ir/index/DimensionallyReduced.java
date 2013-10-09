@@ -38,8 +38,8 @@ public class DimensionallyReduced {
 	 */
 	public void reducedDimensionDoubleMatrix(String fileName, int newDimension, 
 												boolean saveReadable, int reableRowsAmount){
-		SendMessageAsynch.sendMessage(this.workspace, "Iniciando Proceso de Reduccion de Dimensionalidad para " + 
-									newDimension+ " Dimensiones." );
+//		SendMessageAsynch.sendMessage(this.workspace, "Iniciando Proceso de Reduccion de Dimensionalidad para " + 
+//									newDimension+ " Dimensiones." );
 		try{
 			
 			BigDoubleMatrixFileManager ppmiMatrix = new BigDoubleMatrixFileManager(this.workspace);

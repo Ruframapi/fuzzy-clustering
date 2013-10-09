@@ -1,6 +1,8 @@
 package co.edu.sanmartin.fuzzyclustering.ir.index;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -49,6 +51,9 @@ public class InvertedIndex {
 	private int[][] termTermMatrix;
 	//LinkedHashMap InvertedIndex se utiliza linked para manter el orden de insercion
 	private LinkedHashMap<String,Integer[]> invertedIndexMap; 
+
+	private LinkedHashMap<String,Double> relevanceIndexMap; 
+	
 
 
 	private ArrayList<String> wordList;
@@ -112,8 +117,8 @@ public class InvertedIndex {
 	public ArrayList<String> getWordList() {
 		return wordList;
 	}
-	
-	
+
+
 
 	public HashMap<String, Integer[]> getInvertedIndexMap() {
 		return invertedIndexMap;
@@ -146,6 +151,7 @@ public class InvertedIndex {
 	public void loadInvertedIndexDataZipf(){
 		this.loadInvertedIndex("invertedIndexZipf.txt");
 	}
+	
 
 	/**
 	 * Retorna la informacion del archivo de indices invertidos
@@ -176,7 +182,7 @@ public class InvertedIndex {
 	public void reducedZipfInvertedIndex(int cutOnPercent,int cutOffPercent, int minTermOcurrences){
 		this.loadInvertedIndexOriginal();
 		List<String> dataList = new ArrayList<String>();
-		HashMap<String,Integer> filterList = new HashMap<String,Integer>();
+		LinkedHashMap<String,Integer> filterList = new LinkedHashMap<String,Integer>();
 		for (int i = 0; i < termList.length; i++) {
 			filterList.put(termList[i],Integer.parseInt(termList[i].split("\t")[2]));
 		}
@@ -199,14 +205,14 @@ public class InvertedIndex {
 			//Calculamos la cantidad de terminos menor al punto de transicion
 			for (int i = 0; i < this.termDocumentCount.length; i++) {
 				if(this.termDocumentCount[i]<transitionPoint){
-					cutOnQuantity++;
+					cutOffQuantity++;
 				}
 			}
 
 			//Calculamos la cantidad de terminos menor al punto de transicion
 			for (int i = 0; i < this.termDocumentCount.length; i++) {
 				if(this.termDocumentCount[i]>transitionPoint){
-					cutOffQuantity++;
+					cutOnQuantity++;
 				}
 			}	
 
@@ -223,6 +229,80 @@ public class InvertedIndex {
 			this.workspace.getPersistence().writeFile(EDataFolder.INVERTED_INDEX, "invertedIndexZipf.txt", stringBuilder.toString());
 
 		}
+		SendMessageAsynch.sendMessage(this.workspace,"Creación de Indice Reducido Finalizada");
+	}
+
+	/**
+	 * Crea el indice invertido con relevancia de acuerdo a los puntos de corte segun la ley de zipf
+	 * @param cutOnPercent
+	 * @param cutOffPercent
+	 */
+	public void relevanceZipfInvertedIndex(int minTermOcurrences){
+		this.loadInvertedIndexOriginal();
+		LinkedList<String> dataList = new LinkedList<String>();
+		LinkedHashMap<String,Integer> filterList = new LinkedHashMap<String,Integer>();
+		Double transitionPoint = this.getTransitionPoint(minTermOcurrences);
+		Double transitionPointPosition =0.0;
+		List<String> filteredList = new ArrayList<String>();
+		//for (int i = 0; i < this.termDocumentCount.length; i++) {
+		//	if(this.termDocumentCount[i]<=transitionPoint){
+		//		transitionPointPosition++;
+		//	}
+		//	else{
+		//		break;
+		//	}
+		//}
+		
+		for (int i = 0; i < termList.length; i++) {
+			filterList.put(termList[i],Integer.parseInt(termList[i].split("\t")[2]));
+		}
+		//Ordenamos el HashMap
+		filterList = this.sortHashMapByValue(filterList);
+		//Retornamos el indice filtrador
+		Iterator it = filterList.entrySet().iterator();
+
+		int leftCounter = 0;
+		int rightCounter = 0;
+		while (it.hasNext()) {
+			
+			Map.Entry e = (Map.Entry)it.next();
+			String key =  e.getKey().toString();
+			Integer value = (Integer)e.getValue();
+			StringBuilder rowData = new StringBuilder();
+			rowData.append(key.substring(0,key.lastIndexOf("\t")));
+			rowData.append("\t");
+			double relevance = 0.0;
+			if(leftCounter<=transitionPoint){
+				//Relevancia es la posicion dividido el punto de transicion
+				relevance = leftCounter/transitionPoint;
+				leftCounter++;
+			}
+			else{
+				//Relevancia es la posicion dividido el punto de transicion
+				double termCount = this.termDocumentCount.length;
+				//double relevance = ((termCount-counter)-1)/(termCount-counter);
+				relevance = 1-(rightCounter/(termCount-leftCounter));
+				rightCounter ++;
+				//System.out.println(rightCounter);
+			}
+			
+			BigDecimal bigDecimal = new BigDecimal(relevance);
+			bigDecimal = bigDecimal.setScale(1, RoundingMode.HALF_UP);
+			rowData.append(bigDecimal);
+			filteredList.add(rowData.toString());
+			
+		}
+
+	
+
+		StringBuilder stringBuilder = new StringBuilder();
+		for (String string : filteredList) {
+			stringBuilder.append(string);
+			stringBuilder.append(System.getProperty("line.separator"));
+		}
+		this.workspace.getPersistence().writeFile(EDataFolder.INVERTED_INDEX, 
+				"invertedIndexZipf.txt", stringBuilder.toString());
+		logger.info("Inverted Index Relevance Finished");
 	}
 
 
@@ -232,7 +312,7 @@ public class InvertedIndex {
 	 * @param map
 	 * @return
 	 */
-	public  HashMap<String, Integer> sortHashMapByValue(HashMap<String, Integer> map) {
+	public  LinkedHashMap<String, Integer> sortHashMapByValue(LinkedHashMap<String, Integer> map) {
 		List<Map.Entry<String, Integer>> list = new LinkedList<Map.Entry<String, Integer>>(map.entrySet());
 
 		Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
@@ -242,7 +322,7 @@ public class InvertedIndex {
 			}
 		});
 
-		HashMap<String, Integer> result = new LinkedHashMap<String, Integer>();
+		LinkedHashMap<String, Integer> result = new LinkedHashMap<String, Integer>();
 		for (Map.Entry<String, Integer> entry : list) {
 			result.put(entry.getKey(), entry.getValue());
 		}
@@ -257,7 +337,7 @@ public class InvertedIndex {
 	public double  getTransitionPoint(int minTermOcurrences){
 		//Extraemos la  cantidd de terminos que aparecen una vez o el valor de minTermOcurrences
 		int oneOcurrences = this.getTermCountByOcurrences(minTermOcurrences);
-		double transitionPoint = (Math.sqrt(1+8*oneOcurrences))-1/2;
+		double transitionPoint = ((Math.sqrt(1+8*oneOcurrences))-1)/2;
 		return transitionPoint;
 	}
 
@@ -285,7 +365,7 @@ public class InvertedIndex {
 	public int getTermOcurrencesByDocument(String term, int documentId){
 		int ocurrences = 0;
 		Integer[] documentsByTerm = this.invertedIndexMap.get(term);
-		
+
 		for (Integer document : documentsByTerm) {
 			if(document==documentId){
 				ocurrences++;
@@ -301,6 +381,7 @@ public class InvertedIndex {
 	private void loadWordList(){
 		this.wordList = new ArrayList<String>();
 		this.invertedIndexMap = new LinkedHashMap<String, Integer[]>();
+		this.relevanceIndexMap = new LinkedHashMap<String, Double>();
 		for (int i = 0; i < termList.length; i++) {
 			String[] termListSplit =this.termList[i].split("\t");
 			String term =termListSplit[0];
@@ -310,6 +391,7 @@ public class InvertedIndex {
 				integerArray[j]=Integer.parseInt(documents[j]);
 			}
 			this.invertedIndexMap.put(term, integerArray);
+			this.relevanceIndexMap.put(term, Double.parseDouble(termListSplit[3]));
 			this.wordList.add(this.termList[i].split("\t")[0]);
 		}
 	}
@@ -500,6 +582,15 @@ public class InvertedIndex {
 			while(pointerTerm1<documentsTerm1.length && pointerTerm2<documentsTerm2.length);
 		}
 		return  intersection;
+	}
+	
+	/**
+	 * Retorna la relevancia de un termino dependiendo de su frecuencia
+	 * @param term
+	 * @return
+	 */
+	public double getRelevanceTermValue(String term){
+		return this.relevanceIndexMap.get(term);
 	}
 
 

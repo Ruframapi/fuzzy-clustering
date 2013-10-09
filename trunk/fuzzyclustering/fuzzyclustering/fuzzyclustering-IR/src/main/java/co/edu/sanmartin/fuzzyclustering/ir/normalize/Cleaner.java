@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -103,7 +104,7 @@ public class Cleaner {
     	StringBuilder cleanString = new StringBuilder();
     	cleanString.append(data);
     	Lexicon lexicon = Lexicon.getInstance(this.workspace);
-    	HashMap<ELexicon,String> lexiconMap = lexicon.getLexiconMap();
+    	LinkedHashMap<ELexicon,String> lexiconMap = lexicon.getLexiconMap();
     	Iterator it = lexiconMap.entrySet().iterator();
     	while (it.hasNext()) {
     		Map.Entry e = (Map.Entry)it.next();
