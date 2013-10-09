@@ -10,7 +10,7 @@ public class ReutersRssBuilderTest {
 
 	@Test
 	public void createRssReutersR8(){;
-		WorkspaceDTO workspace = WorkspaceFacade.getWorkspace("prueba");
+		WorkspaceDTO workspace = WorkspaceFacade.getWorkspace("reuters_nostemmed");
 		ReutersRssBuilder rssBuilder = new ReutersRssBuilder(workspace);
 		rssBuilder.createRssReutersR8();
 	}
