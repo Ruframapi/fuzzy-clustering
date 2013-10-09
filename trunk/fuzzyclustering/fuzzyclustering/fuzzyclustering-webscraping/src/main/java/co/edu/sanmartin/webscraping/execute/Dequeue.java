@@ -182,13 +182,14 @@ public class Dequeue implements Runnable{
 		logger.info("Cleaning Download Process");
 		QueueFacade.getInstance().truncateQueue();
 		workspace.getPersistence().truncateDocument();
-		workspace.getPersistence().deleteFolder(EDataFolder.DATA_ROOT);
 		//this.sequence = new AtomicInteger();
 		Collection<SourceDTO> source = workspace.getPersistence().getAllSources(true);
 		for (SourceDTO sourceDTO : source) {
 			sourceDTO.setLastQuery(null);
+			sourceDTO.setSinceId(0);
 			workspace.getPersistence().updateSource(sourceDTO);
 		}
+		workspace.getPersistence().deleteFolder(EDataFolder.DATA_ROOT);
 		
 	}
 	
@@ -214,6 +215,7 @@ public class Dequeue implements Runnable{
 	 * @param queueDTO
 	 */
 	public void downloadTwitter(QueueDTO queueDTO, AtomicInteger sequence) throws PropertyValueNotFoundException, SQLException{
+		try{
 		queueDTO.setStatus(EQueueStatus.ACTIVE);
 		WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
 		QueueFacade.getInstance().updateQueue(queueDTO);
@@ -222,6 +224,10 @@ public class Dequeue implements Runnable{
 		threadPool.executeThreadPool(ESourceType.TWITTER);
 		QueueFacade.getInstance().updateQueue(queueDTO);
 		this.addNewQueueEvent(workspace,EQueueEvent.DOWNLOAD_TWITTER);
+		}
+		catch(Exception e){
+			logger.error(e);
+		}
 	}
 	
 	/**
