@@ -10,8 +10,8 @@
 				<p:dataTable id="documents" value="#{documents.documents}"
 					var="document" selection="#{documents.document}"
 					selectionMode="single" rowKey="#{document.id}" paginator="true"
-					rows="10" lazy="true" first="#{document.id}">
-					<p:ajax event="rowSelect" listener="#{documents.onRowSelect}"/>
+					rows="10" lazy="true">
+					<!-- <p:ajax event="rowSelect" listener="#{documents.onRowSelect}"/> -->
 					<f:facet name="header">  
 			            Listado de Archivos 
 			        </f:facet>

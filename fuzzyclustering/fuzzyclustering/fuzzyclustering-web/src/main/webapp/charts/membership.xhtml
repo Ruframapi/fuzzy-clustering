@@ -56,18 +56,24 @@
                 enabled: false
             },
             plotOptions: {
+	           	 series: {
+	                 marker: {
+	                     radius: 0.1
+	                 }
+	             },
                 areaspline: {
                     fillOpacity: 0.5
-                }
+                },
             },
             marker: {
-                radius: 1
+            	lineWidth: 0.1,
+                radius: 0.1
             },
             series: []
                     //End Options
                    
                 };
-                
+                   
                 return options; 
             };
             

@@ -39,7 +39,7 @@
                         type: chartType
                     },
                     title: {
-                        text: 'Terminos 2D',
+                        text: 'Matriz de Co-Ocurrencia Reducida 2D (Johnson -Lindenstrauss)',
                         style: {
                             color: '#000',
                             font: 'bold 16px "Trebuchet MS", Verdana, sans-serif'
@@ -89,7 +89,7 @@
                                 fontSize: '12px',
                                 fontFamily: 'Trebuchet MS, Verdana, sans-serif'
                             },
-                            text: 'Pertenencia'
+                            text: 'PPMI Value'
                         },
                         labels: {
                             formatter: function() {
@@ -102,6 +102,11 @@
                         }
                     },
                     plotOptions: {
+                    	series: {
+       	                 marker: {
+       	                     radius: 1.3
+       	                 }
+       	             },
                         area: {
                             stacking: 'normal',
                             lineColor: '#666666',

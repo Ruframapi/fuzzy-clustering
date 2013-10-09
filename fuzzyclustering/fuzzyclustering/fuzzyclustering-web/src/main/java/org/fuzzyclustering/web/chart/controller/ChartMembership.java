@@ -87,13 +87,14 @@ public class ChartMembership implements Serializable{
 			List<Series<Double>> series = new ArrayList<Series<Double>>();
 
 
-			List<Double[]> membershipMatrix = this.workspaceBean.getWorkspace().getPersistence().readFileMatrix(EDataFolder.MACHINE_LEARNING, "membership.txt");
+			List<Double[]> membershipMatrix = this.workspaceBean.getWorkspace().getPersistence().readFileMatrix(EDataFolder.MACHINE_LEARNING, "reduced_membership.txt");
+			//membershipMatrix = membershipMatrix.subList(1, 10);
 			InvertedIndex invertedIndex = IRFacade.getInstance(this.workspaceBean.getWorkspace()).getInvertedIndexZipf();
 
 			String[] termList = invertedIndex.getTermList();
 
-			//for (int i = 0; i < membershipMatrix.get(0).length; i++) {
-			for (int i = 0; i < 10; i++) {
+			for (int i = 0; i < membershipMatrix.get(0).length; i++) {
+			//for (int i = 0; i < 10; i++) {
 				List membershipSerie = new ArrayList<Double>();
 				for (int j = 0; j < membershipMatrix.size(); j++) {
 					membershipSerie.add(membershipMatrix.get(j)[i]);

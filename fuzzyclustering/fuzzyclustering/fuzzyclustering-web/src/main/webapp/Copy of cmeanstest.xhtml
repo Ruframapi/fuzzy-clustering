@@ -1,0 +1,63 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" template="templates/template.xhtml">
+
+	<ui:define name="context">
+		<ui:include src="contextmenu.xhtml" />
+	</ui:define>
+	<ui:define name="content">
+		<h:form id="cmeansTest">
+			<p:panel>
+
+				<p:panelGrid columns="2">
+					<p:outputLabel value="Texto a categorizar">
+					</p:outputLabel>
+					<p:inputTextarea value="#{cmeanstest.documentText}"
+						autoResize="true" cols="100"></p:inputTextarea>
+					<p:outputLabel value="Termino de Comparacion(Opcional)">
+					</p:outputLabel>
+					<p:inputText value="#{cmeanstest.term}"></p:inputText>
+
+				</p:panelGrid>
+				<p:commandButton value="Categorizar"
+					actionListener="#{cmeanstest.buildDocumentMembership}"
+					update=":cmeansTest:result,cmeansTest:resume"></p:commandButton>
+			</p:panel>
+			<p:panel id="result" header="Resultados">
+				<p:panel header="Matriz de Pertenencia">
+					<p:dataTable id="membership" var="membership"
+						value="#{tableBean.data}">
+						<p:columns value="#{tableBean.columns}" var="column"
+							columnIndexVar="colIndex">
+							<f:facet name="header">  
+				                #{column.header}  
+				            </f:facet>  
+				            #{car[column.property]}  
+				        </p:columns>
+					</p:dataTable>
+					<p:dataList value="#{cmeanstest.membershipDataTable.rowData}"
+						var="membership" itemType="disc">  
+					    #{membership.rowData}  
+					</p:dataList>
+					<p:panelGrid id="resume" columns="2">
+						<p:outputLabel value="Cluster Documento:"></p:outputLabel>
+						<p:outputLabel
+							value="#{cmeanstest.documentClustering.documentCluster}">
+						</p:outputLabel>
+						<p:outputLabel value="Cluster Termino:"></p:outputLabel>
+						<p:outputLabel
+							value="#{cmeanstest.documentClustering.termCluster}">
+						</p:outputLabel>
+					</p:panelGrid>
+				</p:panel>
+			</p:panel>
+			<p:panel>
+				<p:commandButton value="Categorizar"
+					actionListener="#{cmean.classifyDocumentsInFile}"></p:commandButton>
+			</p:panel>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

@@ -16,7 +16,7 @@ import org.primefaces.push.PushContextFactory;
 
 import co.edu.sanmartin.persistence.dto.DocumentDTO;
 
-@ManagedBean(name = "asynch")
+@ManagedBean(name = "asynch", eager= true)
 @ApplicationScoped
 public class AsynchManagedBean implements Serializable{
 
@@ -32,7 +32,7 @@ public class AsynchManagedBean implements Serializable{
 	
 	@PostConstruct
 	public void init(){
-		 
+		 logger.info("Init AsynchManagedBean Servlet");
 	}
 	public String getDownloadStatus() {
 		return downloadStatus;

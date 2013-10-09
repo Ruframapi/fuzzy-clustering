@@ -85,8 +85,8 @@ public class ChartClusterBean2d implements Serializable{
 	    	List<Series<Double[]>> series = new ArrayList<Series<Double[]>>();
 	    	
 	    	List<Double[]> termList = this.workspaceBean.getWorkspace().getPersistence().readFileMatrix(EDataFolder.MATRIX, "reduced2D.txt");
-	    	List<Double[]> centroids = this.workspaceBean.getWorkspace().getPersistence().readFileMatrix(EDataFolder.MACHINE_LEARNING, "centroids.txt");
-	    	List<Double[]> membership = this.workspaceBean.getWorkspace().getPersistence().readFileMatrix(EDataFolder.MACHINE_LEARNING, "membership.txt");
+	    	List<Double[]> centroids = this.workspaceBean.getWorkspace().getPersistence().readFileMatrix(EDataFolder.MACHINE_LEARNING, "reduced_centroids.txt");
+	    	List<Double[]> membership = this.workspaceBean.getWorkspace().getPersistence().readFileMatrix(EDataFolder.MACHINE_LEARNING, "reduced_membership.txt");
 	    	
 	    	
 	    	ArrayList<List <Double[]>> clusterList = new ArrayList<List <Double[]>>(centroids.size());

@@ -15,13 +15,13 @@
 					<p:outputLabel>Total Documentos Descargados:</p:outputLabel>
 					<p:outputLabel value="#{irDownload.downloadDocumentAmount}"></p:outputLabel>
 				</p:panelGrid>
-				<p:dataList id="dataListEnqueue"
+				<p:dataList id="dataListEnqueue" rendered="false"
 					value="#{irDownload.downloadEnqueue}" var="queueEnqueue"
 					type="definition">  
 				    Proximo Evento: #{queueEnqueue.event}, Fecha: #{queueEnqueue.initDate} 
 					</p:dataList>
 
-				<p:dataList id="dataListActive" value="#{irDownload.downloadActive}"
+				<p:dataList id="dataListActive" rendered="false" value="#{irDownload.downloadActive}"
 					var="queueActive" type="definition">  
 				    Evento Activo: #{queueActive.event}, Fecha: #{queueActive.initDate} 
 					</p:dataList>
@@ -31,40 +31,44 @@
 			<p:commandButton value="Descargar"
 				actionListener="#{irDownload.download}"></p:commandButton>
 			<p:commandButton id="showDialogButton" value="Eliminar Descargas"
-				onclick="confirmation.show()" type="button" />
-			<p:commandButton value="Recargar Configuracion"
-				actionListener="#{irDownload.reloadSettings}"></p:commandButton>
+				onclick="confirmation.show()" type="button" rendered="false"/>
+			<p:commandButton value="Eliminar Descargas" rendered="true"
+				actionListener="#{irDownload.deleteDownloadSources}"></p:commandButton>
+			<p:commandButton value="Normalizar"
+				actionListener="#{documents.normalize}"
+				update=":#{p:component('dataFile')}"></p:commandButton>
 
-			
 
 
-			<p:poll interval="20" update="dataListEnqueue,dataListActive,resume"
-				listener="#{irDownload.poolListener}" />
-		</h:form>
-		
-		<p:confirmDialog id="confirmDialog"
+			<p:poll interval="10" update="resume,documents"
+				listener="#{irDownload.poolListener}"  />
+
+
+			<p:confirmDialog id="confirmDialog"
 				message="Esta seguro de eliminar todas las descargas?"
 				header="Eliminación de descargas" severity="alert"
 				widgetVar="confirmation" appendToBody="true">
-				<h:form id="confirmForm">
-				<p:commandButton id="decline" value="No Cancelar"
-					onclick="confirmation.hide()" type="button" />
-				<p:commandButton id="confirm" value="Si Eliminar"
-					oncomplete="confirmation.hide()"
-					actionListener="#{irDownload.deleteDownloadSources}"
-					update=":documentForm:documentsGrid" type="submit" />
+				<h:form id="confirmForm1">
+					<p:commandButton id="decline" value="No Cancelar"
+						onclick="confirmation.hide()" type="button" />
+					<p:commandButton id="confirm" value="Si Eliminar"
+						oncomplete="confirmation.hide()"
+						actionListener="#{irDownload.deleteDownloadSources}"
+						update=":documentForm:documentsGrid" />
+						<p:commandButton value="Eliminar Descargas" rendered="true"
+				actionListener="#{irDownload.deleteDownloadSources}"></p:commandButton>
 				</h:form>
 			</p:confirmDialog>
-		
-		<p:panel>
-			<h:form id="documentsform">
+
+			<p:panel>
 				<p:panelGrid columns="2" styleClass="align_top">
 
 					<p:dataTable id="documents" value="#{documents.documents}"
 						var="document" selection="#{documents.document}"
 						selectionMode="single" rowKey="#{document.id}" paginator="true"
-						rows="10" lazy="true" first="#{document.id}">
-						<p:ajax event="rowSelect" listener="#{documents.onRowSelect}" />
+						rows="10" lazy="true" rowsPerPageTemplate="5,10,100">
+						<p:ajax event="rowSelect" listener="#{documents.onRowSelect}"
+							update=":documentForm:dataFile" />
 						<f:facet name="header">  
 			            Listado de Archivos 
 			        </f:facet>
@@ -103,39 +107,21 @@
 						</f:facet>
 					</p:dataTable>
 
-					<p:panel id="dataFile">
-						<h:outputText value="#{asynch.documentName}" styleClass="display"></h:outputText>
+					<p:panel id="dataFile" style="width:800px">
 						<p:panel id="archivoOriginal" header="Archivo Original">
 							<p:outputLabel id="originalDataLabel"
-								binding="#{asynch.originalDataLabel}"
-								value="#{asynch.documentData}" styleClass="display"></p:outputLabel>
+								value="#{documents.originalDataDocument}"></p:outputLabel>
 						</p:panel>
-						<p:panel header="Archivo Normalizado">
+						<p:panel id="archivoNormalizado" header="Archivo Normalizado">
 							<p:outputLabel id="cleanDataLabel"
-								binding="#{asynch.cleanDataLabel}" value="#{asynch.cleanData}"
-								styleClass="display"></p:outputLabel>
+								value="#{documents.cleanDataDocument}"></p:outputLabel>
 							<p:separator></p:separator>
-							<p:commandButton value="Normalizar"
-								actionListener="#{documents.normalize}"
-								update=":#{p:component('dataFile')}"></p:commandButton>
 						</p:panel>
 					</p:panel>
 				</p:panelGrid>
-			</h:form>
-			<p:outputLabel styleClass="display"></p:outputLabel>
-		</p:panel>
-		<script>
-			function handleMessage1(data) {
-				facesmessage.severity = 'info';
-				growl.show([ data ]);
-				//$('.display').html(data);
-				//alert("Test");
-			}
-		</script>
-		<p:socket onMessage="handleMessage1" channel="/document">
-			<p:ajax event="message" update=":#{p:component('dataFile')}" />
-		</p:socket>
+				<p:outputLabel styleClass="display"></p:outputLabel>
+			</p:panel>
+
+		</h:form>
 	</ui:define>
-
-
 </ui:composition>

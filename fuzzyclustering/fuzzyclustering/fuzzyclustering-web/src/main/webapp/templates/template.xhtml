@@ -21,6 +21,13 @@
 			growl.show([ facesmessage ]);
 		}
 		
+        function start() {  
+            statusDialog.show();  
+        }  
+          
+        function stop() {  
+            statusDialog.hide();  
+        }  
 		
 
 	</script>
@@ -70,7 +77,7 @@
 
 	</p:layout>
 
-	<p:idleMonitor onactive="sessionTimeOutDialog.show();" timeout="300000">
+	<p:idleMonitor onactive="sessionTimeOutDialog.show();" timeout="600000">
 		<p:ajax event="idle" listener="#{workspace.invalidateSession}" />
 	</p:idleMonitor>
 	<p:dialog header="Session Caducada" widgetVar="sessionTimeOutDialog"

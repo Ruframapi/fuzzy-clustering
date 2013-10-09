@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <h:head>
+        <script src="../resources/js/jquery.min.js" type="text/javascript"></script>
+        <script src="../resources/js/highstock.js"></script>
+        <script src="../resources/js/highcharts.js"></script>
+        <script src="../resources/js/exporting.js"></script>
+        <script src="../resources/js/sigma.min.js"></script>
+        <script type="text/javascript">
+            function renderChart(){
+            	$(document).ready(function() {
+            	      var sigRoot = document.getElementById('sig');
+            	      var sigInst = sigma.init(sigRoot).drawingProperties({
+            	        defaultLabelColor: '#ccc',
+            	        font: 'Arial',
+            	        edgeColor: 'source',
+            	        defaultEdgeType: 'curve'
+            	      }).graphProperties({
+            	        minNodeSize: 1,
+            	        maxNodeSize: 10
+            	      });
+
+            	      sigInst.addNode('hello',{
+            	        label: 'Hello',
+            	        color: '#ff0000',
+            	        x: 1
+            	      }).addNode('world',{
+            	        label: 'World !',
+            	        color: '#00ff00',
+            	        x: 2
+            	      }).addEdge('hello_world','hello','world').draw();
+            	    });
+            }
+            
+            
+        </script>
+          <style type="text/css">
+    /* sigma.js context : */
+    .sigma {
+      margin-left:auto;
+      margin-right:auto;
+      position: relative;
+      border-radius: 4px;
+      -moz-border-radius: 4px;
+      -webkit-border-radius: 4px;
+      background: #222;
+      width: 80%;
+      height: 80%;
+      min-height: 200px;
+      top: 0;
+      left: 0;
+    }
+  </style>
+	</h:head>
+    <body>
+        <h:form prependId="false">
+			<h:commandButton onclick="renderChart();" immediate="true" type="button"></h:commandButton>
+        </h:form>
+        <div class="sigma" id="sig"></div>
+    </body>
+</html>
