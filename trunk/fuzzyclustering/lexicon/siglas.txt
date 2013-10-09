@@ -1,0 +1,101 @@
+adj.: adjetivo.
+adj. indef.: adjetivo indefinido.
+adj. indef. pl.: adjetivo indefinido plural.
+adj. numeral: adjetivo numeral.
+adj. poses.: adjetivo posesivo.
+adj. sing.: adjetivo singular.
+adv.: adverbio.
+adv. a.: adverbio de afirmación.
+adv. c.: adverbio de cantidad
+adv. de duda: adverbio de duda.
+adv. de modo: adverbio de modo.
+adv. interrog.: adverbio interrogativo.
+adv. l.: adverbio de lugar.
+adv. neg.: adverbio de negación.
+adv. t.: adverbio de tiempo.
+af.: afín.
+amer.: americanismo.
+Anat.: Anatomía.
+anglic.: anglicismo.
+ant.: antónimo.
+Arq.: Arquitectura.
+art. f.: artículo femenino.
+art. indef.: artículo indefinido.
+art. m.: artículo masculino.
+Astron.: Astronomía.
+aum.: aumentativo.
+Biol.: Biología.
+Bot.: Botánica.
+cm: centímetro.
+coloq.: coloquial.
+conj.: conjunción.
+cub.: cubanismo.
+Dep.: Deporte.
+Der.: Derecho.
+despect.: despectivo.
+dim.: diminutivo.
+Electr.: Electricidad.
+fam.: familiar.
+fig.: sentido figurado.
+Fís.: Física.
+Fon.: Fonética.
+fras.: fraseologismo.
+galic.: galicismo.
+Geogr.: Geografía.
+Geol.: Geología.
+Geom.: Geometría.
+Gram.: Gramática.
+Inform.: Informática.
+interj.: interjección.
+invar.: invariable.
+Ling.: Lingüística.
+Lit.: Literatura.
+loc. adj.: locución adjetiva.
+loc. adv.: locución adverbial.
+loc. conj.: locución conjuntiva.
+loc. nom.: locución nominal.
+loc. prepos.: locución preposicional.
+loc. verb.: locución verbal.
+m.: metro.
+Mar.: Marina.
+Mat.: Matemáticas.
+Med.: Medicina.
+Meteor.: Meteorología.
+Mil.: Militar.
+Mit.: Mitología.
+Mús.: Música.
+p.p.: participio pasivo.
+p.p. irreg.: participio pasivo irregular.
+pl.: plural.
+Pol.: Política.
+pop.: popular.
+Por ext.: Por extensión.
+prep.: preposición.
+pron.: pronombre.
+pron. demos.: pronombre demostrativo.
+pron. excl.: pronombre exclamativo.
+pron. indef.: pronombre indefinido.
+pron. interrog.: pronombre interrogativo.
+pron. pers.: pronombre personal.
+pron. poses.: pronombre posesivo.
+pron. relat.: pronombre relativo.
+Quím.: Química
+ref.: refrán.
+Rel.: Religión.
+s.: sustantivo.
+sf.: sustantivo femenino.
+sf. invar.: sustantivo femenino invariable.
+sf. pl.: sustantivo femenino plural.
+sin.: sinónimo.
+sing.: singular.
+sm.: sustantivo masculino.
+sm. invar.: sustantivo masculino invariable.
+sm. pl.: sustantivo masculino plural.
+Ú. m.: Úsase más.
+Ú. t.: Úsase también.
+vdefect.: verbo defectivo.
+vimpers.: verbo impersonal.
+vintr.: verbo intransitivo.
+vpr.: verbo pronominal.
+vtr.: verbo transitivo.
+Zool.: Zoología.
