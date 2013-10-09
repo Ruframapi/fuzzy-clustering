@@ -40,7 +40,7 @@ public class WorkspaceDAO{
 		} finally {
 			getConnectionPool().freeConnection(connection);
 		}
-		
+	
 	}
 	
 	public void delete(WorkspaceDTO object) throws Exception {
@@ -140,5 +140,7 @@ public class WorkspaceDAO{
 		ConnectionDataSourcePoolMySQL connectionPool = DAOFactory.getInstance().getConnectionPool(EDatabase.MYSQL);
 		return connectionPool;
 	}
+	
+	
 
 }

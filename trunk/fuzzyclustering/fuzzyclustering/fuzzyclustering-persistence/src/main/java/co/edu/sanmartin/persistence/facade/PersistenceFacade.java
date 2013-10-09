@@ -228,8 +228,10 @@ public class PersistenceFacade implements Serializable{
 	 */
 	public void initialize() throws SQLException {
 		sourceDAO.createTable(true);
-		stopwordDAO.createTable(true);
 		propertyDAO.createTable(true);
+		propertyDAO.initData();
+		stopwordDAO.createTable(true);
+		stopwordDAO.initData();
 		documentDAO.createTable(true);
 		this.refreshMemoryData();
 	}

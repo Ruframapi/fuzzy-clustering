@@ -145,7 +145,7 @@ public class PropertyDAO extends AbstractDAO<PropertyDTO> {
 
 			statement = connection.prepareStatement(sQLQuery);
 			statement.executeUpdate();
-			this.insertDefautValues();
+			//this.insertDefautValues();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -233,6 +233,18 @@ public class PropertyDAO extends AbstractDAO<PropertyDTO> {
 	
 	public void restoreTable(){
 		super.restoreTable("property", "name,value");
+	}
+	
+	public void initData() throws SQLException{
+		String sQLQuery = "INSERT INTO property (SELECT * FROM fuzzyclustering.property);";
+		try {
+			connection = getConnectionPool().getConnection(this.workspace);
+			statement = connection.prepareStatement(sQLQuery);
+			statement.execute();
+		}
+		finally{
+			getConnectionPool().freeConnection(connection);
+		};
 	}
 
 	

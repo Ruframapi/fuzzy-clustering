@@ -77,6 +77,7 @@ public class SourceDAO extends AbstractDAO<SourceDTO> {
 
 	@Override
 	public Collection<SourceDTO> selectAll() {
+		this.selectAll(true);
 		if(this.sourceColl==null || this.sourceColl.isEmpty()){
 			this.selectAll(true);
 		}

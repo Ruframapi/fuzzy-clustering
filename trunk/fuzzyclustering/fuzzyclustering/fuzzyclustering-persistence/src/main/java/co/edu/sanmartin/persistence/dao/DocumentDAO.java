@@ -19,6 +19,7 @@ public class DocumentDAO extends AbstractDAO<DocumentDTO> implements Serializabl
 	 */
 	private static final long serialVersionUID = 3719495893287304078L;
 	private static Logger logger = Logger.getLogger("DocumentDAO");
+	
 	public DocumentDAO(WorkspaceDTO workspace) {
 		super(workspace);
 	}

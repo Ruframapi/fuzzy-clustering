@@ -8,7 +8,9 @@ public enum ELexicon {
 	CONJUNCTIONS("conjunctions"),
 	DETERMINANTS("determinants"),
 	PREPOSITIONS("prepositions"),
-	PRONOUNS("pronouns");
+	PRONOUNS("pronouns"),
+	ARTICLES("articles"), 
+	VERBS("verbs");
 	
 	private String fileName;
 	

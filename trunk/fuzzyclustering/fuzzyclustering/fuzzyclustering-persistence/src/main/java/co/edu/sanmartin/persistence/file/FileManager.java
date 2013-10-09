@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.ByteBuffer;
@@ -32,7 +33,12 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
  * Clase encargada de la gestion de almacenamiento en archivos y directorios en disco
  * @author Ricardo Carvajal Salamanca
  */
-public class FileManager {
+public class FileManager implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3164804648586488536L;
 
 	private static Logger logger = Logger.getRootLogger();
 
