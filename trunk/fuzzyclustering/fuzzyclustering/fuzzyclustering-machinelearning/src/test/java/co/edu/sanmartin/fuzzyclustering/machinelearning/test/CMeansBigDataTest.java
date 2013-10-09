@@ -35,7 +35,7 @@ public class CMeansBigDataTest {
 		bigMatrixFileManager.loadReadOnly(EDataFolder.MATRIX, "test.dat");
 		this.printBigMatrix(bigMatrixFileManager);
 		
-		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(this.workspace,"test.dat",2, 200, 2, false);
+		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(this.workspace,"test.dat",2, 200, 2, 0.1, false);
 		fuzzyCmeans.init();
 		double[][] centroids = {{0.2,0.5},{0.8,0.5}};
 		fuzzyCmeans.setCentroids(centroids);
@@ -54,7 +54,7 @@ public class CMeansBigDataTest {
 		bigMatrixFileManager.loadReadOnly(EDataFolder.MATRIX, "test.dat");
 		this.printBigMatrix1(bigMatrixFileManager);
 		
-		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(this.workspace,"test.dat",2, 200, 2, false);
+		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(this.workspace,"test.dat",2, 200, 2, 0.1, false);
 		fuzzyCmeans.init();
 		double[][] centroids = {{0.2,0.5},{0.8,0.5}};
 		fuzzyCmeans.setCentroids(centroids);
@@ -72,7 +72,7 @@ public class CMeansBigDataTest {
 		bigMatrixFileManager.loadReadOnly(EDataFolder.MATRIX, "test.dat");
 		this.printBigMatrix(bigMatrixFileManager);
 		
-		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(this.workspace,"test.dat",2, 200, 2, false);
+		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(this.workspace,"test.dat",2, 200, 2, 0.1,false);
 		fuzzyCmeans.init();
 		double[][] centroids = {{2.71},{7.7}};
 		fuzzyCmeans.setCentroids(centroids);
@@ -93,7 +93,7 @@ public class CMeansBigDataTest {
 		bigMatrixFileManager.loadReadOnly(EDataFolder.MATRIX, "test.txt");
 		this.printBigMatrix(bigMatrixFileManager);
 		
-		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(this.workspace,"test.txt",3, 200, 1.5, false);
+		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(this.workspace,"test.txt",3, 200, 1.5, 0.1,false);
 		fuzzyCmeans.init();
 		fuzzyCmeans.calculateFuzzyCmeans();
 	};
@@ -102,7 +102,7 @@ public class CMeansBigDataTest {
 	public void testGenerateCMeansReducedNio() throws Exception{
 		
 		FuzzyCMeansBigData cmeans = new FuzzyCMeansBigData(this.workspace,DimensionallyReduced.REDUCED_FILE_NAME, 
-				8, 20000, 1.5, true);
+				8, 20000, 1.5, 0.1,true);
 		cmeans.init();
 		cmeans.calculateFuzzyCmeans();
 	};
@@ -123,7 +123,7 @@ public class CMeansBigDataTest {
 		}
 		
 		this.saveMatrix(matrix, "reducidaNio.txt");
-		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(this.workspace,"reducidaNio.txt",10, 200, 2, false);
+		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(this.workspace,"reducidaNio.txt",10, 200, 2,0.1, false);
 		fuzzyCmeans.init();
 		fuzzyCmeans.calculateFuzzyCmeans();
 	};
@@ -146,7 +146,7 @@ public class CMeansBigDataTest {
 		bigMatrixFileManager.loadReadOnly(EDataFolder.MATRIX, "testNio.txt");
 		this.printBigMatrix(bigMatrixFileManager);
 		
-		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(this.workspace,"testNio.txt",10, 200, 2, false);
+		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(this.workspace,"testNio.txt",10, 200, 2,0.1, false);
 		fuzzyCmeans.init();
 		fuzzyCmeans.calculateFuzzyCmeans();
 	};
@@ -220,7 +220,7 @@ public class CMeansBigDataTest {
 	
 	@Test
 	public void calculateCmeansPpmiTest(){
-		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(this.workspace,"ppmi.txt",3, 200, 2, false);
+		FuzzyCMeansBigData fuzzyCmeans = new FuzzyCMeansBigData(this.workspace,"ppmi.txt",3, 200, 2, 0.1,false);
 		fuzzyCmeans.init();
 		fuzzyCmeans.calculateFuzzyCmeans();
 	}

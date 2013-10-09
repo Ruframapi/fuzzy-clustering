@@ -36,7 +36,7 @@ public class DocumentCluster {
 	public void buildMembershipIndex(){
 		List<Double[]> membershipMatrix = 
 				this.workspace.getPersistence().readFileMatrix(EDataFolder.MACHINE_LEARNING, 
-						"membership.txt");
+						"reduced_membership.txt");
 		InvertedIndex invertedIndex = IRFacade.getInstance(this.workspace).getInvertedIndexZipf();
 		invertedIndex.loadInvertedIndexDataZipf();
 

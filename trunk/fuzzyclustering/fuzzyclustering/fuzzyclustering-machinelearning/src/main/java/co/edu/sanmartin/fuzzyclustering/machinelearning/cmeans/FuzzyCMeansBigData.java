@@ -1,6 +1,7 @@
 package co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
 
 import org.apache.log4j.Logger;
@@ -36,7 +37,9 @@ public class FuzzyCMeansBigData {
 	private int centroidsAmount;
 	private int iterationAmount;
 	private double mValue;
+	private double stopValue = 0.0000001;
 	private WorkspaceDTO workspace;
+	private String fileName;
 	
 	private double[][] previousCentroids;
 	private double[][] centroids;
@@ -70,9 +73,10 @@ public class FuzzyCMeansBigData {
 	 * @param buildMatrix indica si realiza la construccion de las matrices de terminos previa
 	 */
 	public FuzzyCMeansBigData(WorkspaceDTO workspace,String fileName, int centroidsAmount, int iterationsAmount, 
-								double mValue, boolean buildMatrix){	
-		logger.info("Init FuzzyCMeansBigData Method");
+								double mValue, double stopValue, boolean buildMatrix){	
+		logger.info("Init FuzzyCMeansBigData Method for FileName:" + fileName);
 		this.workspace = workspace;
+		this.fileName = fileName;
 		try {			
 			this.data  = new BigDoubleMatrixFileManager(this.workspace);
 			data.loadReadOnly(EDataFolder.MATRIX, fileName);
@@ -80,6 +84,7 @@ public class FuzzyCMeansBigData {
 			this.iterationAmount = iterationsAmount;
 			this.centroidsDistances = new double[centroidsAmount];
 			this.mValue = mValue;
+			this.stopValue = stopValue;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			logger.error("Error in load FuzzyCMeansBigData",e);
@@ -138,8 +143,9 @@ public class FuzzyCMeansBigData {
 			
 			
 		}
-		this.workspace.getPersistence().saveMatrixDouble(this.centroids,EDataFolder.MACHINE_LEARNING, "centroids.txt", 0, 4);
-		this.workspace.getPersistence().saveMatrixDouble(this.initMembershipMatrix,EDataFolder.MACHINE_LEARNING, "membership.txt", 0, 4);
+		String fileName1 = this.workspace.getPersistence().getFileNameWithOutExtension(fileName);
+		this.workspace.getPersistence().saveMatrixDouble(this.centroids,EDataFolder.MACHINE_LEARNING, fileName1+"_centroids.txt", 0, 4);
+		this.workspace.getPersistence().saveMatrixDouble(this.initMembershipMatrix,EDataFolder.MACHINE_LEARNING, fileName1+"_membership.txt", 0, 4);
 		time_end = System.currentTimeMillis();
 		
 		String result = "El proceso de clusterizacion Tomo "+ 
@@ -225,7 +231,6 @@ public class FuzzyCMeansBigData {
 	 * deja las iteraciones en -1
 	 */
 	private void calculateDistances() {
-		double tolerance = 0.0000001;
 		double[] newCentroidsDistances = new double[this.centroidsAmount];
 		for (int i = 0; i < centroids.length; i++) {
 			double distanceCentroid = DistanceFunctions.getEuclideanDistance(this.centroids[i], this.previousCentroids[i]);
@@ -238,7 +243,7 @@ public class FuzzyCMeansBigData {
 		for (int i = 0; i < centroidsDistances.length; i++) {
 			double diferenceCentroidsIteration = Math.abs(centroidsDistances[i]-newCentroidsDistances[i]);
 			logger.info("Previos Centroid vs new Centroid " + i + " - Distance:" + diferenceCentroidsIteration);
-			if(diferenceCentroidsIteration>tolerance){
+			if(diferenceCentroidsIteration>this.stopValue){
 				finishProcess = false;
 				break;
 			}
@@ -246,7 +251,7 @@ public class FuzzyCMeansBigData {
 		if(finishProcess == true){
 			this.iterationAmount=-1;
 			logger.info("Proceso Finalizado Los Centroides de la iteracion " +
-						"anterior y la actual son menores a :" + tolerance);
+						"anterior y la actual son menores a :" + this.stopValue);
 		}
 		
 		this.centroidsDistances = newCentroidsDistances.clone();
@@ -345,5 +350,6 @@ public class FuzzyCMeansBigData {
 		queue.setParams(message);
 		queue.setStatus(EQueueStatus.ENQUEUE);
 	}
+	
 	
 }

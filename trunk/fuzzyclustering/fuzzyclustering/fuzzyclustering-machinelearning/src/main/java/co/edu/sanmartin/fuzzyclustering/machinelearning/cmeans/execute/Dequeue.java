@@ -7,6 +7,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import co.edu.sanmartin.fuzzyclustering.ir.index.DimensionallyReduced;
+import co.edu.sanmartin.fuzzyclustering.ir.index.MutualInformation;
 import co.edu.sanmartin.fuzzyclustering.machinelearning.classifier.DocumentCluster;
 import co.edu.sanmartin.fuzzyclustering.machinelearning.cmeans.FuzzyCMeansBigData;
 import co.edu.sanmartin.fuzzyclustering.machinelearning.reuters.ReutersTrainer;
@@ -106,15 +107,25 @@ public class Dequeue implements Runnable{
 	private void generateCmeans(QueueDTO queueDTO) {
 		// TODO Auto-generated method stub
 		String[] parameter = queueDTO.getParams().split(",");
-		int centroidsAmount = Integer.parseInt(parameter[0]);
-		int iterationsAmount = Integer.parseInt(parameter[1]);
-		double mValue = Double.parseDouble(parameter[2]);
-		boolean buildMatrix = Boolean.parseBoolean(parameter[3]);
+		boolean reducedMatrix = Boolean.parseBoolean(parameter[0]);
+		int centroidsAmount = Integer.parseInt(parameter[1]);
+		int iterationsAmount = Integer.parseInt(parameter[2]);
+		double mValue = Double.parseDouble(parameter[3]);
+		double stopValue = Double.parseDouble(parameter[4]);
+		boolean buildMatrix = Boolean.parseBoolean(parameter[5]);
 		
 		WorkspaceDTO workspace = WorkspaceFacade.getWorkspace(queueDTO.getWorkspace());
 		SendMessageAsynch.sendMessage(workspace, "Iniciando proceso de generacion de conjuntos difusos");
-		FuzzyCMeansBigData cmeans = new FuzzyCMeansBigData(workspace,DimensionallyReduced.REDUCED_FILE_NAME, 
-														centroidsAmount, iterationsAmount, mValue, buildMatrix);
+		String fileName =  null;
+		if(reducedMatrix){
+			fileName = DimensionallyReduced.REDUCED_FILE_NAME;
+		}
+		else{
+			fileName = MutualInformation.PPMI_FILE_NAME;
+		}
+		FuzzyCMeansBigData cmeans = new FuzzyCMeansBigData(workspace,fileName, centroidsAmount, 
+															iterationsAmount, mValue, stopValue,
+															buildMatrix);
 		cmeans.init();
 		cmeans.calculateFuzzyCmeans();
 		SendMessageAsynch.sendMessage(workspace, "Proceso de generacion de conjuntos difusos finalizada");
