@@ -1,6 +1,7 @@
 package co.edu.sanmartin.fuzzyclustering.ir.normalize;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import org.apache.log4j.Logger;
 
@@ -21,7 +22,7 @@ import co.edu.sanmartin.persistence.facade.PersistenceFacade;
  */
 public class Lexicon {
 	private static Logger logger = Logger.getLogger(Lexicon.class);
-	private static HashMap<ELexicon,String> lexiconMap;
+	private static LinkedHashMap<ELexicon,String> lexiconMap;
 	private WorkspaceDTO workspace;
 	private static Lexicon instance;
 	
@@ -61,7 +62,7 @@ public class Lexicon {
 	 * Inicializa los lexicones en memoria para realizar el proceso de normalizacion de archivos
 	 */
 	private  void initLexiconinMemory() {
-		lexiconMap = new HashMap<ELexicon,String>();
+		lexiconMap = new LinkedHashMap<ELexicon,String>();
     	try {
 			if (this.workspace.getPersistence().getProperty(EProperty.IR_DELETE_ADVERBS).getValue().equals("true")){
         		Lexicon.lexiconMap.put(ELexicon.ADVERBS, this.getLexiconPattern(ELexicon.ADVERBS));
@@ -77,6 +78,12 @@ public class Lexicon {
 			}
 			if (this.workspace.getPersistence().getProperty(EProperty.IR_DELETE_PRONOUNS).getValue().equals("true")){
 				Lexicon.lexiconMap.put(ELexicon.PRONOUNS, this.getLexiconPattern(ELexicon.PRONOUNS));
+			}
+			if (this.workspace.getPersistence().getProperty(EProperty.IR_DELETE_ARTICLES).getValue().equals("true")){
+				Lexicon.lexiconMap.put(ELexicon.ARTICLES, this.getLexiconPattern(ELexicon.ARTICLES));
+			}
+			if (this.workspace.getPersistence().getProperty(EProperty.IR_DELETE_VERBS).getValue().equals("true")){
+				Lexicon.lexiconMap.put(ELexicon.VERBS, this.getLexiconPattern(ELexicon.VERBS));
 			}
 		} catch (PropertyValueNotFoundException e) {
 			logger.error("No se encuentra la propiedad", e);
@@ -119,7 +126,7 @@ public class Lexicon {
 		return regexPattern.toString();
     }
 
-	public HashMap<ELexicon, String> getLexiconMap() {
+	public LinkedHashMap<ELexicon, String> getLexiconMap() {
 		return lexiconMap;
 	}
     

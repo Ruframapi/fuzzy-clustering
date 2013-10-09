@@ -103,6 +103,11 @@ public class IRFacade {
 		invertedIndex.reducedZipfInvertedIndex(cutOnPercent, cutOffPercent, minTermOcurrences);
 	}
 	
+	public void invertedIndexZipf(int minTermOcurrences){
+		InvertedIndex invertedIndex = new InvertedIndex(workspace);
+		invertedIndex.relevanceZipfInvertedIndex(minTermOcurrences);
+	}
+	
 	public void createTermTermBigMatrix(boolean persist) throws IOException{
 		InvertedIndex invertedIndex = new InvertedIndex(workspace);	
 		invertedIndex.loadInvertedIndexDataZipf();

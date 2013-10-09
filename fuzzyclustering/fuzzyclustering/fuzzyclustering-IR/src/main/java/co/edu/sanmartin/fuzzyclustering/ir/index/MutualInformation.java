@@ -38,7 +38,6 @@ public class MutualInformation {
 	@Deprecated
 	public void buildMutualInformationBigMatrix(boolean persist) throws IOException{
 		logger.info("Inicializando construccion de Matrix PPMI");
-		SendMessageAsynch.sendMessage(this.workspace,"Creando PPMI Matriz");
 		long time_start = 0, time_end=0;
 		time_start = System.currentTimeMillis();
 		InvertedIndex invertedIndex = new InvertedIndex(this.workspace);
@@ -77,7 +76,7 @@ public class MutualInformation {
 				( time_end - time_start )/1000 +" segundos" + 
 				(( time_end - time_start )/1000)/60 +" minutos";
 		logger.info(finalMessage);
-		SendMessageAsynch.sendMessage(this.workspace,"Creando PPMI Matriz");
+		SendMessageAsynch.sendMessage(this.workspace,finalMessage);
 	}
 	
 
@@ -95,7 +94,7 @@ public class MutualInformation {
 
 	 */
 	public void buildMutualInformation(boolean persist){
-		int smoothing = 0;
+		int smoothing = 2;
 		logger.info("Inicializando construccion de Matrix PPMI");
 		SendMessageAsynch.sendMessage(this.workspace,"Creando PPMI Matriz");
 		long time_start = 0, time_end=0;
@@ -127,15 +126,81 @@ public class MutualInformation {
 						}
 						double ppmi = this.ppmi(term2DocumentIntersectionOcurrences, invertedIndex.getCountByTerm(i), 
 								invertedIndex.getCountByTerm(j), countMatrixIntersection);
-						//BigDecimal bigDecimal = new BigDecimal(ppmi);
-						//bigDecimal = bigDecimal.setScale(5, RoundingMode.HALF_UP);
-						//double finalValue = bigDecimal.doubleValue();
-						double finalValue = ppmi;
+//						double ppmi = this.ppmiImproved(term2DocumentIntersectionOcurrences, invertedIndex.getCountByTerm(i), 
+//							invertedIndex.getCountByTerm(j),countMatrixIntersection, invertedIndex.getRelevanceTermValue(term1));
+						BigDecimal bigDecimal = new BigDecimal(ppmi);
+						bigDecimal = bigDecimal.setScale(5, RoundingMode.HALF_UP);
+						double finalValue = bigDecimal.doubleValue();
 						largeMatrixPpmi.set(i, j, finalValue);
 					}
 					 
 				}
 				if(persist){
+					largeMatrixPpmi.saveReadable(500);
+					largeMatrixPpmi.close();
+				}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logger.error("Error en buildMutualInformationBigMatrix", e);
+		}
+		
+		time_end = System.currentTimeMillis();
+		String finalMessage = "La construccion de la Matrix PPMI tomo "+ 
+				( time_end - time_start )/1000 +" segundos" + 
+				(( time_end - time_start )/1000)/60 +" minutos";
+		logger.info(finalMessage);
+		SendMessageAsynch.sendMessage(this.workspace,finalMessage);
+		
+	}
+	
+	
+	public void buildContextMutualInformation(boolean persist, String[] contextWords){
+		int smoothing = 2;
+		logger.info("Inicializando construccion de Matrix PPMI");
+		SendMessageAsynch.sendMessage(this.workspace,"Creando PPMI Matriz");
+		long time_start = 0, time_end=0;
+		time_start = System.currentTimeMillis();
+		InvertedIndex invertedIndex = new InvertedIndex(this.workspace);
+		invertedIndex.loadInvertedIndexDataZipf();
+		BigDoubleMatrixFileManager largeMatrixPpmi = new BigDoubleMatrixFileManager(this.workspace);
+		//double totalWordDocumentsCount = invertedIndex.getTotaldocumentWordsCount();
+		int countMatrixIntersection = this.getCountMatrixIntersection(invertedIndex);
+		try {
+			largeMatrixPpmi.loadReadWrite(EDataFolder.MATRIX,PPMI_FILE_NAME, 
+					contextWords.length, invertedIndex.getTermCount());
+				ArrayList<String> wordsList = invertedIndex.getWordList();
+				
+				for (int i = 0; i < contextWords.length; i++) {
+					String term1 = contextWords[i];
+					logger.info("Build PPMI for: " + term1);
+					for (int j = 0; j < wordsList.size(); j++) {
+						String term2 = wordsList.get(j);
+						if(term1.equals(term2)) {
+							largeMatrixPpmi.set(i, j, 0);
+							continue;
+						}
+						ArrayList<Integer> intersection = invertedIndex.intersectionDocumentTerms(term1, term2);
+						int  term2DocumentIntersectionOcurrences =0;
+						//Sumamos las ocurrencias del termino 2 en los documentos intersectos
+						for (Integer document : intersection) {
+							term2DocumentIntersectionOcurrences =invertedIndex.getTermOcurrencesByDocument(term2, document) + smoothing;
+						}
+						double ppmi = this.ppmi(term2DocumentIntersectionOcurrences, invertedIndex.getCountByTerm(i), 
+								invertedIndex.getCountByTerm(j), countMatrixIntersection);
+//						double ppmi = this.ppmiImproved(term2DocumentIntersectionOcurrences, invertedIndex.getCountByTerm(i), 
+//							invertedIndex.getCountByTerm(j),countMatrixIntersection, invertedIndex.getRelevanceTermValue(term1));
+						BigDecimal bigDecimal = new BigDecimal(ppmi);
+						bigDecimal = bigDecimal.setScale(5, RoundingMode.HALF_UP);
+						double finalValue = bigDecimal.doubleValue();
+						largeMatrixPpmi.set(i, j, finalValue);
+					}
+					 
+				}
+				if(persist){
+					int rowsToSave = 500;
+					if(contextWords.length<rowsToSave){
+						rowsToSave = contextWords.length;
+					}
 					largeMatrixPpmi.saveReadable(500);
 					largeMatrixPpmi.close();
 				}
@@ -199,6 +264,29 @@ public class MutualInformation {
 			}
 		}
 		return ppmi;
+	}
+	
+	/**
+	 * Funcion Pointwise Mutual Information Mejorada incluyendo la importancia del termino
+	 * @param termCount valor de la matrix termino termino 
+	 * @param termCount_i total termino i en todos los documentos
+	 * @param termCount_j total termino j en todos los documentos
+	 * @param totalWordDocumentsCount total terminos en todos los documentos
+	 * @return
+	 */
+	public double ppmiImproved(int termCount, int termCount_i, int termCount_j, 
+						double totalWordDocumentsCount, double termImportance){
+		double ppmi = 0.0;
+		if(termCount>0){
+			if(termCount_i>0.00 || termCount_j>0.00){
+				double ppmiTerm_ij=termCount/totalWordDocumentsCount;
+				double ppmiTermi = termCount_i/totalWordDocumentsCount;
+				double ppmiTermj = termCount_j/totalWordDocumentsCount;
+				ppmi = Math.log((ppmiTerm_ij)/(ppmiTermi*ppmiTermj))/Math.log(2);
+				
+			}
+		}
+		return ppmi*termImportance;
 	}
 	
 	
